@@ -18,6 +18,7 @@ Usage:
 """
 
 import argparse
+import json
 import re
 import shutil
 import sys
@@ -173,9 +174,10 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     if copy_examples:
         copy_from_examples(root, copy_examples, dry_run)
 
-    # Post-cleanup : retirer les @-imports cassés de CLAUDE.md
+    # Post-cleanup : retirer les @-imports cassés de CLAUDE.md + les hooks fantômes de settings.json
     if not dry_run:
         fix_claude_md_imports(root)
+        prune_dead_hooks(root)
 
     return 0
 
@@ -239,6 +241,44 @@ def fix_claude_md_imports(root: Path) -> None:
     if removed > 0:
         claude_md.write_text("\n".join(new_lines), encoding="utf-8")
         print(f"\n🔧 CLAUDE.md : {removed} lignes avec @-imports cassés retirées")
+
+
+def prune_dead_hooks(root: Path) -> None:
+    """Retire de settings.json les hooks dont le script a été supprimé (sinon hooks fantômes
+    → Claude tente d'exécuter un script manquant à chaque event). Générique : s'applique à
+    tout profil qui supprime des fichiers .claude/hooks/*."""
+    settings_path = root / ".claude" / "settings.json"
+    if not settings_path.exists():
+        return
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return
+    script_re = re.compile(r"\.claude/hooks/[^\s\"']+")
+    removed = 0
+    for event in list(hooks.keys()):
+        kept_groups = []
+        for group in hooks.get(event, []):
+            kept = []
+            for h in group.get("hooks", []):
+                m = script_re.search(h.get("command", ""))
+                if m and not (root / m.group(0)).exists():
+                    removed += 1
+                    continue  # script supprimé → on retire le hook
+                kept.append(h)
+            if kept:
+                group["hooks"] = kept
+                kept_groups.append(group)
+        if kept_groups:
+            hooks[event] = kept_groups
+        else:
+            del hooks[event]
+    if removed:
+        settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+        print(f"🔧 settings.json : {removed} hook(s) fantôme(s) retiré(s) (script supprimé)")
 
 
 def main():

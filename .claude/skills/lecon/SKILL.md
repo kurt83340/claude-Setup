@@ -112,7 +112,7 @@ Via AskUserQuestion :
 - Créer/append `.claude/rules/<nom>.md` avec la convention extraite de la leçon
 - Update status leçon
   ```
-  status: 🆕 new → 🔧 → [rule](../../rules/<nom>.md)
+  status: 🆕 new → 🔧 → [rule](../rules/<nom>.md)
   ```
 
 #### Si `🧠 memory only` :

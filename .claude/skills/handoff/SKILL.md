@@ -72,6 +72,10 @@ Format strict :
 1. **Task #N** : <description courte>
 2. **Task #N+1** : ...
 3. <étape suivante>
+
+## Journal (append-only — 1 ligne par session, NE JAMAIS réécrire)
+
+- YYYY-MM-DD — <ce qui a été fait cette session, en 1 phrase>
 ```
 
 ## Étape 4 — Présenter le diff au user
@@ -104,7 +108,8 @@ Si HANDOFF n'a pas changé (rien de neuf) :
 
 ## Anti-patterns à éviter
 
-- ❌ Écrire un roman (HANDOFF court = < 30 lignes)
+- ❌ Écrire un roman (HANDOFF court = < 30 lignes ; le **Journal** est l'exception : il gagne 1 ligne/session)
+- ❌ Réécrire/écraser le **Journal** : on APPEND seulement (1 ligne/session) → l'arc complet reste reconstructible depuis le seul HANDOFF
 - ❌ Dupliquer ce qui est déjà dans CHANGELOG (factuel) ou auto-memory (patterns)
 - ❌ Lister TOUS les commits (juste le sens général)
 - ❌ Mentionner des credentials/secrets
@@ -116,3 +121,7 @@ Ce skill est aussi déclenché **automatiquement** par le hook `PreCompact` (ava
 ## Note : invocation par agent doc-maintainer
 
 L'agent `doc-maintainer` (Task tool) peut aussi générer le HANDOFF en mode "scan auto + propose tout". Utilise l'agent quand tu veux un workflow complet (HANDOFF + ROADMAP + CHANGELOG synchronisés). Utilise `/handoff` quand tu veux juste mettre à jour HANDOFF rapidement.
+
+## Note : projets script-jetable
+
+Sur un projet initialisé en `script-jetable`, `/feature-done` et l'agent `doc-maintainer` ne sont **pas installés** (cleanup). Ce skill reste pleinement autonome (aucune dépendance) — ignore simplement la suggestion `/feature-done` (Étape 5) sur ce type de projet.

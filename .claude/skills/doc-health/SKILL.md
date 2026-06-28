@@ -69,24 +69,24 @@ fi
 
 Quand toutes les entries sont actées/discardées : truncate le fichier (garder le header).
 
-## Étape 3 — ADRs manquants
+## Étape 3 — ADRs manquants (décisions CROSS-feature uniquement)
+
+> ⚠️ Les décisions **locales à une feature** (lib choisie pour cette spec) vivent dans la section `## Décisions` de son `plan.md` et **n'ont PAS besoin d'ADR**. Ne flagge QUE les décisions qui impactent > 1 spec ou survivent à la feature.
 
 ```bash
-# Compter les "choisi", "retenu", "vs", "plutôt que" dans plan.md sans ADR créé récemment
-grep -rE "choisi|retenu|plutôt que|vs " .claude/docs/conception/specs/*/plan.md 2>/dev/null | wc -l
-
-# Compter les ADRs créés ce mois
-find .claude/docs/adr/ -name "*.md" -newer "$(date -d '1 month ago' +%Y-%m-%d)" 2>/dev/null | wc -l
+# Mentions de choix dans les plan.md, HORS d'une section "## Décisions" (déjà documentées localement)
+grep -rnE "choisi|retenu|plutôt que| vs " .claude/docs/conception/specs/*/plan.md 2>/dev/null \
+  | grep -vi "décisions" | head -10
 ```
 
-Si ratio décisions/ADRs > 5 → suggérer de promouvoir.
+Si une décision **cross-feature** non capturée ressort → suggérer `/adr`. **Ignore** celles déjà dans un `## Décisions` de plan.md (légitimement locales).
 
 ## Étape 4 — Leçons en attente de décision
 
 ```bash
-# Entries .claude/docs/lecons.md avec status 🆕 new
-# (+ repérer celles datées > 14j via les headers ## YYYY-MM-DD —)
-grep -c "status:.*🆕 new" .claude/docs/lecons.md
+# Leçons RÉELLES en attente : status 🆕 new sous un header daté réel (## 20XX-…),
+# en EXCLUANT le bloc exemple du template (header ## YYYY-MM-DD).
+awk '/^## [0-9][0-9][0-9][0-9]-/{real=1} /^## YYYY/{real=0} real&&/🆕 new/{n++} END{print n+0}' .claude/docs/lecons.md
 ```
 
 - Si > 5 entries `🆕 new` → 🟢 review hebdo (`/lecon promote` / `discard`)

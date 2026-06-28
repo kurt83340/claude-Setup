@@ -68,13 +68,19 @@ def main():
     suggestions_path = Path(cwd) / ".claude" / ".growth-suggestions.md"
     suggestions_path.parent.mkdir(exist_ok=True, parents=True)
 
+    # Chemin RELATIF au projet (sinon on logge des chemins absolus hors-projet, non actionnables)
+    try:
+        rel_source = str(Path(file_path).resolve().relative_to(Path(cwd).resolve()))
+    except Exception:
+        rel_source = os.path.basename(file_path)
+
     detected = []
     for pattern, (target_file, message) in GROWTH_TRIGGERS:
         if pattern.search(content):
             # Check si target_file existe et n'est pas vide
             target = Path(cwd) / ".claude" / "docs" / target_file
             if not target.exists() or target.stat().st_size < 500:
-                detected.append((target_file, message, file_path))
+                detected.append((target_file, message, rel_source))
 
     if not detected:
         sys.exit(0)
