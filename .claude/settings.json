@@ -1,0 +1,102 @@
+{
+  "autoMemoryEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(mypy:*)",
+      "Bash(alembic:*)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(uv:*)",
+      "Bash(npm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(stat:*)",
+      "Bash(date:*)",
+      "Bash(chmod:*)",
+      "Bash(git init:*)",
+      "Bash(cp:*)",
+      "Bash(python3 .claude/skills/init-from-template/scripts/render.py:*)",
+      "Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)",
+      "Read(./**)",
+      "Edit(./**)",
+      "Write(./.claude/docs/**)",
+      "Write(./src/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(alembic downgrade:*)",
+      "Bash(./scripts/deploy:*)"
+    ],
+    "deny": ["Bash(rm -rf:*)", "Read(./.env)", "Read(./.env.local)"]
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/precompact-snapshot-handoff.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionstart-inject-handoff.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse-inject-codemap.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/posttooluse-growth-detection.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-handoff-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

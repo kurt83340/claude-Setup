@@ -1,0 +1,69 @@
+# Conception — Phase de design (macro + micro)
+
+> Cette phase prend les inputs du `cadrage/` (brief + intake) et produit **tout le design** du projet :
+>
+> - **Design macro** (research, PRD, ARCHITECTURE, tasks) à la racine de ce dossier
+> - **Design micro par feature** dans `specs/` (sous-dossier)
+>
+> ⚠️ Le **ROADMAP n'est PAS ici** — il vit à la racine `../ROADMAP.md` car c'est un **dashboard vivant** lu/MAJ tous les jours.
+
+## Ce que contient ce dossier
+
+### Niveau MACRO (projet entier)
+
+| Fichier                              | Quoi                                                  | Quand l'écrire                         |
+| ------------------------------------ | ----------------------------------------------------- | -------------------------------------- |
+| [`research.md`](research.md)         | Brainstorm initial + options explorées + pivots datés | Avant le PRD, append au fil des pivots |
+| [`PRD.md`](PRD.md)                   | Spec produit (vision, scope, personas, métriques)     | Quand le brainstorm est mûr            |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Plan technique macro (stack, modules, sécurité, flux) | Après PRD validé                       |
+| [`tasks.md`](tasks.md)               | Plan d'exécution MVP (sous-phases + DoD figés)        | Après PRD + ARCHITECTURE               |
+
+### Niveau MICRO (une feature)
+
+| Dossier                        | Quoi                                                       |
+| ------------------------------ | ---------------------------------------------------------- |
+| [`specs/00X-feature/`](specs/) | 1 dossier par feature avec `{research,spec,plan,tasks}.md` |
+
+### Diagrammes
+
+| Cas                                                           | Où le mettre                                   |
+| ------------------------------------------------------------- | ---------------------------------------------- |
+| Diagramme technique simple (composants, séquence < 50 lignes) | Inline ASCII dans `ARCHITECTURE.md`            |
+| Diagramme technique gros / éditable                           | `diagrams/X.excalidraw` + export `.svg` à côté |
+| Diagramme feature simple                                      | Inline dans `specs/00X/plan.md`                |
+| Diagramme feature gros                                        | `specs/00X/diagrams/` (créer si besoin)        |
+
+Convention diagrammes détaillée : voir [diagrams/README.md](diagrams/README.md).
+
+## Statut courant
+
+- ✅ Research initial : voir [research.md](research.md)
+- ✅ PRD v1.0 validé Marie le 2026-05-27
+- ✅ Architecture validée Paul IT le 2026-05-29
+- ✅ Plan MVP : voir [tasks.md](tasks.md)
+- 🚧 Specs en cours : voir [../ROADMAP.md](../ROADMAP.md) pour status courant
+
+## Pattern mirror MACRO ↔ MICRO
+
+Tu apprends UN pattern, tu l'appliques à 2 niveaux dans CE dossier :
+
+| Macro (`conception/`) | Micro (`conception/specs/00X-feature/`) | Question                                        |
+| --------------------- | --------------------------------------- | ----------------------------------------------- |
+| `research.md`         | `research.md`                           | Quelles options on a explorées ?                |
+| `PRD.md`              | `spec.md`                               | Qu'est-ce qu'on construit et pourquoi ?         |
+| `ARCHITECTURE.md`     | `plan.md`                               | Comment on l'implémente ?                       |
+| `tasks.md`            | `tasks.md`                              | Quoi exécuter, dans quel ordre, avec quel DoD ? |
+
+→ `../ROADMAP.md` (racine) = **dashboard vivant** qui agrège le status (sync depuis `specs/00X/tasks.md`).
+
+## Pivots éventuels
+
+Si la hiérarchie demande un pivot, suivre ce protocole :
+
+1. Capturer la réunion dans `../cadrage/reunions/YYYY-MM-DD-pivot.md`
+2. Update `../cadrage/README.md` (nouvelle direction)
+3. Append section `## Pivot YYYY-MM-DD` dans [research.md](research.md)
+4. Bumper [PRD.md](PRD.md) (v1.0 → v2.0)
+5. **Refonte** de [tasks.md](tasks.md) avec nouvelle section `## Phase X — Refonte v2`
+6. Update [../ROADMAP.md](../ROADMAP.md) (nouvelle section v2 dashboard)
+7. Si pivot technique : ADR dans `../adr/00XX-pivot-stack.md` qui supersede les anciens

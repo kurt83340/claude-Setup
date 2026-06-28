@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""
+PostToolUse hook (matcher: "Edit|Write") — Détecte les growth triggers et flag.
+
+Trigger : après chaque Edit/Write sur un fichier.
+Action :
+  1. Scan le contenu écrit pour détecter mots-clés growth (API_KEY, deploy, prod, etc.)
+  2. Si trigger détecté ET fichier doc cible manquant/vide → append à .claude/.growth-suggestions.md
+  3. Non-blocking : juste flag pour /doc-health
+
+Input stdin :
+  {
+    "tool_name": "Edit" | "Write",
+    "tool_input": {"file_path": "...", "content"/"new_string": "..."},
+    "cwd": "/path/to/project"
+  }
+"""
+
+import json
+import os
+import re
+import sys
+from datetime import datetime
+from pathlib import Path
+
+# Triggers : (regex, suggestion)
+GROWTH_TRIGGERS = [
+    (
+        re.compile(r"\b(API_KEY|api_key|OAuth|oauth|token|credentials|secret)\b", re.IGNORECASE),
+        ("ACCESS.md", "Credentials/API détectés → enrichir ACCESS.md"),
+    ),
+    (
+        re.compile(r"\b(deploy|production|prod|incident|rollback|outage)\b", re.IGNORECASE),
+        ("RUNBOOK.md", "Mentions deploy/prod détectées → créer/enrichir RUNBOOK.md"),
+    ),
+    (
+        re.compile(
+            r"\b(SLA|RGPD|GDPR|audit|compliance|conformité)\b", re.IGNORECASE
+        ),
+        ("STAKEHOLDERS.md", "Compliance/SLA → confirmer stakeholders légaux"),
+    ),
+]
+
+
+def main():
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
+
+    tool_name = data.get("tool_name", "")
+    if tool_name not in ("Edit", "Write"):
+        sys.exit(0)
+
+    tool_input = data.get("tool_input", {})
+    file_path = tool_input.get("file_path", "")
+    content = tool_input.get("content") or tool_input.get("new_string", "")
+
+    if not content or not file_path:
+        sys.exit(0)
+
+    # Skip si on est en train d'éditer les fichiers doc-template eux-mêmes
+    if "/.claude/docs/" in file_path:
+        sys.exit(0)
+
+    cwd = data.get("cwd", os.getcwd())
+    suggestions_path = Path(cwd) / ".claude" / ".growth-suggestions.md"
+    suggestions_path.parent.mkdir(exist_ok=True, parents=True)
+
+    detected = []
+    for pattern, (target_file, message) in GROWTH_TRIGGERS:
+        if pattern.search(content):
+            # Check si target_file existe et n'est pas vide
+            target = Path(cwd) / ".claude" / "docs" / target_file
+            if not target.exists() or target.stat().st_size < 500:
+                detected.append((target_file, message, file_path))
+
+    if not detected:
+        sys.exit(0)
+
+    # Append au fichier growth-suggestions (sans duplicates)
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    existing = ""
+    if suggestions_path.exists():
+        try:
+            existing = suggestions_path.read_text(encoding="utf-8")
+        except Exception:
+            pass
+
+    new_entries = []
+    for target_file, message, source in detected:
+        line = f"- **{now}** | source: `{source}` → {message}\n"
+        if line not in existing:
+            new_entries.append(line)
+
+    if new_entries:
+        header = ""
+        if not existing:
+            header = """# Growth Suggestions (auto-detected)
+
+> Triggers détectés par hook PostToolUse. Review hebdo via `/doc-health`.
+
+"""
+        try:
+            suggestions_path.write_text(existing + header + "".join(new_entries), encoding="utf-8")
+        except Exception:
+            pass
+
+    # Notification non-blocking (visible dans Claude UI)
+    if new_entries:
+        first_msg = detected[0][1]
+        print(
+            json.dumps(
+                {
+                    "systemMessage": f"💡 Growth trigger : {first_msg}. Flag dans .claude/.growth-suggestions.md"
+                }
+            )
+        )
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

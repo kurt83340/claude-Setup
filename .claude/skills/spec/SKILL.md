@@ -1,0 +1,105 @@
+---
+name: spec
+description: Crée une nouvelle feature spec — scaffold les 4 fichiers research.md, spec.md, plan.md, tasks.md dans .claude/docs/conception/specs/00X-titre/ depuis des templates bundlés. Update .claude/docs/ROADMAP.md avec la nouvelle entrée. À invoquer chaque fois que tu démarres une nouvelle feature.
+allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(find:*), Bash(mkdir:*), Bash(cp:*), Bash(date:*), AskUserQuestion
+disable-model-invocation: false
+arguments: [id, titre]
+argument-hint: "<id-optionnel> <titre>"
+---
+
+# /spec — Scaffold une nouvelle feature
+
+Ton rôle : créer le dossier `.claude/docs/conception/specs/00X-titre/` avec ses 4 fichiers prêts à remplir, et update ROADMAP.
+
+## Usage
+
+```
+/spec "Pagination cursor"
+# Auto-calcule N suivant + crée specs/00X-pagination-cursor/{research,spec,plan,tasks}.md
+
+/spec 005 "Export PDF"
+# Force le numéro 005 (utile pour pivot ou réorganisation)
+```
+
+## Étape 1 — Calculer le numéro suivant
+
+```bash
+# Trouver le max existant
+ls .claude/docs/conception/specs/ 2>/dev/null | grep -oE "^[0-9]+" | sort -n | tail -1
+```
+
+Si aucune spec existante → `001`. Sinon `max + 1`, formaté sur 3 chiffres.
+
+Si l'user a passé un ID en argument → l'utiliser (override).
+
+## Étape 2 — Demander confirmation titre + scope
+
+Via AskUserQuestion :
+
+1. **Titre court** (kebab-case auto) : ex. "Pagination cursor" → `pagination-cursor`
+2. **Description en 1 phrase** : pour spec.md le user story
+3. **Phase ROADMAP** : à quelle phase elle appartient (Phase 1 MVP, Phase 2, ...)
+
+## Étape 3 — Créer le dossier + 4 fichiers
+
+```bash
+DIR=".claude/docs/conception/specs/00X-<kebab>"
+mkdir -p "$DIR"
+
+# Copier les 4 templates bundlés
+cp ${CLAUDE_SKILL_DIR}/templates/research.md "$DIR/"
+cp ${CLAUDE_SKILL_DIR}/templates/spec.md "$DIR/"
+cp ${CLAUDE_SKILL_DIR}/templates/plan.md "$DIR/"
+cp ${CLAUDE_SKILL_DIR}/templates/tasks.md "$DIR/"
+```
+
+Substituer dans chaque fichier :
+
+- `{{SPEC_ID}}` → ex. `004`
+- `{{SPEC_TITRE}}` → ex. `Pagination cursor`
+- `{{SPEC_KEBAB}}` → ex. `pagination-cursor`
+- `{{SPEC_DATE}}` → date du jour ISO
+
+## Étape 4 — Update .claude/docs/ROADMAP.md
+
+Trouver la section phase indiquée par l'user, ajouter ligne :
+
+```markdown
+- [ ] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — pas commencé
+```
+
+## Étape 5 — Update .claude/docs/HANDOFF.md (optionnel)
+
+Si l'user va commencer la feature tout de suite, proposer d'update HANDOFF :
+
+```markdown
+**Spec en cours** : [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) (0/0 tasks)
+**Goal session** : démarrer feature 00X-<kebab>
+```
+
+## Sortie attendue
+
+```
+✅ Feature 004-pagination-cursor scaffoldée
+
+📂 Fichiers créés :
+  - .claude/docs/conception/specs/004-pagination-cursor/research.md
+  - .claude/docs/conception/specs/004-pagination-cursor/spec.md
+  - .claude/docs/conception/specs/004-pagination-cursor/plan.md
+  - .claude/docs/conception/specs/004-pagination-cursor/tasks.md
+
+📝 .claude/docs/ROADMAP.md : ligne ajoutée Phase 1 — [ ] [004-pagination-cursor]
+
+🚀 Prochaines étapes :
+   1. Remplir research.md (brainstorm options, ~30 min)
+   2. Remplir spec.md (vision micro : QUOI/POURQUOI)
+   3. Remplir plan.md (COMMENT + section ## Décisions)
+   4. Décomposer tasks.md (checklist + DoD)
+```
+
+## Anti-patterns
+
+- ❌ Skip la numérotation continue (toujours max + 1, jamais reset)
+- ❌ Créer la spec sans update ROADMAP (= drift)
+- ❌ Remplir directement les fichiers sans demander au user
+- ❌ Démarrer le code AVANT d'avoir au minimum spec.md + plan.md remplis
