@@ -33,3 +33,19 @@ jobs:
 
       - name: Tous les hooks Python compilent
         run: python3 -m py_compile .claude/hooks/*.py
+
+      - name: Inventaire skills synchro avec .claude/CLAUDE.md
+        run: |
+          rc=0
+          for d in .claude/skills/*/; do
+            name=$(basename "$d")
+            grep -q "/$name" .claude/CLAUDE.md || { echo "❌ Skill '$name' absent de l'inventaire .claude/CLAUDE.md"; rc=1; }
+          done
+          if [ "$rc" -ne 0 ]; then exit 1; fi
+          echo "✅ Tous les skills cœur sont recensés dans .claude/CLAUDE.md"
+
+      - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 3 @-imports
+        run: |
+          n=$(grep -oE '@\.claude/[^ ]+' EXAMPLES/acme-sync-erp-notion-docs/_CLAUDE.md | wc -l)
+          echo "@-imports acme: $n"
+          test "$n" -eq 3

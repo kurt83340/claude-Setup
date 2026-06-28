@@ -3,7 +3,6 @@ name: idee
 description: Gère le cycle de vie des idées perso (.claude/docs/idees/) — capture (mode défaut, crée fichier daté), promote (vers une spec via /spec), discard (abandonné), archive (déplace les vieilles). Une idée = brainstorm interne (vs cadrage = input externe client). Symétrique avec /lecon.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(date:*), Bash(ls:*), Bash(mkdir:*), Bash(mv:*), AskUserQuestion
 disable-model-invocation: false
-arguments: [mode, args]
 argument-hint: "[capture|promote|discard|archive] <args>"
 ---
 
@@ -154,6 +153,7 @@ Garder le fichier idée comme trace historique.
 
 1. Trouver le fichier idée par date
 2. Update statut :
+
    ```markdown
    ## Statut
 

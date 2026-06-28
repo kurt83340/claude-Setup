@@ -1,15 +1,17 @@
 ---
 name: pivot
-description: Orchestre le workflow pivot client (7 étapes) — quand le client change d'avis ou la direction change. Capture la réunion pivot, update cadrage, append research dated, bump PRD, refonte tasks, update ROADMAP v2, crée ADR pivot si technique, append leçon. Validation user à chaque étape (jamais d'overwrite silencieux).
+description: Orchestre le workflow pivot client (9 étapes) — quand le client change d'avis ou la direction change. Capture la réunion pivot, update cadrage, append research dated, bump PRD, refonte tasks, update ROADMAP v2, crée ADR pivot si technique, append leçon, update HANDOFF. Validation user à chaque étape (jamais d'overwrite silencieux).
 allowed-tools: Read, Write, Edit, Glob, Bash(date:*), Bash(ls:*), AskUserQuestion
 disable-model-invocation: false
-arguments: [raison]
 argument-hint: "<raison-courte>"
 ---
 
-# /pivot — Workflow pivot client (7 étapes)
+# /pivot — Workflow pivot client (9 étapes)
 
 Ton rôle : orchestrer le changement de direction d'un projet sans casser l'historique. Chaque étape demande validation à l'user.
+
+> 🧭 **Foyer unique du workflow pivot.** L'agent `doc-maintainer` ne redéfinit PAS ces étapes :
+> il **invoque ce skill**. Toute évolution du pivot se fait ici (et nulle part ailleurs).
 
 ## Usage
 
@@ -90,12 +92,14 @@ Si `.claude/docs/conception/PRD.md` existe :
 - Trouver la version actuelle (`v1.0`, `v2.0`, etc.) dans le header
 - Bumper la version majeure (`v1.0` → `v2.0`)
 - Ajouter en haut une section :
+
   ```markdown
   ## Changelog PRD
 
   - **v2.0** ({{YYYY-MM-DD}}) : pivot — {{raison}}
   - **v1.0** ({{date initiale}}) : version initiale
   ```
+
 - Adapter les user stories impactées (mentionner ce qui change)
 
 ## Étape 5 — Refonte `.claude/docs/conception/tasks.md`

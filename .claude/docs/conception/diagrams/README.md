@@ -1,42 +1,9 @@
 # diagrams/ — Schémas techniques (conception)
 
-> Placeholder pour les **diagrammes techniques complexes** (composants, séquences, data flow) qui méritent un fichier séparé.
+Diagrammes techniques **complexes** (composants, séquences, data flow) qui méritent un fichier séparé.
 
-## Convention
+**Par défaut → ASCII inline** dans [`../ARCHITECTURE.md`](../ARCHITECTURE.md) §1. Crée un fichier séparé ici (`.md` ASCII, ou `.excalidraw` + export `.svg` côte à côte) uniquement si > ~50 lignes ASCII ou besoin d'un visuel éditable/partageable.
 
-**Par défaut, les diagrammes techniques vivent INLINE dans `ARCHITECTURE.md`** (ASCII art). Voir [`../ARCHITECTURE.md`](../ARCHITECTURE.md) section 1.
+> 📐 **Convention complète** (3 formats, règle « source éditable + export côte à côte », gitignore, limites Claude sur `![](path)`) → **[template-maintenance.md § Convention diagrammes](../../../rules/template-maintenance.md#convention-diagrammes-3-formats)** _(source unique — ne pas recopier ici pour éviter le drift)_.
 
-**Utilise ce dossier UNIQUEMENT si :**
-
-- Diagramme trop gros pour rester inline (> 50 lignes ASCII)
-- Tu veux une version éditable (Excalidraw)
-- Tu veux un export SVG/PNG pour partage externe (présentation client, doc Notion)
-
-## Formats supportés (même règle que cadrage/diagrams/)
-
-| Format                              | Usage                        | Claude-friendly ?         |
-| ----------------------------------- | ---------------------------- | ------------------------- |
-| ASCII inline (dans ARCHITECTURE.md) | Par défaut                   | ✅ Parfait                |
-| `.md` séparé (ASCII)                | Si gros diagramme texte      | ✅ Parfait                |
-| `.excalidraw` + `.svg` export       | Diagrammes visuels complexes | ⚠️ SVG via Read explicite |
-| PNG                                 | Screenshots, photos          | ⚠️ Pas fiable mai 2026    |
-
-## Convention de commit
-
-```
-conception/diagrams/
-├── archi-detaillee.excalidraw   # source éditable
-└── archi-detaillee.svg          # export pour Claude + GitHub
-```
-
-## Référencer depuis ARCHITECTURE.md
-
-```markdown
-Vue d'ensemble : voir ci-dessus (ASCII inline).
-Schéma détaillé : [diagrams/archi-detaillee.md](diagrams/archi-detaillee.md)
-ou [diagrams/archi-detaillee.svg](diagrams/archi-detaillee.svg)
-```
-
-## Specs/ (micro)
-
-Pour les diagrammes spécifiques à UNE feature → mets-les **inline dans le `plan.md`** de la spec. Crée `specs/00X-feature/diagrams/` seulement si nécessaire (rare).
+Diagramme spécifique à **une feature** → inline dans le `plan.md` de la spec (créer `specs/00X/diagrams/` seulement si nécessaire, rare).

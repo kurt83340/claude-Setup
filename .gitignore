@@ -38,3 +38,4 @@ logs/
 # Claude Code
 .claude/settings.local.json
 .claude/.cache/
+.claude/.growth-suggestions.md

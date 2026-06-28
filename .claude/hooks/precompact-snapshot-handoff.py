@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-PreCompact hook — Snapshot HANDOFF.md avant compaction.
+PreCompact hook — Snapshot d'état avant compaction (cache non-versionné, par-session).
 
 Pattern inspiré de github.com/thepushkarp/handoff.
 
 Trigger : avant que Claude compacte le contexte (auto à ~90% OU /compact manuel).
 Action :
-  1. Lire le transcript (extraire last user/assistant messages)
-  2. Lire git status + log + diff
-  3. Append section snapshot à .claude/docs/HANDOFF.md avec timestamp
+  1. Lire le transcript (extraire les derniers messages user)
+  2. Lire git status + log
+  3. Écrire (OVERWRITE) le snapshot dans
+     .claude/.cache/handoff-snapshot-<session_id>.md — cache gitignored, nommé
+     par session_id (pas de collision entre teammates partageant le repo), jamais appendé.
   4. Écrire marker /tmp/claude-handoff-marker-<session_id>.json pour SessionStart
 
 Input stdin (JSON Claude Code hook event) :
@@ -16,7 +18,7 @@ Input stdin (JSON Claude Code hook event) :
     "session_id": "...",
     "transcript_path": "/path/to/transcript.jsonl",
     "cwd": "/path/to/project",
-    "tool_input": {"trigger": "auto" | "manual"}
+    "trigger": "auto" | "manual"   # top-level — PreCompact n'a PAS de tool_input
   }
 """
 
@@ -40,10 +42,9 @@ def run(cmd: str, cwd: str = None) -> str:
         return ""
 
 
-def extract_last_messages(transcript_path: str, n: int = 3) -> dict:
-    """Extrait les derniers messages user et assistant du transcript JSONL."""
+def extract_last_user_messages(transcript_path: str, n: int = 3) -> list:
+    """Extrait les n derniers messages user du transcript JSONL."""
     user_msgs = []
-    assistant_msgs = []
     try:
         with open(transcript_path) as f:
             for line in f:
@@ -56,21 +57,11 @@ def extract_last_messages(transcript_path: str, n: int = 3) -> dict:
                                 c.get("text", "") for c in content if c.get("type") == "text"
                             )
                         user_msgs.append(content[:300])
-                    elif entry.get("type") == "assistant":
-                        content = entry.get("message", {}).get("content", "")
-                        if isinstance(content, list):
-                            content = " ".join(
-                                c.get("text", "") for c in content if c.get("type") == "text"
-                            )
-                        assistant_msgs.append(content[:300])
                 except json.JSONDecodeError:
                     continue
     except Exception:
         pass
-    return {
-        "user": user_msgs[-n:],
-        "assistant": assistant_msgs[-n:],
-    }
+    return user_msgs[-n:]
 
 
 def main():
@@ -82,7 +73,9 @@ def main():
     session_id = data.get("session_id", "unknown")
     transcript_path = data.get("transcript_path", "")
     cwd = data.get("cwd", os.getcwd())
-    trigger = data.get("tool_input", {}).get("trigger", "auto")
+    # PreCompact porte "trigger" au TOP-LEVEL ("auto"|"manual"). Il n'a PAS de
+    # tool_input (réservé aux events Pre/PostToolUse) — d'où le bug historique.
+    trigger = data.get("trigger", "auto")
 
     # Snapshot écrit dans un cache NON-VERSIONNÉ (.claude/.cache/, gitignored) au lieu
     # d'être appendé au HANDOFF.md versionné (sinon bloat : +~442 o/compaction, jamais purgé).
@@ -90,19 +83,20 @@ def main():
         sys.exit(0)
     cache_dir = Path(cwd) / ".claude" / ".cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
-    snapshot_path = cache_dir / "handoff-snapshot.md"
+    # Nom par-session → deux teammates partageant le repo n'écrasent pas le snapshot
+    # l'un de l'autre (sinon ré-injection du mauvais contexte au SessionStart).
+    safe_sid = "".join(c if (c.isalnum() or c in "-_") else "_" for c in session_id)
+    snapshot_path = cache_dir / f"handoff-snapshot-{safe_sid}.md"
 
     # Git state
     branch = run("git branch --show-current", cwd=cwd) or "unknown"
     status = run("git status --short", cwd=cwd) or "(clean)"
     log = run("git log -5 --oneline", cwd=cwd) or "(no commits)"
 
-    # Last messages
-    messages = (
-        extract_last_messages(transcript_path) if transcript_path else {"user": [], "assistant": []}
-    )
+    # Derniers messages user
+    user_msgs = extract_last_user_messages(transcript_path) if transcript_path else []
 
-    # Append snapshot section
+    # Construire la section snapshot (écrite en overwrite plus bas)
     now = datetime.now().strftime("%Y-%m-%d %Hh%M")
     snapshot = f"""
 
@@ -124,15 +118,7 @@ def main():
 ```
 
 ### Derniers messages user (extraits)
-{chr(10).join(f"- {m}" for m in messages["user"]) if messages["user"] else "_(aucun)_"}
-
-### TODO Model Summary (à remplir au prochain SessionStart)
-- [ ] Status courant : ...
-- [ ] Échecs tentés : ...
-- [ ] Next steps : ...
-
-### TODO Handoff Context (à remplir)
-- [ ] ...
+{chr(10).join(f"- {m}" for m in user_msgs) if user_msgs else "_(aucun)_"}
 """
 
     # Overwrite (pas d'append) → le cache ne contient jamais qu'UN snapshot, le dernier.

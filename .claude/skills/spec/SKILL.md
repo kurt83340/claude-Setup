@@ -3,7 +3,6 @@ name: spec
 description: Crée une nouvelle feature spec — scaffold les 4 fichiers research.md, spec.md, plan.md, tasks.md dans .claude/docs/conception/specs/00X-titre/ depuis des templates bundlés. Update .claude/docs/ROADMAP.md avec la nouvelle entrée. À invoquer chaque fois que tu démarres une nouvelle feature.
 allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(find:*), Bash(mkdir:*), Bash(cp:*), Bash(date:*), AskUserQuestion
 disable-model-invocation: false
-arguments: [id, titre]
 argument-hint: "<id-optionnel> <titre>"
 ---
 
@@ -31,6 +30,11 @@ ls .claude/docs/conception/specs/ 2>/dev/null | grep -oE "^[0-9]+" | sort -n | t
 Si aucune spec existante → `001`. Sinon `max + 1`, formaté sur 3 chiffres.
 
 Si l'user a passé un ID en argument → l'utiliser (override).
+
+> ⚠️ **Mode agent-teams (plusieurs sessions Claude concurrentes)** : le calcul `max + 1`
+> n'est **pas concurrent-safe** — deux agents qui scaffoldent en même temps prendraient le
+> même `00X`. Convention : **seul le lead scaffolde les specs et alloue les numéros**. Un
+> worker qui a besoin d'une spec la demande au lead (il ne lance pas `/spec` en parallèle).
 
 ## Étape 2 — Demander confirmation titre + scope
 
@@ -62,20 +66,43 @@ Substituer dans chaque fichier :
 
 ## Étape 4 — Update .claude/docs/ROADMAP.md
 
-Trouver la section phase indiquée par l'user, ajouter ligne :
+Trouver la section phase indiquée par l'user, ajouter la ligne dans l'état qui correspond.
+
+### Machine à états ROADMAP (contrat avec `/feature-done` et `/doc-health`)
+
+```
+[ ] pas commencé   →   [~] **EN COURS**   →   [x] livré YYYY-MM-DD
+   (scaffold seul)      (feature démarrée)     (via /feature-done)
+```
+
+- **`/spec` pose `[ ]`** par défaut (spec scaffoldée mais pas démarrée), **OU `[~]`** si l'user enchaîne tout de suite (cf. Étape 5).
+- **`/feature-done` lit l'état réel** (`[ ]` _ou_ `[~]`) et le passe à `[x]`.
+- **`/doc-health` détecte les `[~]` stalled** (en cours depuis > 30j).
+
+> ⚠️ Sans transition vers `[~]`, les greps de `/feature-done` et `/doc-health` (`[~] … **EN COURS**`) ne matchent jamais. C'est `/spec` (Étape 5) ou l'user qui pose `[~]` au démarrage.
+
+Ligne par défaut (scaffold sans démarrer) :
 
 ```markdown
 - [ ] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — pas commencé
 ```
 
-## Étape 5 — Update .claude/docs/HANDOFF.md (optionnel)
+## Étape 5 — Démarrage immédiat : poser `[~]` + update HANDOFF (optionnel)
 
-Si l'user va commencer la feature tout de suite, proposer d'update HANDOFF :
+Si l'user va commencer la feature **tout de suite**, proposer de :
 
-```markdown
-**Spec en cours** : [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) (0/0 tasks)
-**Goal session** : démarrer feature 00X-<kebab>
-```
+1. Passer la ligne ROADMAP en **EN COURS** (format canonique attendu par `/feature-done` + `/doc-health`) :
+
+   ```markdown
+   - [~] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — **EN COURS** 0/Y tasks
+   ```
+
+2. Mettre à jour HANDOFF :
+
+   ```markdown
+   **Spec en cours** : [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) (0/Y tasks)
+   **Goal session** : démarrer feature 00X-<kebab>
+   ```
 
 ## Sortie attendue
 

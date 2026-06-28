@@ -40,7 +40,7 @@
 - [ ] Toutes specs Phase 1 livrées (DoD individuelles cochées dans `specs/00X/tasks.md`)
 - [ ] {{Tests pendant X heures stable}}
 - [ ] {{Décideurs}} ont validé par écrit
-- [ ] [../RUNBOOK.md](../RUNBOOK.md) créé avec procédures rollback
+- [ ] `RUNBOOK.md` créé (à la demande, au 1er déploiement prod) avec procédures rollback
 - [ ] [../CHANGELOG.md](../CHANGELOG.md) à jour avec entry de release
 - [ ] Coverage tests >= {{X}}%
 - [ ] Monitoring opérationnel

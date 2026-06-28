@@ -11,7 +11,7 @@ Types supportés :
   - automation-n8n : ajustement léger (retire RUNBOOK pas-encore-prod)
   - python-app    : retire workflows/, garde tout sinon
   - web-app       : retire workflows/ (pas n8n)
-  - bdd-migration : garde db-migration skill prominent
+  - bdd-migration : copie le skill db-migration depuis EXAMPLES/skills-db
 
 Usage:
     python3 cleanup-for-type.py --type script-jetable [--root .] [--dry-run]
@@ -41,7 +41,9 @@ SCRIPT_JETABLE = {
         ".claude/docs/stack.md",
         ".claude/docs/ACCESS.md",
         ".claude/docs/GLOSSARY.md",
-        ".claude/docs/lecons.md",
+        # NB: lecons.md est CONSERVÉ — /lecon fait partie du trio vital (handoff, lecon,
+        # init) ; supprimer son fichier cible rendrait /lecon capture orphelin. Sur un
+        # jetable, /lecon promote→ADR n'est pas dispo (pas de /adr), mais capture/discard si.
         # Cadrage sous-dossiers (le README suffit)
         ".claude/docs/cadrage/tickets/",
         ".claude/docs/cadrage/reunions/",
@@ -52,7 +54,6 @@ SCRIPT_JETABLE = {
         ".claude/skills/codemap/",
         ".claude/skills/doc-health/",
         ".claude/skills/feature-done/",
-        ".claude/skills/db-migration/",
         ".claude/skills/spec/",
         ".claude/skills/pivot/",
         ".claude/skills/idee/",
@@ -103,12 +104,16 @@ WEB_APP = {
     "keep_reason": "Web app — retire workflows/ (pas n8n)",
 }
 
-# bdd-migration : garde db-migration prominent
+# bdd-migration : copie le skill db-migration (Alembic) depuis EXAMPLES (hors cœur)
 BDD_MIGRATION = {
     "delete": [
         "workflows/",
     ],
-    "keep_reason": "BDD migration — garde db-migration skill",
+    "copy_examples": {
+        # db-migration est stack-spécifique (Alembic) → vit dans EXAMPLES, copié à la demande
+        "EXAMPLES/skills-db/db-migration": ".claude/skills/db-migration",
+    },
+    "keep_reason": "BDD migration — copie le skill db-migration (Alembic) depuis EXAMPLES/skills-db",
 }
 
 PROFILES = {

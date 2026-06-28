@@ -61,7 +61,7 @@ def main():
         sys.exit(0)
 
     tool_name = data.get("tool_name", "")
-    if tool_name not in ("Edit", "Write"):
+    if tool_name not in ("Edit", "Write", "MultiEdit"):
         sys.exit(0)
 
     file_path = data.get("tool_input", {}).get("file_path", "")

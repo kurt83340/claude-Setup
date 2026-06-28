@@ -5,8 +5,9 @@ SessionStart hook (matcher: "compact") — Re-inject HANDOFF.md après compactio
 Trigger : quand session démarre AFTER compaction (le matcher "compact" garantit ça).
 Action :
   1. Lire le marker /tmp/claude-handoff-marker-<session_id>.json
-  2. Si needs_inject=true, lire la dernière section snapshot de HANDOFF.md
-  3. Injecter en additionalContext (stdout direct = injection auto par Claude Code)
+  2. Si needs_inject=true, lire le snapshot pointé par marker["snapshot_path"]
+     (cache non-versionné par-session : .claude/.cache/handoff-snapshot-<session_id>.md)
+  3. Injecter via stdout (injection auto par Claude Code en SessionStart)
   4. Flip needs_inject=false dans le marker
 
 Input stdin :

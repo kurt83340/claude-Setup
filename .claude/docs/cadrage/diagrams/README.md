@@ -1,44 +1,7 @@
-# diagrams/ — Schémas de synthèse business (cadrage)
+# diagrams/ — Schémas business (cadrage)
 
-Diagrammes pour **comprendre/visualiser le cadrage** : flow métier client, processus existant vs cible, organigramme, mindmap des concepts métier.
+Diagrammes pour visualiser le **cadrage métier** : flow client, existant vs cible, organigramme, mindmap des concepts.
 
-## Convention diagrammes (3 formats supportés)
+**Par défaut → ASCII inline** dans [`../README.md`](../README.md). Crée un fichier séparé ici (`.md` ASCII, ou `.excalidraw` + export `.svg` côte à côte) uniquement si le diagramme est gros/visuel.
 
-### 1. ASCII inline (DEFAULT — le plus Claude-friendly)
-
-Pour diagrammes simples (flow linéaire, arbres). Mets-les directement dans `cadrage/README.md` ou dans un `.md` ici. Exemple : [`flow-business-{{nom}}.md`](flow-business-{{nom}}.md).
-
-### 2. Excalidraw / PNG / SVG (pour diagrammes complexes)
-
-**Règle d'or :** commit **la source ET l'export** côte à côte.
-
-```
-diagrams/
-├── flow-X.excalidraw    # source éditable (Excalidraw)
-├── flow-X.svg           # export pour Claude + GitHub preview
-├── mindmap-Y.png        # MindMap exportée
-└── ...
-```
-
-→ Toi humain édites le `.excalidraw`, tu exportes en `.svg` à chaque modif majeure.
-→ Claude lit le SVG via Read explicite (le `.excalidraw` JSON aussi mais comprend mal visuellement).
-
-### 3. Mermaid inline (si tu changes d'avis)
-
-Pas utilisé actuellement (décision utilisateur : ASCII préféré). Mais possible si besoin.
-
-## Référencer un diagramme depuis un autre document
-
-```markdown
-Voir [flow business](diagrams/flow-business-{{nom}}.md)
-ou
-![Flow business](diagrams/flow-business-{{nom}}.svg)
-```
-
-⚠️ Claude ne suit pas automatiquement `![](path)` quand il lit un .md — il faut un Read explicite ou pointer vers un .md qui contient l'ASCII.
-
-## Gitignore
-
-- ✅ Versionner les `.excalidraw` (source = doc projet)
-- ✅ Versionner les exports `.svg`, `.png`
-- ❌ Gitignore : `*.excalidraw.bak`, exports temporaires
+> 📐 **Convention complète** (3 formats, règle « source éditable + export côte à côte », gitignore, limites Claude sur `![](path)`) → **[template-maintenance.md § Convention diagrammes](../../../rules/template-maintenance.md#convention-diagrammes-3-formats)** _(source unique — ne pas recopier ici pour éviter le drift)_.

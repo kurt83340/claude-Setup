@@ -1,8 +1,8 @@
 # Stack — {{PROJECT_NAME}}
 
-> **Inventaire technique pur** : langage, libs, services tiers, LLM, deploy, monitoring.
-> Le **POURQUOI** des choix tech vit dans [adr/](adr/). L'**ARCHI** globale dans [conception/ARCHITECTURE.md](conception/ARCHITECTURE.md).
-> Ce fichier = **vue catalogue rapide** pour répondre à "quelles techs on utilise et pour quoi ?".
+> **Catalogue technique pur** : langage, libs, services tiers, LLM, infra/deploy.
+> Le **POURQUOI** des choix vit dans [adr/](adr/). L'**ARCHI** globale (dont **sécurité** & **observabilité**) dans [conception/ARCHITECTURE.md](conception/ARCHITECTURE.md) ; les **conventions de test** dans [../rules/testing.md](../rules/testing.md).
+> Ce fichier = **vue catalogue rapide** ("quelles techs on utilise et pour quoi ?") — **pas** de narratif archi/sécurité/tests ici (sinon drift avec ARCHITECTURE).
 
 **Dernière MAJ :** {{YYYY-MM-DD}}
 
@@ -51,11 +51,11 @@ Options à considérer si besoin :
 
 ## Services tiers / SaaS
 
-| Service                   | Usage                | Statut                       | Coût               | Voir                   |
-| ------------------------- | -------------------- | ---------------------------- | ------------------ | ---------------------- |
-| **{{Sentry / autre}}**    | {{error tracking}}   | {{✅ actif / ⏳ en attente}} | {{free / X€/mois}} | [{{lien}}]({{path}})   |
-| **{{Vault credentials}}** | {{stockage secrets}} | {{actif}}                    | {{inclus}}         | [ACCESS.md](ACCESS.md) |
-| ...                       | ...                  | ...                          | ...                | ...                    |
+| Service                   | Usage                | Statut                       | Coût               | Voir                              |
+| ------------------------- | -------------------- | ---------------------------- | ------------------ | --------------------------------- |
+| **{{Sentry / autre}}**    | {{error tracking}}   | {{✅ actif / ⏳ en attente}} | {{free / X€/mois}} | [{{lien}}]({{path}})              |
+| **{{Vault credentials}}** | {{stockage secrets}} | {{actif}}                    | {{inclus}}         | `ACCESS.md` _(créé à la demande)_ |
+| ...                       | ...                  | ...                          | ...                | ...                               |
 
 ❌ **Pas utilisé** : {{liste des services explicitement écartés}}.
 
@@ -67,35 +67,13 @@ Options à considérer si besoin :
 | CI/CD       | {{GitHub Actions / GitLab CI / etc.}} | {{lint + tests sur PR}}                          |
 | Versioning  | Tags git `vYYYY.MM.DD-HHMM`           | Voir [git-workflow.md](../rules/git-workflow.md) |
 
-## Auth & Sécurité
+## Hors de ce catalogue (home unique — ne pas dupliquer ici)
 
-| Auth            | Pattern                          | Voir                   |
-| --------------- | -------------------------------- | ---------------------- |
-| {{Système 1}}   | {{JWT / session / OAuth / etc.}} | [{{ADR}}]({{path}})    |
-| Secrets storage | `.env` + {{vault}}               | [ACCESS.md](ACCESS.md) |
+Pour éviter le drift, ces aspects vivent **ailleurs** (ce fichier ne fait que pointer) :
 
-❌ **Anti-patterns interdits** :
-
-- Credentials dans le code source
-- Credentials dans les logs
-- {{Autre anti-pattern spécifique projet}}
-
-## Tests
-
-| Type        | Framework                  | Couverture           | Lancement       |
-| ----------- | -------------------------- | -------------------- | --------------- |
-| Unit        | {{pytest / jest / vitest}} | >= {{X}}% (objectif) | `{{commande}}`  |
-| Integration | {{...}}                    | {{...}}              | `{{commande}}`  |
-| E2E         | {{...}}                    | {{smoke}}            | {{manuel / CI}} |
-
-Voir [testing.md](../rules/testing.md) pour conventions.
-
-## Monitoring & Observability
-
-| Source             | Quoi                        | Retention   |
-| ------------------ | --------------------------- | ----------- |
-| {{Source 1}}       | {{logs / metrics / traces}} | {{X jours}} |
-| {{Sentry / autre}} | {{erreurs}}                 | {{...}}     |
+- **Auth & sécurité** (patterns auth, secrets storage, anti-patterns credentials) → [conception/ARCHITECTURE.md](conception/ARCHITECTURE.md) §6 Sécurité
+- **Monitoring & observabilité** (logs, metrics, alerting, rétention) → [conception/ARCHITECTURE.md](conception/ARCHITECTURE.md) §7 Observabilité
+- **Tests** (frameworks, couverture, commandes) → [../rules/testing.md](../rules/testing.md)
 
 ## Évolutions stack prévues (v2+)
 

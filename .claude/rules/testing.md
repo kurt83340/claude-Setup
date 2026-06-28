@@ -1,3 +1,7 @@
+---
+paths: "**/*.py"
+---
+
 # Testing
 
 ## Outils

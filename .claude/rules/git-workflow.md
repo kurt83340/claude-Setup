@@ -17,9 +17,9 @@ Types :
 Exemples :
 
 ```
-feat(sap): add SAP B1 service layer client
-fix(notion): handle 429 rate limit with exponential backoff
-docs(runbook): ajout procédure rollback workflow n8n
+feat(api): add service-layer client for the external API
+fix(client): handle 429 rate limit with exponential backoff
+docs(runbook): add rollback procedure
 ```
 
 ## Branches
