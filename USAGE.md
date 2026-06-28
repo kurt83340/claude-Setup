@@ -10,7 +10,7 @@
 
 ```bash
 # 1. Copier le template (exclut EXAMPLES et test pour pas polluer)
-rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.git/' \
+rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
   /chemin/vers/template/ /chemin/vers/mon-nouveau-projet/
 
 # 2. Aller dedans

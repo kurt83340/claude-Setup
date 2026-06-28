@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Suite de tests des hooks
+        run: python3 test/test_hooks.py
+
+      - name: settings.json est un JSON valide
+        run: python3 -m json.tool .claude/settings.json > /dev/null
+
+      - name: CLAUDE.md = 3 @-imports (index just-in-time)
+        run: |
+          n=$(grep -oE '@\.claude/[^ ]+' CLAUDE.md | wc -l)
+          echo "@-imports: $n"
+          test "$n" -eq 3
+
+      - name: Pas de 'npx specify' dans STRUCTURE.md
+        run: |
+          ! grep -q 'npx specify' STRUCTURE.md
+
+      - name: Tous les hooks Python compilent
+        run: python3 -m py_compile .claude/hooks/*.py
