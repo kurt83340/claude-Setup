@@ -9,8 +9,8 @@
 ### Procédure complète (6 étapes, ~5 min)
 
 ```bash
-# 1. Copier le template (exclut EXAMPLES et test pour pas polluer)
-rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+# 1. Copier le template (exclut l'exemple ACME + test ; garde EXAMPLES/skills-* pour l'init)
+rsync -av --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
   /chemin/vers/template/ /chemin/vers/mon-nouveau-projet/
 
 # 2. Aller dedans
@@ -46,13 +46,13 @@ Claude va :
 
 ### Les 5 types de projet (impact sur cleanup)
 
-| Type             | Impact   | Skills restants             | Use case                         |
-| ---------------- | -------- | --------------------------- | -------------------------------- |
-| `script-jetable` | **-80%** | 3 (handoff, lecon, init)    | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | 11 (tous)                   | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | 11 (tous)                   | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 11 + skills n8n copiés      | Workflow n8n + helpers Python    |
-| `bdd-migration`  | léger    | 11 (db-migration prominent) | Migration BDD avec Alembic       |
+| Type             | Impact   | Skills installés                              | Use case                         |
+| ---------------- | -------- | --------------------------------------------- | -------------------------------- |
+| `script-jetable` | **-80%** | 3 (handoff, lecon, init)                      | 1-shot Python, < 1 jour          |
+| `python-app`     | léger    | 10 (cœur)                                     | App Python (FastAPI, scripts...) |
+| `web-app`        | léger    | 10 (cœur)                                     | Next.js, React, etc.             |
+| `automation-n8n` | léger    | 10 cœur + 3 skills n8n (depuis EXAMPLES)      | Workflow n8n + helpers Python    |
+| `bdd-migration`  | léger    | 10 cœur + `db-migration` (EXAMPLES/skills-db) | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 
@@ -85,26 +85,11 @@ git commit -m "feat: init projet <nom> depuis template"
 
 ## 🧠 Comprendre AVANT d'utiliser : les 3 layers de mémoire
 
-Claude Code 2.1+ a 3 couches de mémoire qui se complètent. **Ne les confonds pas.**
+Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md` + `.claude/rules/*`), **Patterns** (auto-memory, machine-local) et **État** (`HANDOFF.md`). Ne les confonds pas.
 
-| Layer           | Fichier                                                                      | Qui écrit              | Survit à quoi ?              | Versionné git ?        |
-| --------------- | ---------------------------------------------------------------------------- | ---------------------- | ---------------------------- | ---------------------- |
-| **1. Stable**   | `CLAUDE.md` (projet) + `.claude/CLAUDE.md` (template) + `.claude/rules/*.md` | Toi (humain)           | Toujours                     | ✅ Oui                 |
-| **2. Patterns** | `~/.claude/projects/<projet>/memory/MEMORY.md`                               | Claude (auto)          | Sessions, compaction, /clear | ❌ Non (machine-local) |
-| **3. État**     | `.claude/docs/HANDOFF.md`                                                    | `/handoff` skill + toi | Sessions, compaction         | ✅ Oui                 |
+→ **Détail canonique** (qui écrit quoi / survit à quoi / versionné) : [.claude/rules/template-maintenance.md § Les 3 layers de mémoire](.claude/rules/template-maintenance.md). Source unique — évite le drift.
 
-**Quoi mettre où** :
-
-- Règles **invariantes** du projet → `.claude/rules/*.md`
-- Patterns **appris** automatiquement → MEMORY.md (Claude le gère, tu ne touches pas)
-- **État volatile** (où j'en suis, blockers, next) → HANDOFF.md (court, narratif)
-
-**`/resume` vs HANDOFF.md** :
-
-- `/resume` = built-in Claude, garde 100% du contexte conversation précédente (idéal pour reprendre dans la même journée)
-- `HANDOFF.md` = sert quand : tu changes de machine, tu clones le repo ailleurs, tu partages avec un collègue, ou tu démarres une session fraîche après plusieurs jours
-
-→ Les deux sont **complémentaires**. HANDOFF n'est pas obsolète à cause de `/resume`.
+**`/resume` vs HANDOFF.md** : `/resume` (built-in) garde 100 % du contexte de la session précédente (reprise même journée) ; `HANDOFF.md` sert quand tu changes de machine, clones ailleurs, partages, ou démarres à froid après plusieurs jours. **Complémentaires.**
 
 ## 📅 Workflow quotidien
 
@@ -213,30 +198,30 @@ Rapport généré → tu suis les actions par priorité.
 
 ## 📋 Cheat sheet — Quand utiliser quoi
 
-| Situation                                  | Skill / Action                                      |
-| ------------------------------------------ | --------------------------------------------------- |
-| Nouveau projet                             | `/init-from-template`                               |
-| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)   |
-| Fin de session                             | `/handoff`                                          |
-| Feature livrée                             | `/feature-done <spec-id>`                           |
-| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                            |
-| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`     |
-| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                          |
-| Idée perso à capturer                      | `/idee "<titre>"`                                   |
-| Refacto majeur sur le code                 | `/codemap`                                          |
-| Audit hebdo                                | `/doc-health`                                       |
-| BDD migration (Alembic)                    | `/db-migration`                                     |
-| Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                       |
-| Pivot client                               | `/pivot "<raison>"` (workflow 7 étapes orchestrées) |
-| Promotion leçon → ADR / rule               | `/lecon promote <date>`                             |
-| Promotion idée → spec                      | `/idee promote <date>`                              |
-| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`             |
-| Lister tous les ADRs                       | `/adr list [scope]`                                 |
-| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                 |
-| Reprendre exactement où on en était        | `/resume` (built-in Claude)                         |
-| Compaction context (auto)                  | RIEN — hooks gèrent                                 |
-| Édition fichier code (auto)                | RIEN — hook injecte code-map context                |
-| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions            |
+| Situation                                  | Skill / Action                                                |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| Nouveau projet                             | `/init-from-template`                                         |
+| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)             |
+| Fin de session                             | `/handoff`                                                    |
+| Feature livrée                             | `/feature-done <spec-id>`                                     |
+| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                      |
+| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`               |
+| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                    |
+| Idée perso à capturer                      | `/idee "<titre>"`                                             |
+| Refacto majeur sur le code                 | `/codemap`                                                    |
+| Audit hebdo                                | `/doc-health`                                                 |
+| BDD migration (Alembic)                    | `/db-migration` (stack BDD — copié depuis EXAMPLES/skills-db) |
+| Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                 |
+| Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)           |
+| Promotion leçon → ADR / rule               | `/lecon promote <date>`                                       |
+| Promotion idée → spec                      | `/idee promote <date>`                                        |
+| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                       |
+| Lister tous les ADRs                       | `/adr list [scope]`                                           |
+| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                           |
+| Reprendre exactement où on en était        | `/resume` (built-in Claude)                                   |
+| Compaction context (auto)                  | RIEN — hooks gèrent                                           |
+| Édition fichier code (auto)                | RIEN — hook injecte code-map context                          |
+| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                      |
 
 ## 🔁 Workflow type pour une feature complète
 
@@ -296,7 +281,7 @@ Demande client reçue
 
 ## 🔄 Workflow pivot (client change d'avis)
 
-⚠️ **Workflow rare mais critique**. Protocole 7 étapes :
+⚠️ **Workflow rare mais critique**. Protocole **9 étapes** (orchestré par `/pivot`) :
 
 ```
 1. cadrage/reunions/YYYY-MM-DD-pivot.md (capture réunion)
@@ -314,33 +299,17 @@ Demande client reçue
 7. Si pivot technique : /adr cadrage "Pivot stack" (supersede les anciens ADRs)
        ↓
 8. /lecon cadrage "Pourquoi le pivot" (status 🆕 new pour review post-mortem)
+       ↓
+9. /handoff (snapshot HANDOFF.md : nouvelle direction + next steps)
 ```
 
 → Tu peux déléguer ce workflow complet à l'agent `doc-maintainer` (Task tool).
 
 ## 📜 Quand créer un ADR (cf section `/adr` plus bas pour comment)
 
-✅ **OUI** :
+**Règle courte** : décision **cross-feature** OU qui **survit à la feature** → ADR global (`/adr <scope> "<titre>"`). Décision **locale à une feature** → section `## Décisions` dans `specs/00X/plan.md` (pas d'ADR).
 
-- Choix de stack (langage, framework, BDD, orchestration)
-- Choix d'archi (monolithe vs microservices, REST vs GraphQL)
-- Conventions structurantes (auth JWT vs sessions, async Celery)
-- Décisions sécurité (où stocker les secrets)
-- Migration BDD majeure
-- **Cross-feature** : impacte plusieurs features
-- Décision qui **survit à la feature**
-
-❌ **NON — utiliser `## Décisions` dans `plan.md` de la spec** :
-
-- Choix de lib pour parser CSV dans UNE feature
-- Convention de nommage locale à une feature
-- Refacto interne d'un module
-- Fix de bug
-
-**Règle de promotion** : décision feature **survit** OU **référencée ailleurs** → promouvoir ADR global.
-
-5 scopes : `cadrage` | `mvp` | `feature-00X` | `infra` | `operations`
-Naming : `00XX-<scope>-<titre-kebab>.md` (séquentiel sans reset).
+→ **Critères détaillés (OUI/NON), 5 scopes, naming** = source unique dans [.claude/rules/template-maintenance.md § Convention ADR](.claude/rules/template-maintenance.md). Le « comment » (capture / supersede / deprecate / list) → section `/adr` ci-dessous.
 
 ## 📝 Workflow leçons (`/lecon`)
 
@@ -471,7 +440,7 @@ L'agent `doc-maintainer` est le **cerveau** invocable via Task tool. Il fait ce 
 | ---------------------------------------------------- | ------------------------ |
 | 1 action ciblée rapide (< 1 min)                     | Skill (`/handoff`, etc.) |
 | Workflow complet (HANDOFF + ROADMAP + ADRs en batch) | Agent `doc-maintainer`   |
-| Pivot client (7 étapes synchronisées)                | Agent                    |
+| Pivot client (9 étapes synchronisées)                | Agent                    |
 | Audit + actions (vs juste audit)                     | Agent                    |
 | Promotion multiple lecons → ADRs en une passe        | Agent                    |
 
@@ -481,7 +450,7 @@ L'agent `doc-maintainer` est le **cerveau** invocable via Task tool. Il fait ce 
 
 Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer toutes les MAJ.
 
-```
+````
 
 (Claude utilisera le Task tool automatiquement)
 
@@ -510,92 +479,23 @@ Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer to
 
 **Règle d'or** : crée à la demande, JAMAIS préventivement.
 
-| Trigger                                                         | Fichier à créer                                                            |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| User mentionne credentials/API/OAuth → pas d'ACCESS.md riche    | `.claude/docs/ACCESS.md`                                                   |
-| User parle de déploiement prod imminent                         | `.claude/docs/RUNBOOK.md`                                                  |
-| Décision tech impacte plusieurs features OU survit à la feature | `/adr <scope> "<titre>"` → crée `.claude/docs/adr/00XX-<scope>-<titre>.md` |
-| Décision tech **locale à UNE feature**                          | Section `## Décisions` dans `specs/00X/plan.md` (PAS d'ADR séparé)         |
-| > 3 références à un terme métier non documenté                  | Créer/enrichir `.claude/docs/GLOSSARY.md`                                  |
-| Démarrage d'une feature                                         | `.claude/docs/conception/specs/00X-feature/{research,spec,plan,tasks}.md`  |
-| Nouvelle idée perso pas mûre                                    | `.claude/docs/idees/YYYY-MM-DD-titre.md`                                   |
-| Bug/pattern/observation à capturer                              | `/lecon <scope> "<titre>"` → append dans `lecons.md` (status 🆕 new)       |
-| **Avant d'éditer un fichier de code**                           | **Vérifier les règles de couplage dans `code-map.md`** (rôle/imports : se lisent dans le code) |
-| Nouvelle règle de couplage / contrainte d'archi / gotcha        | MAJ `.claude/docs/code-map.md` (ou `/codemap`) — pas de file-by-file        |
-| Nouvelle lib Python / service tiers / LLM utilisé               | MAJ `.claude/docs/stack.md`                                                |
-| Doc reçue du client                                             | `.claude/docs/cadrage/documents/YYYY-MM-DD-description.ext`                |
-| Compte-rendu de réunion                                         | `.claude/docs/cadrage/reunions/YYYY-MM-DD-titre.md`                        |
-| Ticket Jira/Linear/Asana reçu                                   | `.claude/docs/cadrage/tickets/TICKET-XXX-titre.md`                         |
-| Pivot client                                                    | Voir [Workflow pivot](#-workflow-pivot-client-change-davis)                |
-| Diagramme business simple                                       | Inline ASCII dans `cadrage/README.md`                                      |
-| Diagramme business complexe                                     | `cadrage/diagrams/X.excalidraw` + export `.svg`                            |
-| Diagramme technique simple                                      | Inline ASCII dans `conception/ARCHITECTURE.md`                             |
-| Diagramme technique gros                                        | `conception/diagrams/X.excalidraw` + export `.svg`                         |
-| Diagramme spécifique à une feature                              | Inline dans `specs/00X/plan.md` ou `specs/00X/diagrams/` (rare)            |
+→ **Matrice complète (trigger → fichier)** = source unique dans [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](.claude/rules/template-maintenance.md). Couvre ACCESS, RUNBOOK, ADR vs `plan.md`, GLOSSARY, specs, idées, leçons, code-map, stack, cadrage (documents / réunions / tickets) et diagrammes.
 
 ## 🎨 Convention diagrammes (3 formats)
 
-| Format                       | Quand                                      | Claude-friendly ?         |
-| ---------------------------- | ------------------------------------------ | ------------------------- |
-| **ASCII inline** dans le .md | Default — diagrammes simples (flow, arbre) | ✅ Parfait                |
-| **Excalidraw + export SVG**  | Diagrammes visuels complexes               | ⚠️ SVG via Read explicite |
-| **PNG/JPG**                  | Screenshots, photos uniquement             | ⚠️ Pas fiable en 2026     |
+→ **Source unique** (ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export ») : [.claude/rules/template-maintenance.md § Convention diagrammes](.claude/rules/template-maintenance.md).
 
-**Règle d'or images** : commit **la SOURCE éditable + l'EXPORT SVG/PNG** côte à côte.
-
-```
-
-diagrams/
-├── flow-X.excalidraw # source éditable (humain)
-└── flow-X.svg # export (Claude + GitHub preview)
-
-````
-
-⚠️ `![](path.png)` dans un .md n'est PAS auto-suivi par Claude. Pour qu'il "voit" un diagramme image, il faut un Read explicite ou pointer vers un .md ASCII.
+**Où placer** : simple → inline dans le .md (PRD, ARCHITECTURE, spec.md, plan.md) ; gros / éditable → dossier `diagrams/` local (`cadrage/diagrams/`, `conception/diagrams/`, `specs/00X/diagrams/`).
 
 ## 📛 Conventions de naming
 
-| Type            | Format                                              | Exemple                                            |
-| --------------- | --------------------------------------------------- | -------------------------------------------------- |
-| Specs           | `00X-feature-name/` (séquentiel sans reset)         | `001-erp-connector/`, `002-notion-writer/`         |
-| ADR             | `00XX-<scope>-<titre-kebab>.md` (séquentiel global) | `0007-mvp-stack-bdd.md`, `0008-infra-1password.md` |
-| Réunions/pivots | `YYYY-MM-DD-titre.md`                               | `2026-05-20-kickoff.md`, `2026-06-12-pivot.md`     |
-| Sources reçues  | `YYYY-MM-DD-description.ext`                        | `2026-05-15-rgpd-spec.pdf`                         |
-| Idées perso     | `YYYY-MM-DD-titre-court.md`                         | `2026-05-22-sync-inverse.md`                       |
-| Leçons          | Header `## YYYY-MM-DD — <titre>` dans `lecons.md`   | `## 2026-05-24 — Notion rate limit`                |
-| Tags git        | `vYYYY.MM.DD-HHMM`                                  | `v2026.06.10-1430`                                 |
+→ **Source unique** (specs `00X`, ADR `00XX-<scope>-<titre>`, réunions/sources/idées datées ISO, leçons, tags git) : [.claude/rules/template-maintenance.md § Conventions de naming](.claude/rules/template-maintenance.md).
 
 ## 🚦 Conventions de statut
 
-### ROADMAP
-
-- `[ ]` = planifié, pas commencé
-- `[~]` = en cours (mettre en **gras** pour visibilité)
-- `[x]` = livré
-
-### ADR (frontmatter)
-
-- `proposed` = en discussion
-- `accepted` = décidé, en vigueur
-- `deprecated` = à éviter mais pas remplacé
-- `superseded` = remplacé par un autre ADR (lien `superseded_by`)
-
-### Leçons
-
-- `🆕 new` = observé, pas décidé (défaut)
-- `📜 → ADR-00XX` = promu en ADR (avec lien)
-- `🔧 → rule X` = promu en règle Claude (path)
-- `🧠 → memory only` = laissé à auto-memory
-- `❌ discarded` = pas pertinent
-- `📦 archived` = fermé post-promotion stable
-
-### Idées
-
-- `💡 Backlog` = en attente
-- `🔄 À promouvoir en spec`
-- `💬 Discuter avec X`
-- `✅ Promu en spec 00X — YYYY-MM-DD`
-- `❌ Abandonné`
+- **ROADMAP** (`[ ]` / `[~]` / `[x]`) → [.claude/rules/template-maintenance.md § Conventions de statut](.claude/rules/template-maintenance.md).
+- **ADR** (`proposed` / `accepted` / `deprecated` / `superseded`) → [§ Convention ADR](.claude/rules/template-maintenance.md) (frontmatter YAML).
+- **Leçons** / **Idées** : statuts définis dans leurs workflows ci-dessus (§ Workflow leçons `/lecon`, § Workflow idées `/idee`) — source unique.
 
 ## 🔐 Permissions (`settings.json`)
 
@@ -803,16 +703,16 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 
 ## 📚 Aller plus loin
 
-| Fichier                                                                        | Pour quoi                                                  |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| [STRUCTURE.md](STRUCTURE.md)                                                   | Convention 2026 complète (arborescence, naming, patterns)  |
-| [CLAUDE.md](CLAUDE.md)                                                         | Index **projet** : résumé + nav doc + conventions          |
-| [.claude/CLAUDE.md](.claude/CLAUDE.md)                                         | Index **template** : skills, workflow, agent               |
-| [.claude/rules/template-maintenance.md](.claude/rules/template-maintenance.md) | Méta-doc : 3 layers mémoire, fichiers vivants, conventions |
-| [.claude/docs/adr/README.md](.claude/docs/adr/README.md)                       | Convention ADRs détaillée                                  |
-| [.claude/docs/conception/README.md](.claude/docs/conception/README.md)         | Pattern mirror macro/micro                                 |
-| [.claude/docs/cadrage/README.md](.claude/docs/cadrage/README.md)               | Template cadrage initial                                   |
-| [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/)                               | Exemple complet rempli (référence ACME)                    |
+| Fichier                                                                        | Pour quoi                                                       |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| [STRUCTURE.md](STRUCTURE.md)                                                   | Convention 2026 complète (arborescence, naming, patterns)       |
+| [CLAUDE.md](CLAUDE.md)                                                         | Index **projet** : résumé + nav doc + conventions               |
+| [.claude/CLAUDE.md](.claude/CLAUDE.md)                                         | Index **template** : skills, workflow, agent                    |
+| [.claude/rules/template-maintenance.md](.claude/rules/template-maintenance.md) | Méta-doc : 3 layers mémoire, fichiers vivants, conventions      |
+| [.claude/docs/adr/README.md](.claude/docs/adr/README.md)                       | Convention ADRs détaillée                                       |
+| [.claude/docs/conception/README.md](.claude/docs/conception/README.md)         | Pattern mirror macro/micro                                      |
+| [.claude/docs/cadrage/README.md](.claude/docs/cadrage/README.md)               | Template cadrage initial                                        |
+| [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/)     | Exemple rempli (repo template ; exclu de ton projet par l'init) |
 
 ## 🎯 Philosophie
 

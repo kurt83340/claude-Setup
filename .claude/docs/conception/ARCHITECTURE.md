@@ -55,17 +55,11 @@ Stack résumé des choix **structurants** avec ADR liés.
 | {{Auth}}          | ...            | ...           | -                                 |
 | {{Logging}}       | ...            | ...           | -                                 |
 
-## 3. Modules
+## 3. Modules & découpage
 
-### Module 1 — `{{module_name}}`
+Décris ici le **découpage macro en sous-systèmes** (qui fait quoi, à gros grain) — voir aussi la vue d'ensemble §1. **Pas** de détail fichier-par-fichier (rôle, méthodes, liste de tests) : ça se retrouve en lisant le code (`grep`/lecture) et ça drifte.
 
-- {{Rôle du module}}
-- Méthodes : {{...}}
-- Tests : `tests/...`
-
-### Module 2 — `{{module_name}}`
-
-- ...
+> ⚠️ Ce qui **n'est PAS déductible du code** — règles de couplage, intention, gotchas — vit dans **[../code-map.md](../code-map.md)** (auto-chargé + réinjecté par hook avant chaque édition). Ne pas le dupliquer ici.
 
 ## 4. Flux de données
 

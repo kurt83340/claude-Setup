@@ -21,7 +21,7 @@
 - `/handoff` ⭐ — snapshot HANDOFF.md fin de session
 - `/spec "<titre>"` ⭐ — scaffold nouvelle feature (4 fichiers + ROADMAP)
 - `/feature-done <spec-id>` ⭐ — livraison feature
-- `/pivot "<raison>"` — orchestrer un pivot client (7 étapes)
+- `/pivot "<raison>"` — orchestrer un pivot client (9 étapes)
 
 ### Cycle de vie des artefacts (capture/promote/discard/archive)
 
@@ -33,15 +33,21 @@
 
 - `/doc-health` — audit hebdo de la doc
 - `/codemap` — régénère `code-map.md` depuis `src/`
-- `/db-migration` — workflow Alembic (si stack BDD)
 
 ### Bootstrap
 
 - `/init-from-template` — initialise un projet depuis ce template (UNE FOIS)
 
-### Skills hors-template (spécifiques à la stack du projet)
+> 🗂️ **Inventaire canonique** : cette liste (**10 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
-_Aucun par défaut (template générique)._ Quand un projet ajoute des skills liés à sa stack (ex. les 7 skills n8n d'un projet d'automatisation), les installer dans `.claude/skills/` **et les recenser ici** : ce fichier est l'inventaire unique de **tous** les skills — template ou non.
+### Skills hors-template (stack-spécifiques — copiés à la demande depuis `EXAMPLES/skills-*`)
+
+Hors du cœur (outillage non générique). `/init-from-template` les copie dans `.claude/skills/` selon le **type de projet** choisi :
+
+- **n8n** (type `automation-n8n`) → `/n8n-push`, `/n8n-seed-db`, `/n8n-deploy` (source : [`EXAMPLES/skills-n8n/`](../EXAMPLES/skills-n8n/))
+- **BDD / Alembic** (type `bdd-migration`) → `/db-migration` (source : [`EXAMPLES/skills-db/`](../EXAMPLES/skills-db/))
+
+Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.claude/skills/` **et les recenser ici** : ce fichier reste l'inventaire unique de **tous** les skills — cœur ou stack.
 
 ## Slash commands projet
 
@@ -53,7 +59,8 @@ _Aucun par défaut (template générique)._ Quand un projet ajoute des skills li
 ## Agent perso (`.claude/agents/`)
 
 - `doc-maintainer` — invocable via Task tool, gère tout le workflow doc (HANDOFF, ROADMAP, ADRs, pivot, promotion)
+- `worker` — rôle teammate pour les **agent-teams** : exécute une sous-tâche dans son périmètre (idéalement son git worktree), rapporte au lead via `SendMessage`, ne touche pas aux docs partagés ni à la numérotation (voir [§ Agent teams](rules/template-maintenance.md#agent-teams-multi-agent--anti-collision))
 
 ---
 
-> 💡 **Exemple complet rempli (référence optionnelle)** : [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/) — projet ACME (Sync ERP→Notion). À consulter pour voir « à quoi ça ressemble une fois rempli ». Ce n'est **pas** le mécanisme de scaffolding (ça, c'est `/spec` + ses templates bundlés `.claude/skills/spec/templates/`).
+> 💡 **Exemple complet rempli (référence optionnelle)** : [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/) — projet ACME (Sync ERP→Notion). Présent dans le **repo template uniquement** (exclu de ton projet par le rsync d'init). À consulter pour voir « à quoi ça ressemble une fois rempli ». Ce n'est **pas** le mécanisme de scaffolding (ça, c'est `/spec` + ses templates bundlés `.claude/skills/spec/templates/`).

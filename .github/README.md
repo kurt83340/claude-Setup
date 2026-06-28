@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **11 skills** (`.claude/skills/`) : `/handoff`, `/spec`, `/feature-done`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/db-migration`, `/init-from-template`
+- **10 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/feature-done`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
 - **1 agent** `doc-maintainer` (maintenance doc en batch, diff par diff)
 - **5 hooks** lifecycle : snapshot pré-compaction → `.claude/.cache/`, ré-injection, code-map, growth-detection, rappel `/handoff`
 - **Doc structurée** : cadrage / conception (PRD, ARCHITECTURE, specs) / ADR / ROADMAP / HANDOFF / code-map / stack…
@@ -16,12 +16,14 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 ## Démarrer un projet
 
 ```bash
-rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+rsync -av --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
   ./ /chemin/vers/mon-projet/
 cd /chemin/vers/mon-projet
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 claude   # puis, dans la session : /init-from-template
 ```
+
+> `EXAMPLES/skills-*` (n8n, db-migration) est **conservé** : `/init-from-template` y copie les skills stack selon le type de projet. Seul l'exemple ACME est exclu. Tu peux retirer `EXAMPLES/` à la fin si tu n'en as plus besoin.
 
 → Guide complet : **[USAGE.md](../USAGE.md)** · Convention : **[STRUCTURE.md](../STRUCTURE.md)** · Exemple rempli : **[EXAMPLES/](../EXAMPLES/)**
 

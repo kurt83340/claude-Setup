@@ -3,7 +3,6 @@ name: lecon
 description: Gère le cycle de vie complet des leçons (.claude/docs/lecons.md) — capture (mode défaut), promote (vers ADR/rule), discard, archive. Une leçon = une observation/bug/pattern à décider plus tard. 5 statuts possibles : 🆕 new → 📜 ADR / 🔧 rule / 🧠 memory / ❌ discarded → 📦 archived.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(date:*), Bash(grep:*), AskUserQuestion
 disable-model-invocation: false
-arguments: [mode, args]
 argument-hint: "[capture|promote|discard|archive] <args>"
 ---
 
@@ -113,7 +112,7 @@ Via AskUserQuestion :
 - Créer/append `.claude/rules/<nom>.md` avec la convention extraite de la leçon
 - Update status leçon
   ```
-  status: 🆕 new → 🔧 → [rule](../../rules/<nom>.md)
+  status: 🆕 new → 🔧 → [rule](../rules/<nom>.md)
   ```
 
 #### Si `🧠 memory only` :

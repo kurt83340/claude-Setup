@@ -2,57 +2,34 @@
 
 Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB ACME.
 
-## 🧭 Comment vivre avec ce template
+> ⚠️ **Exemple de référence** — montre à quoi ressemble un projet rempli. **Peut drifter** : non maintenu en lockstep avec le template (un check CI vérifie seulement la règle des 3 `@`-imports ci-dessous). Pour les conventions à jour, fie-toi au template, pas à cet exemple.
 
-**Lis EN PREMIER** : @.claude/rules/template-maintenance.md
-→ explique la structure, le workflow fin/début de session, quel skill/agent invoquer.
+> 🧭 **Comment marche & vit ce template** (skills, structure, workflow, agent) → [.claude/CLAUDE.md](.claude/CLAUDE.md)
 
 ## Documentation projet
 
-### 📥 Cadrage (capture initiale + évolutions/pivots)
+> 🪶 **Chargement just-in-time** : seuls les 3 docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = liens lus à la demande (mesuré : ~1,5k vs ~14,6k tokens si on charge tout).
 
-- Synthèse cadrage : @.claude/docs/cadrage/README.md
+### 🔄 Auto-chargés (`@` — état vivant)
 
-### 🎨 Conception (design macro + micro)
-
-- Research / brainstorm : @.claude/docs/conception/research.md
-- Vision produit (PRD) : @.claude/docs/conception/PRD.md
-- Architecture : @.claude/docs/conception/ARCHITECTURE.md
-- Plan d'exécution MVP (figé) : @.claude/docs/conception/tasks.md
-- Specs détaillées par feature : `.claude/docs/conception/specs/00X-feature/`
-
-### 🔄 Vivants (lus/MAJ tous les jours)
-
-- Roadmap : @.claude/docs/ROADMAP.md
 - Reprise session : @.claude/docs/HANDOFF.md ⭐
-- Accès requis : @.claude/docs/ACCESS.md
-- Changelog : @.claude/docs/CHANGELOG.md
-- Journal leçons : @.claude/docs/lecons.md
-- **Code map** : @.claude/docs/code-map.md ⭐ (à lire AVANT d'éditer le code)
-- **Stack technique** : @.claude/docs/stack.md (inventaire libs + services + LLM)
+- Roadmap : @.claude/docs/ROADMAP.md
+- **Code map** : @.claude/docs/code-map.md ⭐ (règles de couplage + gotchas — à respecter avant d'éditer)
 
-### 📚 Transversaux
+### 📂 Lus à la demande (liens — pas auto-chargés)
 
-- Décisions tech (ADR) : @.claude/docs/adr/
-- Glossaire métier : @.claude/docs/GLOSSARY.md
-- Procédures ops (post-prod) : @.claude/docs/RUNBOOK.md
+- 📥 **Cadrage** : [cadrage/README.md](.claude/docs/cadrage/README.md)
+- 🎨 **Conception** : [research](.claude/docs/conception/research.md) · [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md) · [tasks](.claude/docs/conception/tasks.md) · specs → `.claude/docs/conception/specs/`
+- 🔄 **Suivi** : [ACCESS](.claude/docs/ACCESS.md) · [CHANGELOG](.claude/docs/CHANGELOG.md) · [leçons](.claude/docs/lecons.md) · [stack](.claude/docs/stack.md)
+- 📚 **Transversaux** : [ADR](.claude/docs/adr/) · [GLOSSARY](.claude/docs/GLOSSARY.md) · [RUNBOOK](.claude/docs/RUNBOOK.md)
 
-## Conventions techniques
+## Skills projet (stack n8n)
 
-- Code style : @.claude/rules/code-style.md
-- Tests : @.claude/rules/testing.md
-- Git : @.claude/rules/git-workflow.md
-
-## Skills projet (slash)
-
-- `/n8n-push` → publish workflow n8n sur tenant ACME
-- `/n8n-seed-db` → fixtures de test en local
-- `/n8n-deploy` → push prod (migration BDD + workflow) — `disable-model-invocation: true`
-- `/handoff` → update HANDOFF.md fin de session ⭐
-- `/feature-done` → coche ROADMAP + entrée CHANGELOG après livraison
+- `/n8n-push` · `/n8n-seed-db` · `/n8n-deploy` (push prod, `disable-model-invocation: true`)
+- Skills cœur (`/handoff`, `/spec`, `/feature-done`, …) → inventaire dans [.claude/CLAUDE.md](.claude/CLAUDE.md)
 
 ## Reminders critiques
 
-- Credentials **JAMAIS** dans le repo (voir ACCESS.md pour le stockage)
-- HANDOFF.md à update **à chaque fin de session** (via `/handoff`)
-- Décision tech structurante → créer un ADR
+- Credentials **JAMAIS** dans le repo (stockage : `.claude/docs/ACCESS.md`)
+- `.claude/docs/HANDOFF.md` à update **à chaque fin de session** (via `/handoff`)
+- Décision tech structurante → créer un ADR (immuable : on ne modifie pas, on supersede)

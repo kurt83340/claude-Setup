@@ -1,3 +1,7 @@
+---
+paths: "**/*.py"
+---
+
 # Code style — Python
 
 ## Outils

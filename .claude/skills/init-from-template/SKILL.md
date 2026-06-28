@@ -118,17 +118,22 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
 ### Profils
 
-| Type             | Impact   | Ce que ça supprime                                                                                                                                                                                     |
-| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `script-jetable` | **-80%** | Toute la conception (PRD/ARCHITECTURE/specs), ADRs, idees, ROADMAP, RUNBOOK, code-map, stack, ACCESS, lecons, GLOSSARY, hooks code, agents, skills overkill (adr/codemap/doc-health/feature-done/spec) |
-| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement)                                                                                                                                                  |
-| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                |
-| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                |
-| `bdd-migration`  | léger    | `workflows/`                                                                                                                                                                                           |
+| Type             | Impact   | Ce que ça supprime                                                                                                                                                                                                                                    |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `script-jetable` | **-80%** | Toute la conception (PRD/ARCHITECTURE/specs), ADRs, idees, ROADMAP, RUNBOOK, code-map, stack, ACCESS, GLOSSARY, hooks code, agents, skills overkill (adr/codemap/doc-health/feature-done/spec/idee). **Garde** `lecons.md` (cible du `/lecon` vital). |
+| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement)                                                                                                                                                                                                 |
+| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
+| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
+| `bdd-migration`  | léger    | `workflows/`                                                                                                                                                                                                                                          |
+
+**Copie depuis `EXAMPLES/` (stack-spécifique, hors cœur)** :
+
+- `automation-n8n` → copie les skills n8n (`EXAMPLES/skills-n8n/n8n-*`)
+- `bdd-migration` → copie le skill `db-migration` (Alembic, `EXAMPLES/skills-db/db-migration`)
 
 ### Garantie : skills "vitaux" toujours conservés
 
-Pour TOUS les types : `handoff`, `lecon`, `init-from-template` restent disponibles.
+Pour TOUS les types : `handoff`, `lecon`, `init-from-template` restent disponibles (+ `lecons.md` conservé comme cible de `/lecon`).
 
 ### Si le user n'est pas sûr du type
 
@@ -139,7 +144,7 @@ Choisir `automation-n8n` ou `python-app` par défaut (impact léger, peut affine
 Demander au user pour chaque action (optionnel) :
 
 1. **`EXAMPLES/`** — supprimer du projet actif ?
-   - ⚠️ **Note** : `EXAMPLES/` n'est PAS copié par défaut si tu utilises `rsync --exclude='EXAMPLES/'` (recommandé). Si tu l'as copié, tu peux le retirer :
+   - ⚠️ **Note** : le quick-start exclut seulement `EXAMPLES/acme-sync-erp-notion-docs/` (l'exemple navigable). Les `EXAMPLES/skills-*` sont la **source** des skills stack copiés selon ton type de projet ; une fois l'init faite (skills copiés dans `.claude/skills/`), tu peux retirer `EXAMPLES/` :
 
    ```bash
    rm -rf EXAMPLES/  # uniquement si présent et user confirme

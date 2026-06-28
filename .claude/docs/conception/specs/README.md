@@ -31,12 +31,9 @@ specs/
 
 ## Pattern mirror macro ↔ micro
 
-| Macro (`conception/`) | Micro (`specs/00X-feature/`) | Question                                |
-| --------------------- | ---------------------------- | --------------------------------------- |
-| `research.md`         | `research.md`                | Quelles options on a explorées ?        |
-| `PRD.md`              | `spec.md`                    | Qu'est-ce qu'on construit et pourquoi ? |
-| `ARCHITECTURE.md`     | `plan.md`                    | Comment on l'implémente ?               |
-| `tasks.md` (plan MVP) | `tasks.md`                   | Quoi exécuter et dans quel ordre ?      |
+Chaque fichier d'une spec a son équivalent macro dans `conception/` : `research`↔`research`, `spec`↔`PRD`, `plan`↔`ARCHITECTURE`, `tasks`↔`tasks`.
+
+> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[template-maintenance.md § La structure en 30 secondes](../../../rules/template-maintenance.md#la-structure-en-30-secondes)** _(source unique — ne pas recopier ici pour éviter le drift)_.
 
 ## Cross-références
 

@@ -69,26 +69,28 @@ fi
 
 Quand toutes les entries sont actées/discardées : truncate le fichier (garder le header).
 
-## Étape 3 — ADRs manquants
+## Étape 3 — ADRs manquants (décisions CROSS-feature uniquement)
+
+> ⚠️ Les décisions **locales à une feature** (lib choisie pour cette spec) vivent dans la section `## Décisions` de son `plan.md` et **n'ont PAS besoin d'ADR**. Ne flagge QUE les décisions qui impactent > 1 spec ou survivent à la feature.
 
 ```bash
-# Compter les "choisi", "retenu", "vs", "plutôt que" dans plan.md sans ADR créé récemment
-grep -rE "choisi|retenu|plutôt que|vs " .claude/docs/conception/specs/*/plan.md 2>/dev/null | wc -l
-
-# Compter les ADRs créés ce mois
-find .claude/docs/adr/ -name "*.md" -newer "$(date -d '1 month ago' +%Y-%m-%d)" 2>/dev/null | wc -l
+# Mentions de choix dans les plan.md, HORS d'une section "## Décisions" (déjà documentées localement)
+grep -rnE "choisi|retenu|plutôt que| vs " .claude/docs/conception/specs/*/plan.md 2>/dev/null \
+  | grep -vi "décisions" | head -10
 ```
 
-Si ratio décisions/ADRs > 5 → suggérer de promouvoir.
+Si une décision **cross-feature** non capturée ressort → suggérer `/adr`. **Ignore** celles déjà dans un `## Décisions` de plan.md (légitimement locales).
 
-## Étape 4 — Leçons en attente
+## Étape 4 — Leçons en attente de décision
 
 ```bash
-# Compter les entries .claude/docs/lecons.md avec status 🆕 new
-grep -c "status:.*🆕 new" .claude/docs/lecons.md
+# Leçons RÉELLES en attente : status 🆕 new sous un header daté réel (## 20XX-…),
+# en EXCLUANT le bloc exemple du template (header ## YYYY-MM-DD).
+awk '/^## [0-9][0-9][0-9][0-9]-/{real=1} /^## YYYY/{real=0} real&&/🆕 new/{n++} END{print n+0}' .claude/docs/lecons.md
 ```
 
-Si > 5 → suggérer review hebdo.
+- Si > 5 entries `🆕 new` → 🟢 review hebdo (`/lecon promote` / `discard`)
+- Si une `🆕 new` date de > 14j → 🟠 "en attente de décision depuis > 14j → review urgent"
 
 ## Étape 5 — Drift code-map vs code
 
@@ -125,16 +127,22 @@ grep -l "^status: superseded" .claude/docs/adr/[0-9]*.md 2>/dev/null
 # Vérifier que chacun est listé dans la section "archived / superseded" du README
 ```
 
-## Étape 8 — Specs stalled
+## Étape 8 — Specs stalled + liens ROADMAP cassés
 
 ```bash
 # Specs marquées [~] EN COURS dans ROADMAP mais pas de commit récent
 grep -E "\[~\].*EN COURS" .claude/docs/ROADMAP.md
 # Pour chaque spec en cours, vérifier la dernière modif des fichiers
 find .claude/docs/conception/specs/*/tasks.md -mtime +30 2>/dev/null
+
+# Liens spec cassés : chaque spec référencée dans ROADMAP doit exister sur disque
+grep -oE "conception/specs/[0-9a-z-]+/spec\.md" .claude/docs/ROADMAP.md | while read -r p; do
+  [ -f ".claude/docs/$p" ] || echo "🔴 ROADMAP référence une spec absente : $p"
+done
 ```
 
-Si `[~]` depuis > 30j → 🟠 "spec stalled, refresh ou archive"
+- Si `[~]` depuis > 30j → 🟠 "spec stalled, refresh ou archive"
+- Si spec référencée absente → 🔴 "lien ROADMAP cassé"
 
 ## Étape 9 — Idées âgées sans décision
 
@@ -145,28 +153,7 @@ find .claude/docs/idees/ -name "*.md" -mtime +30 2>/dev/null | head -10
 
 Si > 5 idées vieilles → 🟢 "review idées : promouvoir / discard / archiver"
 
-## Étape 10 — Leçons new vieillissantes
-
-```bash
-# Entries .claude/docs/lecons.md avec status 🆕 new datées > 14j
-# (parse les dates dans les headers ## YYYY-MM-DD —)
-```
-
-Si trouvées → 🟠 "leçons en attente de décision depuis > 14j → review urgent"
-
-## Étape 11 — Liens cassés dans docs
-
-```bash
-# Links markdown vers des fichiers qui n'existent plus
-grep -rE "\[.*\]\(([^)]+\.md)\)" .claude/docs/ | while read -r line; do
-  # Parser et vérifier l'existence
-  :
-done
-```
-
-Spécialement vérifier que les specs référencées dans ROADMAP existent toujours.
-
-## Étape 12 — Rapport synthétique
+## Étape 10 — Rapport synthétique
 
 Format type :
 

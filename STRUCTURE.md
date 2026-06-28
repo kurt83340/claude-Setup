@@ -12,7 +12,7 @@
    - Petit script Python jetable → tu utiliseras peut-être 30% (cadrage + spec rapide + HANDOFF)
    - Projet client moyen → 70-80% (tout sauf RUNBOOK si pas encore prod)
    - Gros projet enterprise → 100% + tu rajoutes STAKEHOLDERS.md
-4. **Voir [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/)** = exemple complet rempli (référence quand tu doutes "comment je remplis cette section ?")
+4. **Voir [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/)** = exemple complet rempli (dans le **repo template** ; exclu de ton projet par l'init). Référence quand tu doutes « comment je remplis cette section ? ».
 5. **Automatique** : lance `/init-from-template` (skill bundled) qui pose 10 questions (CORE placeholders : nom projet, client, décideur, commandes stack…), substitue auto + lance `cleanup-for-type.py` adapté au type de projet. Cf [USAGE.md](USAGE.md) section "Setup nouveau projet" pour la procédure complète.
 
 ## Arborescence complète
@@ -50,9 +50,9 @@ mon-projet/
     │   ├── idee/SKILL.md           # 4 modes : capture/promote/discard/archive
     │   ├── doc-health/SKILL.md
     │   ├── codemap/SKILL.md
-    │   ├── pivot/SKILL.md          # workflow 7 étapes
-    │   ├── init-from-template/SKILL.md
-    │   └── db-migration/SKILL.md
+    │   ├── pivot/SKILL.md          # workflow 9 étapes
+    │   └── init-from-template/SKILL.md
+    │   # db-migration + skills n8n = hors-cœur → EXAMPLES/skills-{db,n8n}/ (copiés par /init-from-template selon le type)
     │   # Pour grouper par source : préfixe le nom (n8n-deploy, n8n-test) ou package en plugin
     │
     ├── agents/                     # custom agents — à plat aussi
@@ -117,23 +117,7 @@ mon-projet/
 
 ## Convention diagrammes
 
-3 formats supportés (par ordre de préférence) :
-
-| Format                       | Quand                                                       | Claude-friendly ?         |
-| ---------------------------- | ----------------------------------------------------------- | ------------------------- |
-| **ASCII inline** dans le .md | Default — diagrammes simples (flow, arbre, séquence courte) | ✅ Parfait                |
-| **Excalidraw + export SVG**  | Diagrammes visuels complexes                                | ⚠️ SVG via Read explicite |
-| **PNG/JPG**                  | Screenshots uniquement                                      | ⚠️ Pas fiable mai 2026    |
-
-**Règle d'or** : commit **la source ET l'export** :
-
-```
-diagrams/
-├── flow-X.excalidraw   # source éditable
-└── flow-X.svg          # export pour Claude + GitHub
-```
-
-⚠️ `![](path)` dans un .md n'est **pas auto-suivi par Claude** — il faut un Read explicite, ou pointer vers un .md ASCII pour qu'il "voie" le contenu.
+→ **Convention canonique** (3 formats : ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export », + piège `![](path)` non auto-suivi) : [.claude/rules/template-maintenance.md § Convention diagrammes](.claude/rules/template-maintenance.md).
 
 **Où placer les diagrammes ?**
 
@@ -173,44 +157,9 @@ diagrams/
 
 **Règle d'or :** un fichier qu'on ne met pas à jour ment. Crée à la demande, pas préventivement.
 
-### 🟢 Essentiels — créer dès le début
+→ **Matrice canonique (trigger → fichier)** : [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](.claude/rules/template-maintenance.md). Vue actionnable jour-1 / plus-tard → checklist « Démarrer un nouveau projet » en fin de ce doc.
 
-| Fichier                          | Quand                                                |
-| -------------------------------- | ---------------------------------------------------- |
-| `CLAUDE.md`                      | Setup initial du projet                              |
-| `README.md`                      | Setup initial (si projet code)                       |
-| `.claude/docs/cadrage/README.md` | Dès la demande reçue (contient aussi interlocuteurs) |
-| `.claude/docs/cadrage/`          | Dès qu'on reçoit ticket/docs                         |
-| `.claude/docs/idees/`            | Dès la 1ère idée perso                               |
-
-### 🟡 Quand un besoin émerge
-
-| Fichier                                      | À créer quand…                                        |
-| -------------------------------------------- | ----------------------------------------------------- |
-| `.claude/docs/conception/research.md`        | Premier brainstorm exploratoire (peut être avant PRD) |
-| `.claude/docs/conception/PRD.md`             | Le brief est mûr et validé (pas avant)                |
-| `.claude/docs/conception/ARCHITECTURE.md`    | Le PRD est validé et tu as choisi la stack            |
-| `.claude/docs/ROADMAP.md`                    | Tu peux découper en > 2 features                      |
-| `.claude/docs/ACCESS.md`                     | Dès qu'un accès tiers est requis (API, VPN, compte)   |
-| `.claude/docs/HANDOFF.md` ⭐                 | **2ème session** (le plus utile)                      |
-| `.claude/docs/CHANGELOG.md`                  | 1ère feature livrée                                   |
-| `.claude/docs/adr/00XX-<scope>-<titre>.md`   | 1ère décision tech structurante (via `/adr`)          |
-| `.claude/docs/conception/specs/00X-feature/` | Tu démarres une feature spécifique                    |
-| `.claude/docs/cadrage/diagrams/`             | 1er diagramme de synthèse business (mermaid)          |
-| `.claude/docs/GLOSSARY.md`                   | Tu as re-demandé 2x ce qu'un terme métier signifie    |
-
-### 🔴 À créer plus tard
-
-| Fichier                        | À créer quand…                                       |
-| ------------------------------ | ---------------------------------------------------- |
-| `.claude/docs/RUNBOOK.md`      | **Jour du 1er déploiement prod** (avant = inutile)   |
-| `.claude/docs/STAKEHOLDERS.md` | Plus de 4-5 interlocuteurs client (sinon dans BRIEF) |
-
-### ❌ À NE PAS créer
-
-- Bug log séparé → tout va dans CHANGELOG
-- Backup HANDOFF / handoff archives → git suffit
-- "Notes générales" → utiliser idees/ daté
+**❌ À NE PAS créer** : bug log séparé (→ CHANGELOG), backups HANDOFF / archives (git suffit), « notes générales » (→ `idees/` daté).
 
 ---
 
@@ -225,12 +174,9 @@ diagrams/
 
 ## Distinction critique : `cadrage/` vs `idees/`
 
-| Dossier        | Contenu                                     | Source                       |
-| -------------- | ------------------------------------------- | ---------------------------- |
-| **`cadrage/`** | Ce qu'on **te file** (input externe)        | Client, collègue, Jira, mail |
-| **`idees/`**   | Ce que **toi** brainstormes (input interne) | Toi                          |
+`cadrage/` = ce qu'**on te file** (client, Jira, mail — input externe). `idees/` = ce que **toi** brainstormes (input interne). Ne JAMAIS mélanger : tickets/docs reçus ≠ tes notes perso.
 
-→ Les tickets Jira et docs reçus n'ont rien à faire avec tes propres notes d'idées. Cette séparation évite le chaos doc client.
+→ Détail : [.claude/rules/template-maintenance.md § Distinction cadrage/ vs idees/](.claude/rules/template-maintenance.md).
 
 ---
 
@@ -553,23 +499,9 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 
 ## ADR — Architecture Decision Record
 
-Fichier court (≤ 1 page) qui capture **une décision technique structurante** + son contexte + ses conséquences.
+Fichier court (≤ 1 page) qui capture **une décision technique structurante** + contexte + conséquences. Immuable (on supersede), créé via `/adr <scope> "<titre>"`.
 
-**Règles :**
-
-- 1 décision = 1 fichier `00XX-<scope>-<titre-kebab>.md` (ex: `0007-mvp-stack-bdd.md`)
-- 5 scopes : `cadrage` / `mvp` / `feature-00X` / `infra` / `operations`
-- **Immuable** : on ne modifie pas un ADR passé, on en crée un nouveau qui le "supersede"
-- Statut (frontmatter YAML) : `proposed` / `accepted` / `deprecated` / `superseded` (+ `superseded_by: 00XX`)
-- Création + index automatique via `/adr <scope> "<titre>"`
-
-**Quand créer un ADR ?**
-
-- Choix de stack (FastAPI vs Flask, Postgres vs SQLite)
-- Choix d'archi (monolithe vs micro-services, REST vs GraphQL)
-- Conventions structurantes (tous les jobs async via Celery)
-- Décisions de sécurité (JWT vs sessions, gestion des secrets)
-- ❌ PAS pour : nommage de variable, refactor mineur, fix de bug
+→ **Convention canonique** (5 scopes, frontmatter, statuts, quand-créer OUI/NON, ADR vs `plan.md`) : [.claude/rules/template-maintenance.md § Convention ADR](.claude/rules/template-maintenance.md). Exemple de fichier rempli ci-dessous.
 
 ### Template d'un ADR
 
@@ -738,8 +670,8 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Skills (`.claude/skills/`)
 
-- /handoff /spec /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap /db-migration · /init-from-template
-- Skills hors-template (ex. n8n) : installer dans `.claude/skills/` ET les recenser ici.
+- /handoff /spec /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap · /init-from-template (10 cœur)
+- Skills hors-cœur stack (`/n8n-*`, `/db-migration`) copiés depuis `EXAMPLES/skills-*` ; installer dans `.claude/skills/` ET recenser dans `.claude/CLAUDE.md`.
 
 ## Workflow features
 

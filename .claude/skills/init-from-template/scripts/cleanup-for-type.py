@@ -11,13 +11,14 @@ Types supportés :
   - automation-n8n : ajustement léger (retire RUNBOOK pas-encore-prod)
   - python-app    : retire workflows/, garde tout sinon
   - web-app       : retire workflows/ (pas n8n)
-  - bdd-migration : garde db-migration skill prominent
+  - bdd-migration : copie le skill db-migration depuis EXAMPLES/skills-db
 
 Usage:
     python3 cleanup-for-type.py --type script-jetable [--root .] [--dry-run]
 """
 
 import argparse
+import json
 import re
 import shutil
 import sys
@@ -41,7 +42,9 @@ SCRIPT_JETABLE = {
         ".claude/docs/stack.md",
         ".claude/docs/ACCESS.md",
         ".claude/docs/GLOSSARY.md",
-        ".claude/docs/lecons.md",
+        # NB: lecons.md est CONSERVÉ — /lecon fait partie du trio vital (handoff, lecon,
+        # init) ; supprimer son fichier cible rendrait /lecon capture orphelin. Sur un
+        # jetable, /lecon promote→ADR n'est pas dispo (pas de /adr), mais capture/discard si.
         # Cadrage sous-dossiers (le README suffit)
         ".claude/docs/cadrage/tickets/",
         ".claude/docs/cadrage/reunions/",
@@ -52,7 +55,6 @@ SCRIPT_JETABLE = {
         ".claude/skills/codemap/",
         ".claude/skills/doc-health/",
         ".claude/skills/feature-done/",
-        ".claude/skills/db-migration/",
         ".claude/skills/spec/",
         ".claude/skills/pivot/",
         ".claude/skills/idee/",
@@ -103,12 +105,16 @@ WEB_APP = {
     "keep_reason": "Web app — retire workflows/ (pas n8n)",
 }
 
-# bdd-migration : garde db-migration prominent
+# bdd-migration : copie le skill db-migration (Alembic) depuis EXAMPLES (hors cœur)
 BDD_MIGRATION = {
     "delete": [
         "workflows/",
     ],
-    "keep_reason": "BDD migration — garde db-migration skill",
+    "copy_examples": {
+        # db-migration est stack-spécifique (Alembic) → vit dans EXAMPLES, copié à la demande
+        "EXAMPLES/skills-db/db-migration": ".claude/skills/db-migration",
+    },
+    "keep_reason": "BDD migration — copie le skill db-migration (Alembic) depuis EXAMPLES/skills-db",
 }
 
 PROFILES = {
@@ -168,9 +174,10 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     if copy_examples:
         copy_from_examples(root, copy_examples, dry_run)
 
-    # Post-cleanup : retirer les @-imports cassés de CLAUDE.md
+    # Post-cleanup : retirer les @-imports cassés de CLAUDE.md + les hooks fantômes de settings.json
     if not dry_run:
         fix_claude_md_imports(root)
+        prune_dead_hooks(root)
 
     return 0
 
@@ -234,6 +241,44 @@ def fix_claude_md_imports(root: Path) -> None:
     if removed > 0:
         claude_md.write_text("\n".join(new_lines), encoding="utf-8")
         print(f"\n🔧 CLAUDE.md : {removed} lignes avec @-imports cassés retirées")
+
+
+def prune_dead_hooks(root: Path) -> None:
+    """Retire de settings.json les hooks dont le script a été supprimé (sinon hooks fantômes
+    → Claude tente d'exécuter un script manquant à chaque event). Générique : s'applique à
+    tout profil qui supprime des fichiers .claude/hooks/*."""
+    settings_path = root / ".claude" / "settings.json"
+    if not settings_path.exists():
+        return
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return
+    script_re = re.compile(r"\.claude/hooks/[^\s\"']+")
+    removed = 0
+    for event in list(hooks.keys()):
+        kept_groups = []
+        for group in hooks.get(event, []):
+            kept = []
+            for h in group.get("hooks", []):
+                m = script_re.search(h.get("command", ""))
+                if m and not (root / m.group(0)).exists():
+                    removed += 1
+                    continue  # script supprimé → on retire le hook
+                kept.append(h)
+            if kept:
+                group["hooks"] = kept
+                kept_groups.append(group)
+        if kept_groups:
+            hooks[event] = kept_groups
+        else:
+            del hooks[event]
+    if removed:
+        settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+        print(f"🔧 settings.json : {removed} hook(s) fantôme(s) retiré(s) (script supprimé)")
 
 
 def main():

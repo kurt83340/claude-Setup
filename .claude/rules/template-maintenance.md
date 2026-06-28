@@ -123,6 +123,7 @@ Claude Code 2.1.x a maintenant 3 couches de mémoire qui se complètent. **Ne le
 | Nouvelle lib Python / service tiers (Sentry, Slack…) / LLM utilisé                  | MAJ `.claude/docs/stack.md` (table appropriée)                                                                     |
 | Doc reçue du client                                                                 | Archiver dans `.claude/docs/cadrage/documents/` avec date                                                          |
 | Compte-rendu de réunion                                                             | Créer `.claude/docs/cadrage/reunions/YYYY-MM-DD-titre.md`                                                          |
+| Ticket Jira/Linear/Asana reçu                                                       | Créer `.claude/docs/cadrage/tickets/TICKET-XXX-titre.md`                                                           |
 | Diagramme business simple                                                           | Inline ASCII dans `cadrage/README.md`                                                                              |
 | Diagramme business complexe                                                         | `cadrage/diagrams/X.excalidraw` + export `.svg` à côté                                                             |
 | Diagramme technique simple                                                          | Inline ASCII dans `conception/ARCHITECTURE.md`                                                                     |
@@ -188,6 +189,8 @@ diagrams/
 
 ### Skills perso (`.claude/skills/`)
 
+> 🗂️ **Inventaire canonique** (liste + 1-ligne + chemin) → [`.claude/CLAUDE.md`](../CLAUDE.md). Ici = **quand** invoquer. Les skills stack-spécifiques (`/db-migration`, `/n8n-*`) vivent hors-cœur dans `EXAMPLES/skills-*` (copiés par `/init-from-template` selon le type de projet).
+
 #### Session & feature
 
 | Skill                    | Quand l'invoquer                                                                      |
@@ -196,7 +199,7 @@ diagrams/
 | `/handoff` ⭐            | Fin de session — snapshot .claude/docs/HANDOFF.md (status + échecs + blockers + next) |
 | `/spec "<titre>"` ⭐     | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP       |
 | `/feature-done <id>` ⭐  | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées            |
-| `/pivot "<raison>"`      | Workflow pivot client 7 étapes orchestrées                                            |
+| `/pivot "<raison>"`      | Workflow pivot client 9 étapes orchestrées                                            |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
 
@@ -208,11 +211,10 @@ diagrams/
 
 #### Audit & technique
 
-| Skill           | Quand l'invoquer                                                                       |
-| --------------- | -------------------------------------------------------------------------------------- |
-| `/doc-health`   | Audit hebdo — docs stale + ADRs manquants + growth + leçons en attente + specs stalled |
-| `/codemap`      | Après gros refacto — régénère .claude/docs/code-map.md depuis le code                  |
-| `/db-migration` | Modification schéma BDD Alembic                                                        |
+| Skill         | Quand l'invoquer                                                                       |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `/doc-health` | Audit hebdo — docs stale + ADRs manquants + growth + leçons en attente + specs stalled |
+| `/codemap`    | Après gros refacto — régénère .claude/docs/code-map.md depuis le code                  |
 
 ### Slash commands projet
 
@@ -222,15 +224,16 @@ diagrams/
 > **le template n'utilise plus que `.claude/skills/<nom>/SKILL.md`**.
 > Pour un `/nom` sensible (deploy…) : `disable-model-invocation: true` = slash-only.
 
-**Exemples stack disponibles** : [EXAMPLES/skills-n8n/](../../EXAMPLES/skills-n8n/) (3 skills n8n typiques, préfixés `n8n-`, copiés automatiquement par `/init-from-template` type `automation-n8n`).
+**Exemples stack disponibles** : [EXAMPLES/skills-n8n/](../../EXAMPLES/skills-n8n/) (3 skills n8n, préfixés `n8n-`, type `automation-n8n`) et [EXAMPLES/skills-db/](../../EXAMPLES/skills-db/) (`db-migration` Alembic, type `bdd-migration`) — copiés dans `.claude/skills/` par `/init-from-template`.
 
 > **Pas de namespacing par dossier en 2026** : Claude Code scanne `.claude/skills/<nom>/SKILL.md` à **1 niveau uniquement** (cf. [issue #18192](https://github.com/anthropics/claude-code/issues/18192), feature request OPEN). Si tu veux grouper des skills par thème → utilise des **préfixes de nom** (ex: `n8n-deploy`, `n8n-test`) ou package-les en **plugin** (`/<plugin>:<skill>`).
 
 ### Agent perso (`.claude/agents/`)
 
-| Agent            | Quand l'invoquer                                                                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer` | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 7-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite. |
+| Agent            | Quand l'invoquer                                                                                                                                                                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc-maintainer` | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                              |
+| `worker`         | **Agent-teams** : rôle teammate. Exécute une sous-tâche (idéalement dans son git worktree), rapporte au lead via `SendMessage`, n'écrit ni les docs partagés ni la numérotation specs/ADR. Voir [§ Agent teams](#agent-teams-multi-agent--anti-collision). |
 
 ### Skills built-in Claude Code utiles
 
@@ -254,10 +257,12 @@ diagrams/
 | `/feature-done` ⭐       | Coche ROADMAP + CHANGELOG + HANDOFF + suggère ADRs + archive idées + marque leçons promues                                                          | `.claude/skills/feature-done/`       |
 | `/doc-health`            | Audit hebdo : docs stale, ADRs manquants, growth opportunities, code-map drift, specs stalled, leçons en attente                                    | `.claude/skills/doc-health/`         |
 | `/lecon`                 | Ajoute entry rapide dans .claude/docs/lecons.md (statut 🆕 new) + workflow promotion documenté                                                      | `.claude/skills/lecon/`              |
+| `/idee`                  | Capture/gère les idées perso (`idees/`) — capture / promote (→ spec) / discard / archive                                                            | `.claude/skills/idee/`               |
 | `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file. | `.claude/skills/codemap/`            |
 | `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                               | `.claude/skills/adr/`                |
-| `/pivot`                 | Workflow pivot client 7 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR + leçon)                                 | `.claude/skills/pivot/`              |
-| `/db-migration`          | Workflow Alembic (autogen + test upgrade/downgrade + ADR infra si structurant)                                                                      | `.claude/skills/db-migration/`       |
+| `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                       | `.claude/skills/pivot/`              |
+
+> 🧩 Skills **hors-cœur** (stack-spécifiques) : `/db-migration` (Alembic) → `EXAMPLES/skills-db/`, `/n8n-*` → `EXAMPLES/skills-n8n/` — copiés dans `.claude/skills/` par `/init-from-template` selon le type. Inventaire complet → [`.claude/CLAUDE.md`](../CLAUDE.md).
 
 ### Hooks configurés (cf `.claude/settings.json`)
 
@@ -275,7 +280,7 @@ diagrams/
 
 | Agent            | Quoi                                                                                                                                                                 |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer` | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 7-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
+| `doc-maintainer` | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
 
 ## Distinction `cadrage/` vs `idees/`
 
@@ -354,3 +359,24 @@ diagrams/
 - ✅ Mettre à jour ROADMAP **à chaque** changement d'état de feature
 - ✅ Garder le `CLAUDE.md` racine court & centré projet (< 60 lignes) ; template & skills → `.claude/CLAUDE.md` ; détail → `@.claude/rules/*.md`
 - ✅ Préférer un ADR à un long commit message pour les décisions structurantes
+
+## Agent teams (multi-agent) — anti-collision
+
+> Ce template est mono-session par héritage. En **agent teams natifs** (un lead + N teammates,
+> potentiellement plusieurs sessions Claude dans le repo), applique ces règles — sinon les docs
+> partagés se télescopent (last-write-wins, conflits de merge). Rôle teammate : [agents/worker.md](../agents/worker.md).
+
+**Propriété des docs — le lead écrit, les workers rapportent :**
+
+- Le **lead** (session principale) est seul à écrire les docs partagés : `HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md`, `code-map.md`, `adr/README.md`, et **alloue les numéros** de specs (`00X`) et d'ADR (`00XX`).
+- Les **workers** n'écrivent que les fichiers de leur tâche (`src/...`, `specs/<leur-spec>/...`) et **rapportent au lead via `SendMessage`** — jamais via leur texte de réponse (il n'arrive pas au lead, seul un idle ping passe).
+
+**Isolation par worktree (recommandé dès 2 workers qui codent) :**
+
+- 1 worker = 1 `git worktree` sur sa branche → son **propre** `HANDOFF.md` / `.cache/` / état git → zéro collision. Les hooks utilisent `${CLAUDE_PROJECT_DIR}` → worktree-safe nativement.
+- Le lead merge les branches en fin de tâche (conflits = uniquement vrai chevauchement de code, géré normalement).
+
+**Hooks en multi-agent :**
+
+- Snapshot pré-compaction = **par session** (`.cache/handoff-snapshot-<session_id>.md`) — pas de cache unique partagé.
+- Le rappel `/handoff` (Stop) ne se déclenche que pour le **lead** (sinon N rappels simultanés).

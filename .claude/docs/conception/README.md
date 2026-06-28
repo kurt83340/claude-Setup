@@ -45,14 +45,9 @@ Convention diagrammes détaillée : voir [diagrams/README.md](diagrams/README.md
 
 ## Pattern mirror MACRO ↔ MICRO
 
-Tu apprends UN pattern, tu l'appliques à 2 niveaux dans CE dossier :
+Tu apprends UN pattern, tu l'appliques à 2 niveaux : macro ici (`conception/`) ↔ micro par feature (`specs/00X-feature/`) — `research`↔`research`, `PRD`↔`spec`, `ARCHITECTURE`↔`plan`, `tasks`↔`tasks`.
 
-| Macro (`conception/`) | Micro (`conception/specs/00X-feature/`) | Question                                        |
-| --------------------- | --------------------------------------- | ----------------------------------------------- |
-| `research.md`         | `research.md`                           | Quelles options on a explorées ?                |
-| `PRD.md`              | `spec.md`                               | Qu'est-ce qu'on construit et pourquoi ?         |
-| `ARCHITECTURE.md`     | `plan.md`                               | Comment on l'implémente ?                       |
-| `tasks.md`            | `tasks.md`                              | Quoi exécuter, dans quel ordre, avec quel DoD ? |
+> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[template-maintenance.md § La structure en 30 secondes](../../rules/template-maintenance.md#la-structure-en-30-secondes)** _(source unique — ne pas recopier ici pour éviter le drift)_.
 
 → `../ROADMAP.md` (racine) = **dashboard vivant** qui agrège le status (sync depuis `specs/00X/tasks.md`).
 

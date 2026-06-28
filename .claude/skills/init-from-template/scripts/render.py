@@ -33,6 +33,8 @@ EXCLUDE = [
     # Meta-docs du template (parlent du système, contiennent exemples)
     "STRUCTURE.md",
     "USAGE.md",
+    # test/ contient des rapports qui citent {{UPPER_SNAKE}} en exemple (pas de vraies vars)
+    "test/",
 ]
 
 # Une placeholder est CORE si son nom est COMPOUND_UPPER_SNAKE :

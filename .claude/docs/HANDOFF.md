@@ -2,6 +2,7 @@
 
 > Court, narratif, versionné. **Patterns techniques** → auto-memory (Claude le gère).
 > **Reprise précise** → utilise `/resume`. Ce fichier = "où j'en suis" pour démarrage à froid.
+> 🧑‍🤝‍🧑 **Multi-agent / agent teams** : fichier partagé = point de collision (overwrite last-write-wins). En équipe → 1 HANDOFF par worker/worktree. Voir [template-maintenance.md § Agent teams](../rules/template-maintenance.md#agent-teams-multi-agent--anti-collision).
 
 **Branche** : `{{feature/00X-name | main}}`
 **Spec en cours** : [{{00X-feature}}/](conception/specs/{{00X-feature}}/spec.md) ({{X/Y tasks}})

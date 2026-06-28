@@ -35,7 +35,14 @@
       "Bash(alembic downgrade:*)",
       "Bash(./scripts/deploy:*)"
     ],
-    "deny": ["Bash(rm -rf:*)", "Read(./.env)", "Read(./.env.local)"]
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*)",
+      "Read(./secrets.*)",
+      "Read(./.claude/docs/ACCESS.md)"
+    ]
   },
   "hooks": {
     "PreCompact": [
@@ -64,7 +71,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
@@ -76,7 +83,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",

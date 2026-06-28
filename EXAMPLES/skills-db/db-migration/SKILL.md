@@ -5,9 +5,13 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(alembic:*), Bash(pytest:*), B
 disable-model-invocation: false
 ---
 
-# Skill : DB migration
+# /db-migration — Workflow migration BDD (Alembic)
 
 Workflow standardisé pour créer une migration Alembic propre.
+
+> 📦 **Skill stack-spécifique** (Alembic / SQLAlchemy) — vit dans `EXAMPLES/` et n'est PAS
+> dans le cœur du template. Copié dans `.claude/skills/` par `/init-from-template` (type
+> `bdd-migration`), ou à la main : `cp -r EXAMPLES/skills-db/db-migration .claude/skills/`.
 
 ## Étapes
 

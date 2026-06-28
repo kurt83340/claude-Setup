@@ -62,19 +62,28 @@ Les plugins ont leur propre namespace automatiquement (`plugin-name:skill-name`)
 
 ## Skills du template (à plat)
 
-| Skill                  | Quoi                                  |
-| ---------------------- | ------------------------------------- |
-| `/handoff`             | Snapshot .claude/docs/HANDOFF.md fin de session    |
-| `/spec`                | Scaffold nouvelle feature             |
-| `/feature-done`        | Marque feature comme livrée           |
-| `/pivot`               | Workflow pivot client 7 étapes        |
-| `/lecon`               | Cycle de vie leçons                   |
-| `/adr`                 | Cycle de vie ADR                      |
-| `/idee`                | Cycle de vie idées                    |
-| `/doc-health`          | Audit hebdo doc                       |
-| `/codemap`             | Régénère .claude/docs/code-map.md                  |
-| `/db-migration`        | Workflow Alembic                      |
-| `/init-from-template`  | Init projet depuis ce template (UNE FOIS) |
+| Skill                 | Quoi                                            |
+| --------------------- | ----------------------------------------------- |
+| `/handoff`            | Snapshot .claude/docs/HANDOFF.md fin de session |
+| `/spec`               | Scaffold nouvelle feature                       |
+| `/feature-done`       | Marque feature comme livrée                     |
+| `/pivot`              | Workflow pivot client 9 étapes                  |
+| `/lecon`              | Cycle de vie leçons                             |
+| `/adr`                | Cycle de vie ADR                                |
+| `/idee`               | Cycle de vie idées                              |
+| `/doc-health`         | Audit hebdo doc                                 |
+| `/codemap`            | Régénère .claude/docs/code-map.md               |
+| `/init-from-template` | Init projet depuis ce template (UNE FOIS)       |
+
+## Skills stack-spécifiques (hors cœur → `EXAMPLES/`, copiés à l'init)
+
+Pas livrés dans `.claude/skills/` par défaut — copiés par `/init-from-template` selon le type
+de projet, ou à la main. Recensés ici pour visibilité.
+
+| Skill           | Source                 | Copié pour type  |
+| --------------- | ---------------------- | ---------------- |
+| `/db-migration` | `EXAMPLES/skills-db/`  | `bdd-migration`  |
+| `/n8n-*`        | `EXAMPLES/skills-n8n/` | `automation-n8n` |
 
 ## Skills built-in Claude Code (hors `.claude/skills/`)
 

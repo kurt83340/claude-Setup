@@ -3,7 +3,6 @@ name: adr
 description: Gère le cycle de vie complet des ADR (Architecture Decision Records) — capture (mode défaut), supersede (remplacement explicite d'un ADR existant), deprecate (marque comme à éviter sans remplacement), list (liste avec status). Décisions immuables, on ne modifie jamais (on supersede).
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(find:*), Bash(date:*), Bash(ls:*), Bash(grep:*), AskUserQuestion
 disable-model-invocation: false
-arguments: [mode, args]
 argument-hint: "[capture|supersede|deprecate|list] <args>"
 ---
 
@@ -46,6 +45,12 @@ ls .claude/docs/adr/[0-9]*.md 2>/dev/null | sort -r | head -1
 ```
 
 Numéro suivant = max(existant) + 1, formaté sur 4 chiffres (`0001`, `0002`, ...).
+
+> ⚠️ **Mode agent-teams (plusieurs sessions Claude concurrentes)** : `max(existant) + 1` n'est
+> **pas concurrent-safe** — deux agents créant un ADR en même temps prendraient le même `00XX`.
+> Convention : **seul le lead crée les ADR et alloue les numéros**. Un worker qui identifie une
+> décision structurante la **propose au lead** (ou la capture en `/lecon` 🆕 new), il ne lance
+> pas `/adr` en parallèle.
 
 ### Étape 2 — Scanner ADRs existants (pour helper)
 
@@ -223,8 +228,8 @@ Affichage formaté en table markdown.
 
 | Niveau de décision                          | Où l'écrire                                      |
 | ------------------------------------------- | ------------------------------------------------ |
-| Cross-feature (impacte > 1 spec)            | ADR global `.claude/docs/adr/`                           |
-| Survit à la mort de la feature              | ADR global `.claude/docs/adr/`                           |
+| Cross-feature (impacte > 1 spec)            | ADR global `.claude/docs/adr/`                   |
+| Survit à la mort de la feature              | ADR global `.claude/docs/adr/`                   |
 | Locale à UNE feature (lib, pattern interne) | Section `## Décisions` dans `specs/00X/plan.md`  |
 | Devient cross-feature plus tard             | **Promouvoir** depuis plan.md → créer ADR global |
 

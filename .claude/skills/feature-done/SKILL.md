@@ -48,47 +48,45 @@ Promouvoir en ADR ?
 - Décision **cross-feature** ou qui **survit à la feature** → ADR global (créer fichier)
 - Décision **locale à cette feature uniquement** → laisser dans `plan.md` section `## Décisions`
 
-## Étape 2bis — Si ADR créé : update `.claude/docs/adr/README.md`
+## Étape 2bis — Promotion en ADR : **déléguer à `/adr`** (ne pas ré-implémenter)
 
-Pour chaque ADR créé en étape 2 :
+Pour chaque décision que l'user valide en ADR, **invoquer le skill `/adr`** :
 
-1. Créer le fichier `.claude/docs/adr/00XX-<scope>-<titre-court>.md` (format complet voir `.claude/docs/adr/README.md`)
-2. Ajouter une ligne dans la table du scope correspondant dans `.claude/docs/adr/README.md` :
-   ```markdown
-   | [00XX](00XX-<scope>-<titre>.md) | <titre> | Accepted |
-   ```
-3. Si l'ADR **supersede** un ancien :
-   - Update frontmatter de l'ancien : `status: superseded` + `superseded_by: 00XX`
-   - Déplacer l'ancien vers la table "archived / superseded" dans le README
+```
+/adr <scope> "<titre dérivé de la décision>"
+```
 
-## Étape 2ter — Marquer les leçons promues
+`/adr` est le **seul foyer** de la logique ADR — il gère tout : numérotation `00XX`, création
+du fichier (frontmatter + structure), index `adr/README.md`, pattern `supersede` (si la décision
+remplace une ancienne), append `CHANGELOG.md` section `Decided`, et mise à jour du status de la
+leçon source si la décision vient d'une entry `.claude/docs/lecons.md` (`🆕 new` → `📜 → ADR-00XX`).
 
-Si une décision provient d'une entry dans `.claude/docs/lecons.md` (status `🆕 new`) :
-
-1. Trouver l'entry concernée (grep titre)
-2. Update le status : `🆕 new` → `📜 → ADR-00XX` avec lien
+→ Ici on se contente de **détecter + proposer** (Étape 2) puis **déléguer**. On ne crée PAS le
+fichier ADR ni n'édite `adr/README.md`/`lecons.md` à la main (ce serait dupliquer `/adr` = drift).
+C'est le même pattern que `/pivot` Étape 7 et `/lecon promote`, qui délèguent déjà à `/adr`.
 
 ## Étape 3 — Update .claude/docs/ROADMAP.md
 
-Trouver la ligne `- [~] [<spec-id>](...) — **EN COURS** X/Y tasks` :
+Trouver la ligne de `<spec-id>` **quel que soit son état actuel** — `[ ]` (jamais marquée en
+cours) **ou** `[~] … **EN COURS** X/Y tasks` (démarrée via `/spec` Étape 5). Machine à états :
+`[ ] → [~] → [x]`.
 
-- Remplacer par `- [x] [<spec-id>](...) — livré YYYY-MM-DD`
-- Retirer le **gras** (plus en cours)
+- Passer l'état à `[x]` : `- [x] [<spec-id>](...) — livré YYYY-MM-DD`
+- Retirer le **gras** `**EN COURS**` s'il était présent (plus en cours)
 
 ## Étape 4 — Append entry dans .claude/docs/CHANGELOG.md
 
-Format Keep a Changelog dans la section `## [Unreleased]` :
+Format Keep a Changelog dans la section `## [Unreleased]` — section `### Added` uniquement :
 
 ```markdown
 ### Added
 
 - <nom feature> ([spec](conception/specs/<spec-id>/spec.md))
 - Tests : X tests verts, coverage Y%
-
-### Decided (si ADR créé)
-
-- <titre décision> ([ADR-XXXX](adr/XXXX-...md))
 ```
+
+> ℹ️ La section `### Decided` (liens ADR) est écrite par **`/adr`** (Étape 2bis), pas ici —
+> ne pas la dupliquer, sinon double entry dans le CHANGELOG.
 
 ## Étape 5 — Update .claude/docs/HANDOFF.md
 
@@ -152,8 +150,8 @@ git tag -a v$(date +%Y.%m.%d-%H%M) -m "Feature <spec-id> livrée"
 - ❌ Promouvoir trop d'ADRs (chaque décision **locale** = pas un ADR — garder dans plan.md)
 - ❌ Auto-commit sans demander
 - ❌ Ajouter des descriptions fichier-par-fichier dans code-map.md (déductible — Claude le retrouve seul)
-- ❌ Créer un ADR sans update `.claude/docs/adr/README.md` (index par scope)
-- ❌ Oublier de marquer la leçon source (status `🆕 new` → `📜 → ADR-00XX`)
+- ❌ Ré-implémenter la création d'ADR ici (fichier + `adr/README.md` + supersede) — **déléguer à `/adr`**
+- ❌ Dupliquer la section `### Decided` du CHANGELOG (c'est `/adr` qui l'écrit)
 
 ## Note : invocation par agent doc-maintainer
 

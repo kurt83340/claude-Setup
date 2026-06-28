@@ -10,8 +10,8 @@ Action :
 
 Input stdin :
   {
-    "tool_name": "Edit" | "Write",
-    "tool_input": {"file_path": "...", "content"/"new_string": "..."},
+    "tool_name": "Edit" | "Write" | "MultiEdit",
+    "tool_input": {"file_path": "...", "content"/"new_string"/"edits": ...},
     "cwd": "/path/to/project"
   }
 """
@@ -33,12 +33,8 @@ GROWTH_TRIGGERS = [
         re.compile(r"\b(deploy|production|prod|incident|rollback|outage)\b", re.IGNORECASE),
         ("RUNBOOK.md", "Mentions deploy/prod détectées → créer/enrichir RUNBOOK.md"),
     ),
-    (
-        re.compile(
-            r"\b(SLA|RGPD|GDPR|audit|compliance|conformité)\b", re.IGNORECASE
-        ),
-        ("STAKEHOLDERS.md", "Compliance/SLA → confirmer stakeholders légaux"),
-    ),
+    # NB : pas de trigger STAKEHOLDERS.md — la doctrine du template dit explicitement
+    # de NE PAS créer ce fichier pour < 5 personnes (cf. template-maintenance.md).
 ]
 
 
@@ -49,12 +45,17 @@ def main():
         sys.exit(0)
 
     tool_name = data.get("tool_name", "")
-    if tool_name not in ("Edit", "Write"):
+    if tool_name not in ("Edit", "Write", "MultiEdit"):
         sys.exit(0)
 
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
+    # Write → content ; Edit → new_string ; MultiEdit → edits[].new_string (concaténés)
     content = tool_input.get("content") or tool_input.get("new_string", "")
+    if not content and isinstance(tool_input.get("edits"), list):
+        content = "\n".join(
+            e.get("new_string", "") for e in tool_input["edits"] if isinstance(e, dict)
+        )
 
     if not content or not file_path:
         sys.exit(0)
@@ -67,13 +68,19 @@ def main():
     suggestions_path = Path(cwd) / ".claude" / ".growth-suggestions.md"
     suggestions_path.parent.mkdir(exist_ok=True, parents=True)
 
+    # Chemin RELATIF au projet (sinon on logge des chemins absolus hors-projet, non actionnables)
+    try:
+        rel_source = str(Path(file_path).resolve().relative_to(Path(cwd).resolve()))
+    except Exception:
+        rel_source = os.path.basename(file_path)
+
     detected = []
     for pattern, (target_file, message) in GROWTH_TRIGGERS:
         if pattern.search(content):
             # Check si target_file existe et n'est pas vide
             target = Path(cwd) / ".claude" / "docs" / target_file
             if not target.exists() or target.stat().st_size < 500:
-                detected.append((target_file, message, file_path))
+                detected.append((target_file, message, rel_source))
 
     if not detected:
         sys.exit(0)
@@ -88,10 +95,15 @@ def main():
             pass
 
     new_entries = []
+    seen_in_run = set()
     for target_file, message, source in detected:
-        line = f"- **{now}** | source: `{source}` → {message}\n"
-        if line not in existing:
-            new_entries.append(line)
+        # Dédup par (source, message) SANS le timestamp — sinon ré-émission à chaque
+        # minute pour le même fichier/trigger. La signature suffit à identifier le flag.
+        signature = f"source: `{source}` → {message}"
+        if signature in existing or signature in seen_in_run:
+            continue
+        seen_in_run.add(signature)
+        new_entries.append(f"- **{now}** | {signature}\n")
 
     if new_entries:
         header = ""
