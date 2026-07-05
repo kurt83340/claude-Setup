@@ -485,6 +485,14 @@ la clôture (lead-owned) ; un teammate que TU as demandé **persiste** — seul 
 fermer (user-owned). **Topologie** : par défaut chaque teammate ne parle qu'au lead
 (hub-and-spoke) ; le mesh (teammates qui s'écrivent entre eux) est opt-in, scopé, décidé au spawn.
 
+**Sessions sans prompts (sandbox uniquement)** : les teammates **héritent du mode de
+permission du lead** au spawn → un seul levier. Soit le flag ponctuel
+(`tmux new -s <projet> 'claude --resume --dangerously-skip-permissions'`), soit persistant
+dans `.claude/settings.local.json` (non versionné) :
+`{ "permissions": { "defaultMode": "bypassPermissions" } }`. Les règles `deny` (rm -rf,
+`.env`…) restent appliquées. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
+mode normal (les `allow`/`ask` du template existent pour ça).
+
 → Protocole complet (source unique) : [.claude/rules/agent-teams.md](.claude/rules/agent-teams.md).
 
 ## 🤖 Comprendre les hooks automatiques
