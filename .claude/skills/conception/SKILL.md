@@ -1,0 +1,85 @@
+---
+name: conception
+description: Workflow de planification arrêté — explore en parallèle le code, les docs/bonnes pratiques et la mémoire projet (ADR/leçons/code-map) via subagents, fait émerger 2-3 options avec trade-offs, fait trancher l'utilisateur, rédige plan.md + tasks.md (partitionnés pour /team), puis fait relire le plan par un agent adverse à contexte frais. À invoquer après /spec (micro, par feature) ou en mode macro (ARCHITECTURE projet). Ne produit JAMAIS de code.
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, WebFetch, WebSearch, Bash(git log:*), Bash(git diff:*), Bash(grep:*), Bash(find:*)
+disable-model-invocation: false
+---
+
+# /conception — Explorer, converger, arrêter le plan
+
+Codifie la boucle power-user **Explore → Options → Décision → Plan → Revue adverse** sur les
+artefacts EXISTANTS du template (`research.md` / `plan.md` / `tasks.md` / `spec.md`) : aucun
+nouveau type de fichier — on les remplit avec méthode au lieu de les remplir à l'humeur.
+
+**Arguments** : `/conception <spec-id>` (micro, défaut — ex. `/conception 001-livre-d-or`)
+· `/conception macro` (projet entier : `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`).
+**Chaîne** : `/spec` (scaffold) → **`/conception`** (méthode) → exécution (solo ou `/team`) → `/feature-done`.
+**Interdit ici** : écrire du code. Ce skill produit un PLAN, rien d'autre.
+
+## Étape 0 — Charger les contraintes (ce qui borne le plan)
+
+Lis AVANT d'explorer : `cadrage/README.md` (contraintes client), `conception/PRD.md` +
+`ARCHITECTURE.md` (si remplis), **`code-map.md` — règles de couplage : un plan qui les viole
+est mort-né**, `adr/README.md` + ADRs pertinents (décisions immuables), `lecons.md` (échecs
+déjà payés), `stack.md`. → Écris « Contraintes retenues » en tête du `research.md` de la spec.
+
+## Étape 1 — Explorer en parallèle (subagents lecture seule)
+
+Le bruit d'exploration tue la qualité du plan → il ne rentre PAS dans ton contexte principal.
+Spawne EN PARALLÈLE des **subagents** (Task tool — one-shot, invisibles ; pas des teammates) :
+
+1. **Explore code** : fichiers/modules touchés, patterns existants à imiter, points
+   d'intégration → rapporte des `chemin:ligne`, pas des impressions.
+2. **Explore docs** (si lib/API/service en jeu) : doc officielle À JOUR (WebFetch/WebSearch,
+   context7 si dispo) — versions exactes, API réelles, pièges connus → URLs + versions.
+3. **Explore mémoire projet** : ADRs/leçons/idées liés au sujet → ce qui a déjà été
+   décidé ou tenté (et pourquoi ça a raté).
+
+Chaque rapport, factuel et sourcé → `research.md` § « Explorations » (daté ISO).
+
+## Étape 2 — Faire émerger 2-3 options (jamais UNE seule)
+
+Dans `research.md` § « Options considérées », un tableau :
+
+| Option | Approche (2 lignes) | Coût | Risques | Réversibilité | Conforme couplage/ADR ? |
+
+Pour un choix **structurant**, génère les options par subagents indépendants à angle imposé
+(MVP-first / robustesse-first / réutilisation-first) — la diversité bat l'itération.
+
+## Étape 3 — Recommander, faire trancher
+
+Recommandation argumentée : L'option retenue, pourquoi elle, pourquoi pas les autres →
+`AskUserQuestion`. **L'utilisateur tranche, pas toi.**
+Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `## Décisions` du `plan.md`.
+
+## Étape 4 — Rédiger le plan exécutable
+
+- `plan.md` : étapes numérotées, fichiers touchés par étape, risques + parades, et **un point
+  de vérification exécutable par étape** (test/build/curl — jamais « ça devrait marcher »).
+- `tasks.md` : checklist `- [ ]` avec DoD mesurable, **partitionnée par fichiers disjoints**
+  si une exécution `/team` est envisagée (2 teammates sur les mêmes fichiers = interdit).
+- `spec.md` : scope / non-scope ajustés à la décision.
+
+(Mode `macro` : mêmes étapes, sur `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`.)
+
+## Étape 5 — Revue adverse à contexte frais
+
+Spawne UN subagent qui n'a PAS vu la genèse du plan, avec pour seule mission de le **casser** :
+hypothèse non vérifiée ? étape sans point de vérification ? violation code-map/ADR ? oubli
+(migration, gestion d'erreur, rollback) ? tasks non partitionnées ? → findings 🔴/🟠/🟢.
+Corrige le plan, et note dans `research.md` § « Revue adverse » ce qu'elle a attrapé.
+
+## Étape 6 — Geler et brancher la suite
+
+Validation utilisateur finale → ROADMAP à jour (`[ ]` → `[~]` si démarrage immédiat),
+HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
+`/team <spec-id>` (les tasks sont déjà partitionnées pour).
+
+## Anti-patterns
+
+- ❌ Coder « juste un bout » pendant la conception
+- ❌ Une seule option étudiée (= pas une décision, une pente)
+- ❌ Option sans trade-offs / plan sans points de vérification exécutables
+- ❌ Explorer dans le contexte principal (→ subagents, rapports sourcés)
+- ❌ Sauter la revue adverse « parce que le plan a l'air bon » (c'est là qu'elle sert)
+- ❌ Re-décider ce qu'un ADR a tranché (le superseder explicitement via `/adr` si besoin)

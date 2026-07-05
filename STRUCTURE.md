@@ -45,6 +45,7 @@ mon-projet/
     │   ├── README.md               # convention skills + comment ajouter (préfixe pour grouper)
     │   ├── handoff/SKILL.md        # /handoff
     │   ├── spec/SKILL.md           # /spec (scaffold feature)
+    │   ├── conception/SKILL.md     # /conception — explore → options → plan arrêté + revue adverse
     │   ├── feature-done/SKILL.md
     │   ├── adr/SKILL.md            # 4 modes : capture/supersede/deprecate/list
     │   ├── lecon/SKILL.md          # 4 modes : capture/promote/discard/archive

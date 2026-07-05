@@ -117,11 +117,11 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
 
 📝 .claude/docs/ROADMAP.md : ligne ajoutée Phase 1 — [ ] [004-pagination-cursor]
 
-🚀 Prochaines étapes :
-   1. Remplir research.md (brainstorm options, ~30 min)
-   2. Remplir spec.md (vision micro : QUOI/POURQUOI)
-   3. Remplir plan.md (COMMENT + section ## Décisions)
-   4. Décomposer tasks.md (checklist + DoD)
+🚀 Prochaine étape :
+   /conception 004-pagination-cursor
+   → explore (code + docs + mémoire projet) → 2-3 options → décision → plan.md
+     avec points de vérification + tasks.md partitionné + revue adverse.
+   (Ou remplir les 4 fichiers à la main si la feature est triviale.)
 ```
 
 ## Anti-patterns

@@ -198,14 +198,15 @@ diagrams/
 
 #### Session & feature
 
-| Skill                    | Quand l'invoquer                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `/init-from-template` ⭐ | UNE FOIS, début de projet — substitue les CORE placeholders (UPPER_SNAKE)             |
-| `/handoff` ⭐            | Fin de session — snapshot .claude/docs/HANDOFF.md (status + échecs + blockers + next) |
-| `/spec "<titre>"` ⭐     | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP       |
-| `/feature-done <id>` ⭐  | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées            |
-| `/pivot "<raison>"`      | Workflow pivot client 9 étapes orchestrées                                            |
-| `/team <spec-id>` ⭐     | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, débrief |
+| Skill                      | Quand l'invoquer                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/init-from-template` ⭐   | UNE FOIS, début de projet — substitue les CORE placeholders (UPPER_SNAKE)                                           |
+| `/handoff` ⭐              | Fin de session — snapshot .claude/docs/HANDOFF.md (status + échecs + blockers + next)                               |
+| `/spec "<titre>"` ⭐       | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP                                     |
+| `/conception <spec-id>` ⭐ | Arrêter le plan — explore par subagents (code/docs/mémoire), 2-3 options, décision, plan vérifiable + revue adverse |
+| `/feature-done <id>` ⭐    | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées                                          |
+| `/pivot "<raison>"`        | Workflow pivot client 9 étapes orchestrées                                                                          |
+| `/team <spec-id>` ⭐       | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, débrief                               |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
 
@@ -260,6 +261,7 @@ diagrams/
 | `/init-from-template` ⭐ | Pose 10 questions, substitue les CORE placeholders + lance cleanup-for-type.py adapté au type projet (à exécuter UNE FOIS)                          | `.claude/skills/init-from-template/` |
 | `/handoff` ⭐            | Snapshot .claude/docs/HANDOFF.md fin de session (status + échecs + blockers + next). Détecte HANDOFF fresh (post-init)                              | `.claude/skills/handoff/`            |
 | `/spec` ⭐               | Scaffold nouvelle feature : 4 fichiers research/spec/plan/tasks depuis templates + update ROADMAP                                                   | `.claude/skills/spec/`               |
+| `/conception` ⭐         | Méthode de planification : explorations parallèles (subagents), tableau d'options, décision user, plan avec points de vérification, revue adverse   | `.claude/skills/conception/`         |
 | `/feature-done` ⭐       | Coche ROADMAP + CHANGELOG + HANDOFF + suggère ADRs + archive idées + marque leçons promues                                                          | `.claude/skills/feature-done/`       |
 | `/doc-health`            | Audit hebdo : docs stale, ADRs manquants, growth opportunities, code-map drift, specs stalled, leçons en attente                                    | `.claude/skills/doc-health/`         |
 | `/lecon`                 | Ajoute entry rapide dans .claude/docs/lecons.md (statut 🆕 new) + workflow promotion documenté                                                      | `.claude/skills/lecon/`              |

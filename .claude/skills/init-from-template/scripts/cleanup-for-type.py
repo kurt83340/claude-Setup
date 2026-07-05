@@ -59,6 +59,7 @@ SCRIPT_JETABLE = {
         ".claude/skills/pivot/",
         ".claude/skills/idee/",
         ".claude/skills/team/",
+        ".claude/skills/conception/",
         # Agents (pas besoin doc-maintainer pour 1-shot)
         ".claude/agents/",
         # Hooks code (pas de code structuré)

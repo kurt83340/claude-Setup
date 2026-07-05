@@ -3,6 +3,17 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.3.0] — 2026-07-05
+
+### Added
+
+- **Skill `/conception <spec-id|macro>`** (12e skill cœur) — le workflow de planification arrêté qui manquait entre `/spec` (scaffold) et `/team` (exécution) : contraintes d'abord (code-map/ADR/leçons), **explorations parallèles par subagents** (code, docs officielles, mémoire projet — rapports sourcés), **2-3 options avec trade-offs** (jamais une seule), décision par l'utilisateur (ADR si structurante), plan avec **un point de vérification exécutable par étape**, tasks **partitionnées par fichiers** (prêtes pour `/team`), **revue adverse à contexte frais**, gel + ROADMAP/HANDOFF. Zéro nouveau type de fichier (remplit research/spec/plan/tasks existants), zéro nouvel agent (le skill est le foyer et orchestre des subagents — doctrine post-audit).
+
+### Changed
+
+- `/spec` : les « prochaines étapes » pointent vers `/conception` (au lieu de « remplir les 4 fichiers à la main »).
+- Inventaires synchronisés (12 skills cœur) : `.claude/CLAUDE.md`, `template-maintenance.md`, `USAGE.md` (cheat-sheet + workflow feature complète), `STRUCTURE.md`, README repo ; `cleanup-for-type.py` (le type `script-jetable` retire aussi `/conception`).
+
 ## [0.2.1] — 2026-07-05
 
 ### Fixed

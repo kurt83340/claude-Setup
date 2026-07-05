@@ -199,31 +199,32 @@ Rapport généré → tu suis les actions par priorité.
 
 ## 📋 Cheat sheet — Quand utiliser quoi
 
-| Situation                                  | Skill / Action                                                |
-| ------------------------------------------ | ------------------------------------------------------------- |
-| Nouveau projet                             | `/init-from-template`                                         |
-| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)             |
-| Fin de session                             | `/handoff`                                                    |
-| Feature livrée                             | `/feature-done <spec-id>`                                     |
-| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                      |
-| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`               |
-| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                    |
-| Idée perso à capturer                      | `/idee "<titre>"`                                             |
-| Refacto majeur sur le code                 | `/codemap`                                                    |
-| Audit hebdo                                | `/doc-health`                                                 |
-| BDD migration (Alembic)                    | `/db-migration` (stack BDD — copié depuis EXAMPLES/skills-db) |
-| Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                 |
-| Déléguer une feature à une équipe (tmux)   | `/team <spec-id>` — teammates + worktrees + débrief mémoire   |
-| Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)           |
-| Promotion leçon → ADR / rule               | `/lecon promote <date>`                                       |
-| Promotion idée → spec                      | `/idee promote <date>`                                        |
-| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                       |
-| Lister tous les ADRs                       | `/adr list [scope]`                                           |
-| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                           |
-| Reprendre exactement où on en était        | `/resume` (built-in Claude)                                   |
-| Compaction context (auto)                  | RIEN — hooks gèrent                                           |
-| Édition fichier code (auto)                | RIEN — hook injecte code-map context                          |
-| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                      |
+| Situation                                  | Skill / Action                                                                |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| Nouveau projet                             | `/init-from-template`                                                         |
+| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                             |
+| Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse) |
+| Fin de session                             | `/handoff`                                                                    |
+| Feature livrée                             | `/feature-done <spec-id>`                                                     |
+| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                                      |
+| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`                               |
+| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                                    |
+| Idée perso à capturer                      | `/idee "<titre>"`                                                             |
+| Refacto majeur sur le code                 | `/codemap`                                                                    |
+| Audit hebdo                                | `/doc-health`                                                                 |
+| BDD migration (Alembic)                    | `/db-migration` (stack BDD — copié depuis EXAMPLES/skills-db)                 |
+| Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                                 |
+| Déléguer une feature à une équipe (tmux)   | `/team <spec-id>` — teammates + worktrees + débrief mémoire                   |
+| Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
+| Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                       |
+| Promotion idée → spec                      | `/idee promote <date>`                                                        |
+| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                                       |
+| Lister tous les ADRs                       | `/adr list [scope]`                                                           |
+| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                                           |
+| Reprendre exactement où on en était        | `/resume` (built-in Claude)                                                   |
+| Compaction context (auto)                  | RIEN — hooks gèrent                                                           |
+| Édition fichier code (auto)                | RIEN — hook injecte code-map context                                          |
+| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                                      |
 
 ## 🔁 Workflow type pour une feature complète
 
@@ -234,7 +235,9 @@ Rapport généré → tu suis les actions par priorité.
    → scaffold auto : conception/specs/004-export-pdf/{research,spec,plan,tasks}.md
    → update ROADMAP.md auto
        ↓
-3. Remplir les 4 fichiers générés (substituer les {{...}} CONTENT placeholders)
+3. /conception 004-export-pdf
+   → explore (subagents : code + docs + mémoire projet) → 2-3 options → tu tranches
+   → plan.md (points de vérification) + tasks.md (partitionné) + revue adverse
        ↓
 4. CODE → hooks auto pour contexte code-map + growth detection
        ↓
