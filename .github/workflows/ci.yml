@@ -18,6 +18,9 @@ jobs:
       - name: Suite de tests des hooks
         run: python3 test/test_hooks.py
 
+      - name: Suite de tests render.py (init-from-template)
+        run: python3 test/test_render.py
+
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 

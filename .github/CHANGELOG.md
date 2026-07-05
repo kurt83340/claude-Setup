@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.2.1] — 2026-07-05
+
+### Fixed
+
+- **`render.py` (init-from-template) : init silencieusement à vide** — les motifs `EXCLUDE` étaient testés en substring sur le chemin **absolu** ; un projet situé sous un dossier parent nommé comme un motif (ex. `.../test/projetA/`) voyait 100 % de ses fichiers exclus → « 0 fichiers à scanner », 0 substitution, aucune erreur. Découvert au **premier init réel** (projetA, session satellite) et rapatrié ici. Correctif : matching sur le chemin **relatif** à la racine, **ancré sur les frontières de segments** (`latest/` ne matche plus `test/`). Test de régression `test/test_render.py` + step CI.
+
 ## [0.2.0] — 2026-07-05
 
 Câblage **agent-teams** complet + **filets mémoire** — objectifs : tout déléguer à des agents visibles sous tmux (préconfigurés ou à la volée, retours à l'orchestrateur), mémoire cross-session qui n'oublie rien.

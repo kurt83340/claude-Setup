@@ -31,7 +31,7 @@ claude   # puis, dans la session : /init-from-template
 ## Maintenance du template
 
 - Audit & décisions vérifiées : [test/AUDIT-2026-06-28.md](../test/AUDIT-2026-06-28.md)
-- Tests des hooks : `python3 test/test_hooks.py` (rejoué en CI à chaque push)
+- Tests des hooks : `python3 test/test_hooks.py` · tests init : `python3 test/test_render.py` (rejoués en CI à chaque push)
 - Packaging plugin (proto) : `python3 test/build-plugin.py --out dist`
 - Historique des versions : [CHANGELOG.md](CHANGELOG.md)
 

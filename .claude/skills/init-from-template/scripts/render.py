@@ -51,11 +51,33 @@ def is_core(placeholder: str) -> bool:
     return bool(CORE_REGEX.match(placeholder.strip()))
 
 
+def is_excluded(rel_path: str) -> bool:
+    """Motifs d'EXCLUDE testés sur le chemin RELATIF à la racine, ancrés sur des
+    frontières de segments — jamais en substring sur le chemin absolu :
+
+    - sinon un projet situé sous un dossier parent nommé comme un motif (ex.
+      `.../test/projetA/` vs EXCLUDE "test/") verrait TOUS ses fichiers exclus
+      → « 0 fichiers à scanner » → init silencieusement à vide (bug 2026-07-05) ;
+    - l'ancrage `/` évite les faux positifs de substring (`latest/` ≠ `test/`).
+
+    "dir/"  → exclut tout fichier sous un segment de ce nom (racine ou milieu).
+    "f.md"  → exclut ce nom de fichier exact (racine ou sous-dossier).
+    """
+    haystack = "/" + rel_path
+    for ex in EXCLUDE:
+        if ex.endswith("/"):
+            if "/" + ex in haystack:
+                return True
+        elif haystack.endswith("/" + ex):
+            return True
+    return False
+
+
 def find_files(root: Path) -> list[Path]:
     files = set()
     for pattern in PATTERNS:
         for f in root.glob(pattern):
-            if f.is_file() and not any(ex in str(f) for ex in EXCLUDE):
+            if f.is_file() and not is_excluded(f.relative_to(root).as_posix()):
                 files.add(f)
     return sorted(files)
 
