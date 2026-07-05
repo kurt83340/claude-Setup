@@ -1,7 +1,7 @@
 ---
 name: conception
 description: Workflow de planification arrêté — explore en parallèle le code, les docs/bonnes pratiques et la mémoire projet (ADR/leçons/code-map) via subagents, fait émerger 2-3 options avec trade-offs, fait trancher l'utilisateur, rédige plan.md + tasks.md (partitionnés pour /team), puis fait relire le plan par un agent adverse à contexte frais. À invoquer après /spec (micro, par feature) ou en mode macro (ARCHITECTURE projet). Ne produit JAMAIS de code.
-allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, WebFetch, WebSearch, Bash(git log:*), Bash(git diff:*), Bash(grep:*), Bash(find:*)
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, WebFetch, WebSearch, mcp__context7, Bash(git log:*), Bash(git diff:*), Bash(grep:*), Bash(find:*)
 disable-model-invocation: false
 ---
 
@@ -30,12 +30,18 @@ Spawne EN PARALLÈLE des **subagents** (Task tool — one-shot, invisibles ; pas
 
 1. **Explore code** : fichiers/modules touchés, patterns existants à imiter, points
    d'intégration → rapporte des `chemin:ligne`, pas des impressions.
-2. **Explore docs** (si lib/API/service en jeu) : doc officielle À JOUR (WebFetch/WebSearch,
-   context7 si dispo) — versions exactes, API réelles, pièges connus → URLs + versions.
+2. **Explore docs** (si lib/API/service en jeu) : doc officielle À JOUR — par ordre de
+   préférence : **context7** (doc versionnée de la lib, si le MCP est connecté), tout autre
+   MCP de docs connecté (exa, `get_sdk_reference` n8n sur un projet n8n…), sinon
+   WebFetch/WebSearch — versions exactes, API réelles, pièges connus → URLs + versions.
 3. **Explore mémoire projet** : ADRs/leçons/idées liés au sujet → ce qui a déjà été
    décidé ou tenté (et pourquoi ça a raté).
 
 Chaque rapport, factuel et sourcé → `research.md` § « Explorations » (daté ISO).
+
+Projet **from scratch / première spec** : l'explorateur code n'a rien à lire → il explore à
+la place les conventions cibles (`rules/code-style.md`, `stack.md`) et un exemple proche si
+dispo ; le poids de l'explo se déplace sur docs + cadrage.
 
 ## Étape 2 — Faire émerger 2-3 options (jamais UNE seule)
 
@@ -74,6 +80,15 @@ Corrige le plan, et note dans `research.md` § « Revue adverse » ce qu'elle a 
 Validation utilisateur finale → ROADMAP à jour (`[ ]` → `[~]` si démarrage immédiat),
 HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
 `/team <spec-id>` (les tasks sont déjà partitionnées pour).
+
+## Mode visible (tmux) — optionnel
+
+Par défaut, explorateurs et critique sont des **subagents** (rapides, invisibles). Si
+l'utilisateur veut les VOIR travailler (ou qu'une équipe tmux est déjà ouverte) : spawne-les
+en **teammates** nommés (`explore-code`, `explore-docs`, critique = rôle `reviewer`) — mêmes
+prompts, rapport par `SendMessage`, **lead-owned** → ferme-les après débrief (rule
+agent-teams). Les deux gates (choix d'option, validation finale) restent dans TA session —
+c'est pourquoi /conception est un skill du lead, pas un agent.
 
 ## Anti-patterns
 
