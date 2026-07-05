@@ -23,7 +23,8 @@
 - `/conception <spec-id|macro>` ⭐ — arrêter le plan : explore (subagents code+docs+mémoire) → 2-3 options → décision → plan/tasks + revue adverse
 - `/feature-done <spec-id>` ⭐ — livraison feature
 - `/pivot "<raison>"` — orchestrer un pivot client (9 étapes)
-- `/team <spec-id>` ⭐ — déléguer une feature à une équipe de teammates visibles en tmux (worktrees, task list native, merge, débrief mémoire)
+- `/team <spec-id>` ⭐ — déléguer une feature à une équipe de teammates visibles en tmux (worktrees, task list native, mode TDD opt-in, merge, débrief mémoire)
+- `/debug "<symptôme>"` — pipeline de debugging : reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → test pérennisé + leçon
 
 ### Cycle de vie des artefacts (capture/promote/discard/archive)
 
@@ -40,7 +41,7 @@
 
 - `/init-from-template` — initialise un projet depuis ce template (UNE FOIS)
 
-> 🗂️ **Inventaire canonique** : cette liste (**12 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**13 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills hors-template (stack-spécifiques — copiés à la demande depuis `EXAMPLES/skills-*`)
 

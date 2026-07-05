@@ -206,7 +206,8 @@ diagrams/
 | `/conception <spec-id>` ⭐ | Arrêter le plan — explore par subagents (code/docs/mémoire), 2-3 options, décision, plan vérifiable + revue adverse |
 | `/feature-done <id>` ⭐    | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées                                          |
 | `/pivot "<raison>"`        | Workflow pivot client 9 étapes orchestrées                                                                          |
-| `/team <spec-id>` ⭐       | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, débrief                               |
+| `/team <spec-id>` ⭐       | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, mode TDD opt-in, débrief              |
+| `/debug "<symptôme>"`      | Bug non trivial — reproduire (test rouge) → explorer → hypothèses → fix minimal → test pérennisé + leçon            |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
 
@@ -270,7 +271,8 @@ diagrams/
 | `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file. | `.claude/skills/codemap/`            |
 | `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                               | `.claude/skills/adr/`                |
 | `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                       | `.claude/skills/pivot/`              |
-| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, suivi, merge, débrief mémoire, clôture propre  | `.claude/skills/team/`               |
+| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire | `.claude/skills/team/`               |
+| `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                        | `.claude/skills/debug/`              |
 
 > 🧩 Skills **hors-cœur** (stack-spécifiques) : `/db-migration` (Alembic) → `EXAMPLES/skills-db/`, `/n8n-*` → `EXAMPLES/skills-n8n/` — copiés dans `.claude/skills/` par `/init-from-template` selon le type. Inventaire complet → [`.claude/CLAUDE.md`](../CLAUDE.md).
 

@@ -3,6 +3,21 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.5.0] — 2026-07-05
+
+Les « templates d'orchestration » : la chaîne implémentation existait déjà (`/spec` → `/conception` → `/team` → `/feature-done`, chaque maillon suggère le suivant) — cette version ajoute les chaînons manquants + le pipeline debugging.
+
+### Added
+
+- **Skill `/debug "<symptôme>"`** (13e skill cœur) — pipeline debugging : symptôme **verbatim** → REPRODUIRE (test rouge minimal — règle d'or : pas de repro = pas de fix) → explorer (`explore-code` + git log + `explore-memoire`) → hypothèses **discriminées par instrumentation** → fix minimal (la cause, pas le symptôme, sans refacto opportuniste) → suite verte → pérenniser (le test de repro RESTE, `/lecon`, gotcha code-map, CHANGELOG Fixed).
+- **Mode TDD dans `/team`** (opt-in, décidé au plan d'équipe) : tasks de tests créées d'abord (assignées à `tester`), tasks d'implémentation **bloquées dessus** (`addBlockedBy`) — back/front font passer au vert sans modifier les tests.
+- **Étape PR GitHub dans `/feature-done`** : `gh pr create` selon git-workflow (1 spec = 1 PR, squash, CI verte) ; `git push` reste en permission « ask » ; fallback commit local + tag.
+- **Choix SDD/TDD critérisé dans `/conception`** (étape 4) : le mode d'exécution est décidé PAR SPEC et noté dans `plan.md` § Décisions — TDD si comportements spécifiables a priori (logique métier, parsing, contrats d'API) ; tests-après + E2E ciblés si exploratoire — `/team` lit ce choix.
+
+### Changed
+
+- Inventaires synchronisés (13 skills cœur) ; `cleanup-for-type.py` : `script-jetable` retire aussi `/debug`.
+
 ## [0.4.0] — 2026-07-05
 
 ### Added

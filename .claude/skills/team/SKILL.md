@@ -40,6 +40,8 @@ git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un r
    - rôles + tâches par teammate + worktrees ;
    - **topologie de communication** — défaut hub-and-spoke ; propose un mesh scopé si deux
      rôles doivent négocier (ex. contrat d'API front ↔ back) ;
+   - **mode d'exécution** : standard ou **TDD** (les tests d'abord — cf. Étape 2) — si
+     `/conception` l'a déjà arrêté dans `plan.md` § Décisions, applique ce choix ;
    - rappel cycle de vie : les teammates spawnés par `/team` sont **lead-owned** → je les
      fermerai à la clôture (Étape 8).
 5. → **Validation utilisateur avant de spawner.**
@@ -50,6 +52,16 @@ git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un r
   contexte + DoD + fichiers probables). Dépendances : `TaskUpdate` `addBlockedBy`.
 - La task list native = tableau de bord de la session ; `specs/<id>/tasks.md` reste la
   source **versionnée** (tu y recopies l'état final en Étape 8).
+
+**Mode TDD (opt-in, décidé à l'Étape 1)** :
+
+1. Les tasks de TESTS sont créées et assignées à `tester` EN PREMIER (tests rouges attendus).
+2. Chaque task d'implémentation est **bloquée** sur sa task de tests (`TaskUpdate`
+   `addBlockedBy`) → back/front ne démarrent que sur tests rouges existants, et les font
+   passer au vert.
+3. Rappels protocole : les codeurs ne MODIFIENT pas les tests (test rouge légitime = rapport
+   au lead) ; `tester` ne touche pas au code de prod. Le partitionnement est naturel :
+   `tests/` vs `src/`.
 
 ## Étape 3 — Worktrees (teammates qui codent)
 

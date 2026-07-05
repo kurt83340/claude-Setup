@@ -209,6 +209,7 @@ Rapport généré → tu suis les actions par priorité.
 | Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                                      |
 | Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`                               |
 | Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                                    |
+| Débugger un bug non trivial                | `/debug "<symptôme>"` (repro → cause → fix minimal → leçon)                   |
 | Idée perso à capturer                      | `/idee "<titre>"`                                                             |
 | Refacto majeur sur le code                 | `/codemap`                                                                    |
 | Audit hebdo                                | `/doc-health`                                                                 |

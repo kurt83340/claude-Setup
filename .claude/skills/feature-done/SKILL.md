@@ -1,6 +1,6 @@
 ---
 name: feature-done
-description: Marque une feature comme livrée. Coche dans .claude/docs/ROADMAP.md, ajoute entry dans .claude/docs/CHANGELOG.md, met à jour .claude/docs/HANDOFF.md, suggère ADRs si décisions tech structurantes, vérifie que .claude/docs/code-map.md est à jour. À invoquer après livraison d'une feature (tous les tasks de specs/00X/tasks.md cochés).
+description: Marque une feature comme livrée. Coche dans .claude/docs/ROADMAP.md, ajoute entry dans .claude/docs/CHANGELOG.md, met à jour .claude/docs/HANDOFF.md, suggère ADRs si décisions tech structurantes, vérifie que .claude/docs/code-map.md est à jour, propose la PR GitHub (gh — 1 spec = 1 PR, squash). À invoquer après livraison d'une feature (tous les tasks de specs/00X/tasks.md cochés).
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(date:*)
 disable-model-invocation: false
 ---
@@ -117,13 +117,25 @@ Si la feature est issue d'une `.claude/docs/idees/YYYY-MM-DD-titre.md` :
 1. Update le statut dans l'idée : `Statut: 💡 Backlog` → `✅ Promu en spec 00X — livré YYYY-MM-DD`
 2. Optionnel : déplacer vers `.claude/docs/idees/archived/` (créer le dossier si besoin)
 
-## Étape 8 — Suggérer commit + tag
+## Étape 8 — Suggérer commit + PR + tag
 
 ```bash
 git add .
 git commit -m "feat(<spec-id>): <titre court>"
+```
 
-# Optionnel si release
+**PR GitHub (si remote + `gh` dispo)** — règle git-workflow : **1 spec = 1 PR, squash merge** :
+
+```bash
+git push -u origin feature/<spec-id>   # push = permission « ask » → confirmation user
+gh pr create --title "feat(<spec-id>): <titre court>" \
+  --body "Spec : .claude/docs/conception/specs/<spec-id>/spec.md · Tasks X/X ✅ · Tests : <résultat>"
+```
+
+- CI verte obligatoire avant merge ; squash merge (1 commit par feature dans main).
+- Pas de remote / pas de `gh` / solo sans PR → rester sur le commit local, et si release :
+
+```bash
 git tag -a v$(date +%Y.%m.%d-%H%M) -m "Feature <spec-id> livrée"
 ```
 
@@ -140,6 +152,8 @@ git tag -a v$(date +%Y.%m.%d-%H%M) -m "Feature <spec-id> livrée"
 
 📚 ADRs proposés :
 - ADR-0004-mvp-pattern-retry-tenacity ← user à valider
+
+🔀 PR : feature/001-erp-connector → main proposée (gh pr create) — squash après CI verte
 
 🚀 Suivant : démarrer feature 002-notion-writer ? (lance /spec ou créer manuellement)
 ```

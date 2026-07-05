@@ -67,6 +67,10 @@ Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `
   de vérification exécutable par étape** (test/build/curl — jamais « ça devrait marcher »).
 - `tasks.md` : checklist `- [ ]` avec DoD mesurable, **partitionnée par fichiers disjoints**
   si une exécution `/team` est envisagée (2 teammates sur les mêmes fichiers = interdit).
+- **Mode d'exécution — décide-le ICI, par spec** (note-le dans `plan.md` § Décisions) :
+  **TDD** si les comportements sont spécifiables a priori (logique métier, parsing, contrats
+  d'API — le test rouge devient le point de vérification de l'étape) ; **tests-après + E2E
+  ciblés** si exploratoire (UI mouvante, intégration à découvrir). `/team` lira ce choix.
 - `spec.md` : scope / non-scope ajustés à la décision.
 
 (Mode `macro` : mêmes étapes, sur `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`.)
