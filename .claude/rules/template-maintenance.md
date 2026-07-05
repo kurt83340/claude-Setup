@@ -16,6 +16,11 @@ Claude Code 2.1.x a maintenant 3 couches de mémoire qui se complètent. **Ne le
 
 **Auto-memory (layer 2) est ACTIF par défaut depuis v2.1.59.** Claude écrit tout seul ce qu'il apprend : conventions, build commands, debugging, préférences. Tu n'as rien à faire — c'est dans `~/.claude/projects/...`.
 
+⚠️ **Layer 2 = un cache, pas une garantie** : machine-local, non versionné, keyé par repo git
+(les worktrees le partagent), écrit en concurrence si plusieurs sessions tournent en parallèle.
+Le « n'oublie rien » durable passe par la **promotion** vers les couches versionnées :
+`/doc-health` (étape auto-memory) propose de promouvoir les patterns stables en rule / leçon / ADR.
+
 **Quoi mettre où ?**
 
 - Règles **invariantes** du projet → `.claude/rules/*.md` (humain-écrit, versionné)
@@ -200,6 +205,7 @@ diagrams/
 | `/spec "<titre>"` ⭐     | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP       |
 | `/feature-done <id>` ⭐  | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées            |
 | `/pivot "<raison>"`      | Workflow pivot client 9 étapes orchestrées                                            |
+| `/team <spec-id>` ⭐     | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, débrief |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
 
@@ -230,10 +236,10 @@ diagrams/
 
 ### Agent perso (`.claude/agents/`)
 
-| Agent            | Quand l'invoquer                                                                                                                                                                                                                                           |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer` | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                              |
-| `worker`         | **Agent-teams** : rôle teammate. Exécute une sous-tâche (idéalement dans son git worktree), rapporte au lead via `SendMessage`, n'écrit ni les docs partagés ni la numérotation specs/ADR. Voir [§ Agent teams](#agent-teams-multi-agent--anti-collision). |
+| Agent                                                       | Quand l'invoquer                                                                                                                                                                                                                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc-maintainer`                                            | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                             |
+| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | **Agent-teams** : rôles teammate (généraliste, UI, serveur, QA, review lecture-seule), spawnés par le lead — en général via `/team`. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [agent-teams.md](agent-teams.md). |
 
 ### Skills built-in Claude Code utiles
 
@@ -261,26 +267,31 @@ diagrams/
 | `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file. | `.claude/skills/codemap/`            |
 | `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                               | `.claude/skills/adr/`                |
 | `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                       | `.claude/skills/pivot/`              |
+| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, suivi, merge, débrief mémoire, clôture propre  | `.claude/skills/team/`               |
 
 > 🧩 Skills **hors-cœur** (stack-spécifiques) : `/db-migration` (Alembic) → `EXAMPLES/skills-db/`, `/n8n-*` → `EXAMPLES/skills-n8n/` — copiés dans `.claude/skills/` par `/init-from-template` selon le type. Inventaire complet → [`.claude/CLAUDE.md`](../CLAUDE.md).
 
 ### Hooks configurés (cf `.claude/settings.json`)
 
-| Hook                             | Quoi                                                                                                          | Script                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `PreCompact` ⭐                  | Snapshot pré-compaction dans `.claude/.cache/` (non-versionné, overwrite) + marker `/tmp/`                    | `hooks/precompact-snapshot-handoff.py`  |
-| `SessionStart(matcher: compact)` | Re-inject le snapshot (depuis `.claude/.cache/`) après compaction                                             | `hooks/sessionstart-inject-handoff.py`  |
-| `PreToolUse(Edit\|Write)` ⭐     | Réinjecte les règles de couplage + intention + gotchas (non-déductibles) avant édition de code (cap 4k chars) | `hooks/pretooluse-inject-codemap.py`    |
-| `PostToolUse(Edit\|Write)`       | Détecte triggers (API_KEY, deploy, RGPD) → flag dans `.growth-suggestions.md`                                 | `hooks/posttooluse-growth-detection.py` |
-| `Stop`                           | Rappel `/handoff` si .claude/docs/HANDOFF.md > 24h + changements git pending                                  | `hooks/stop-handoff-reminder.sh`        |
+| Hook                                             | Quoi                                                                                                          | Script                                  |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `PreCompact` ⭐                                  | Snapshot pré-compaction dans `.claude/.cache/` (non-versionné, overwrite) + marker `/tmp/`                    | `hooks/precompact-snapshot-handoff.py`  |
+| `SessionStart(matcher: compact)`                 | Re-inject le snapshot (depuis `.claude/.cache/`) après compaction                                             | `hooks/sessionstart-inject-handoff.py`  |
+| `SessionEnd` ⭐                                  | Filet « n'oublie rien » : snapshot d'état à CHAQUE fin de session (cache, overwrite)                          | `hooks/sessionend-snapshot.py`          |
+| `SessionStart(matcher: startup)`                 | Injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme                          | `hooks/sessionstart-inject-handoff.py`  |
+| `PreToolUse(Edit\|Write)` ⭐                     | Réinjecte les règles de couplage + intention + gotchas (non-déductibles) avant édition de code (cap 4k chars) | `hooks/pretooluse-inject-codemap.py`    |
+| `PostToolUse(Edit\|Write)`                       | Détecte triggers (API_KEY, deploy, RGPD) → flag dans `.growth-suggestions.md`                                 | `hooks/posttooluse-growth-detection.py` |
+| `Stop`                                           | Rappel `/handoff` si .claude/docs/HANDOFF.md > 24h + changements git pending                                  | `hooks/stop-handoff-reminder.sh`        |
+| `TaskCreated` / `TaskCompleted` / `TeammateIdle` | Trace JSON de progression d'équipe dans `.claude/.cache/team-progress.log`                                    | `hooks/teamtask-log.py`                 |
 
 ⚠️ **Prérequis** : `chmod +x .claude/hooks/*.py .claude/hooks/*.sh` (sinon les hooks bloquent). Géré automatiquement par `/init-from-template` étape 0.
 
 ### Agent perso
 
-| Agent            | Quoi                                                                                                                                                                 |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer` | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
+| Agent                                                       | Quoi                                                                                                                                                                 |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc-maintainer`                                            | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
+| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | Rôles teammate agent-teams (spawn via `/team` ou à la demande) — protocole commun : [agent-teams.md](agent-teams.md).                                                |
 
 ## Distinction `cadrage/` vs `idees/`
 
@@ -362,21 +373,15 @@ diagrams/
 
 ## Agent teams (multi-agent) — anti-collision
 
-> Ce template est mono-session par héritage. En **agent teams natifs** (un lead + N teammates,
-> potentiellement plusieurs sessions Claude dans le repo), applique ces règles — sinon les docs
-> partagés se télescopent (last-write-wins, conflits de merge). Rôle teammate : [agents/worker.md](../agents/worker.md).
-
-**Propriété des docs — le lead écrit, les workers rapportent :**
-
-- Le **lead** (session principale) est seul à écrire les docs partagés : `HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md`, `code-map.md`, `adr/README.md`, et **alloue les numéros** de specs (`00X`) et d'ADR (`00XX`).
-- Les **workers** n'écrivent que les fichiers de leur tâche (`src/...`, `specs/<leur-spec>/...`) et **rapportent au lead via `SendMessage`** — jamais via leur texte de réponse (il n'arrive pas au lead, seul un idle ping passe).
-
-**Isolation par worktree (recommandé dès 2 workers qui codent) :**
-
-- 1 worker = 1 `git worktree` sur sa branche → son **propre** `HANDOFF.md` / `.cache/` / état git → zéro collision. Les hooks utilisent `${CLAUDE_PROJECT_DIR}` → worktree-safe nativement.
-- Le lead merge les branches en fin de tâche (conflits = uniquement vrai chevauchement de code, géré normalement).
-
-**Hooks en multi-agent :**
-
-- Snapshot pré-compaction = **par session** (`.cache/handoff-snapshot-<session_id>.md`) — pas de cache unique partagé.
-- Le rappel `/handoff` (Stop) ne se déclenche que pour le **lead** (sinon N rappels simultanés).
+> **Source unique du protocole** (lead / teammate, cycle de vie lead-owned vs user-owned,
+> topologie hub-and-spoke vs mesh, worktrees, débrief mémoire, hooks) :
+> [agent-teams.md](agent-teams.md) — une rule auto-chargée, comme celle-ci. Ne pas redupliquer ici.
+>
+> Câblage : `settings.json` (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode: "tmux"`).
+> Orchestration d'une feature : skill `/team`. Rôles teammate : `.claude/agents/` (worker,
+> front-end, back-end, tester, reviewer).
+>
+> Résumé en 3 lignes : le **lead** écrit les docs partagés et alloue les numéros specs/ADR ;
+> les **teammates** rapportent via `SendMessage` (jamais leur texte de réponse) et codent
+> chacun dans leur **worktree** ; chaque rapport est **débriefé en mémoire** (leçons /
+> code-map / HANDOFF) sinon le savoir meurt avec la session teammate.

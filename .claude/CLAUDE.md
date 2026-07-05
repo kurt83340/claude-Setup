@@ -22,6 +22,7 @@
 - `/spec "<titre>"` ⭐ — scaffold nouvelle feature (4 fichiers + ROADMAP)
 - `/feature-done <spec-id>` ⭐ — livraison feature
 - `/pivot "<raison>"` — orchestrer un pivot client (9 étapes)
+- `/team <spec-id>` ⭐ — déléguer une feature à une équipe de teammates visibles en tmux (worktrees, task list native, merge, débrief mémoire)
 
 ### Cycle de vie des artefacts (capture/promote/discard/archive)
 
@@ -38,7 +39,7 @@
 
 - `/init-from-template` — initialise un projet depuis ce template (UNE FOIS)
 
-> 🗂️ **Inventaire canonique** : cette liste (**10 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**11 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills hors-template (stack-spécifiques — copiés à la demande depuis `EXAMPLES/skills-*`)
 
@@ -58,8 +59,8 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 
 ## Agent perso (`.claude/agents/`)
 
-- `doc-maintainer` — invocable via Task tool, gère tout le workflow doc (HANDOFF, ROADMAP, ADRs, pivot, promotion)
-- `worker` — rôle teammate pour les **agent-teams** : exécute une sous-tâche dans son périmètre (idéalement son git worktree), rapporte au lead via `SendMessage`, ne touche pas aux docs partagés ni à la numérotation (voir [§ Agent teams](rules/template-maintenance.md#agent-teams-multi-agent--anti-collision))
+- `doc-maintainer` — subagent (Task tool), gère tout le workflow doc (HANDOFF, ROADMAP, ADRs, pivot, promotion)
+- `worker` · `front-end` · `back-end` · `tester` · `reviewer` — **rôles teammate** pour les agent-teams (spawnés par le lead, en général via `/team`, visibles en tmux). Protocole commun (SendMessage, périmètre, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh) : source unique [rules/agent-teams.md](rules/agent-teams.md)
 
 ---
 

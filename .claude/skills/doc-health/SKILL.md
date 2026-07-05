@@ -1,6 +1,6 @@
 ---
 name: doc-health
-description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision. Génère un rapport priorisé sans modifier.
+description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision, patterns auto-memory à consolider. Génère un rapport priorisé sans modifier.
 allowed-tools: Read, Glob, Grep, Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(date:*)
 disable-model-invocation: false
 ---
@@ -153,7 +153,23 @@ find .claude/docs/idees/ -name "*.md" -mtime +30 2>/dev/null | head -10
 
 Si > 5 idées vieilles → 🟢 "review idées : promouvoir / discard / archiver"
 
-## Étape 10 — Rapport synthétique
+## Étape 10 — Auto-memory : patterns à consolider
+
+> L'auto-memory (layer 2) est **machine-locale et non versionnée** — un cache. La durabilité
+> (« n'oublie rien ») vient de la **promotion** vers les docs versionnées (rule / leçon / ADR).
+
+1. Localise la mémoire : `autoMemoryDirectory` dans `.claude/settings.json` si défini, sinon
+   `~/.claude/projects/<clé>/memory/MEMORY.md` où `<clé>` = le chemin absolu du repo avec
+   chaque caractère non-alphanumérique remplacé par `-` (ex. `/mnt/e/proj/x` → `-mnt-e-proj-x`).
+   (Keyée par repo git : les worktrees partagent la même mémoire.) Lis-la avec le tool Read.
+2. Lis `MEMORY.md` (l'index) + les fichiers de mémoire pointés qui semblent stables.
+3. Flag pour le rapport :
+   - Pattern répété/confirmé sur plusieurs sessions → 🟢 « promouvoir en rule (`.claude/rules/`) ou leçon (`/lecon`) »
+   - Décision structurante apprise → 🟢 « promouvoir en ADR (`/adr`) »
+   - Mémoire contredite par le code actuel → 🟠 « stale : corriger ou supprimer le fichier mémoire »
+   - Pas de MEMORY.md → ✅ RAS (rien d'appris ou auto-memory désactivée)
+
+## Étape 11 — Rapport synthétique
 
 Format type :
 
@@ -175,6 +191,7 @@ Format type :
 - 5 mentions de "API_KEY" dans plan.md mais .claude/docs/ACCESS.md vide → enrichir ?
 - 3 "choisi vs" dans 001/plan.md sans ADR → promouvoir en ADR ?
 - 2 placeholders {{...}} non remplis (CLAUDE.md ligne 12, README.md ligne 8)
+- 1 pattern auto-memory stable (« retry API en 3× ») → promouvoir en rule ou leçon ?
 
 ## ✅ Tout va bien
 

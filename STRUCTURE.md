@@ -38,6 +38,7 @@ mon-projet/
     │   ├── code-style.md           # outils + conventions code (ruff, eslint, naming, longueur ligne, etc.)
     │   ├── testing.md              # framework + structure tests + coverage minimum + lancement
     │   ├── git-workflow.md         # convention commits (Conventional Commits), branches, PRs, tags
+    │   ├── agent-teams.md          # protocole agent-teams (lead/teammate, cycle de vie, topologie) — SOURCE UNIQUE
     │   └── template-maintenance.md # méta-doc : comment vivre avec ce template (workflows, skills, agents)
     │
     ├── skills/                     # skills perso — À PLAT (Claude Code scanne 1 niveau, cf issue #18192)
@@ -51,13 +52,16 @@ mon-projet/
     │   ├── doc-health/SKILL.md
     │   ├── codemap/SKILL.md
     │   ├── pivot/SKILL.md          # workflow 9 étapes
+    │   ├── team/SKILL.md           # /team — orchestration agent-teams (worktrees, task list, débrief)
     │   └── init-from-template/SKILL.md
     │   # db-migration + skills n8n = hors-cœur → EXAMPLES/skills-{db,n8n}/ (copiés par /init-from-template selon le type)
     │   # Pour grouper par source : préfixe le nom (n8n-deploy, n8n-test) ou package en plugin
     │
-    ├── agents/                     # custom agents — à plat aussi
+    ├── agents/                     # custom agents — à plat aussi (subagents ET rôles teammate)
     │   ├── README.md
-    │   └── doc-maintainer.md       # agent qui maintient HANDOFF/ROADMAP/CHANGELOG
+    │   ├── doc-maintainer.md       # agent qui maintient HANDOFF/ROADMAP/CHANGELOG (subagent)
+    │   ├── worker.md               # teammate d'exécution généraliste (agent-teams)
+    │   └── front-end.md / back-end.md / tester.md / reviewer.md   # rôles teammate spécialisés (cf rules/agent-teams.md)
     │
     │   # ⚠️ Invocation skills/agents = via le `name:` du frontmatter (qui DOIT matcher le dossier/fichier).
     │   # Ex : `.claude/skills/handoff/SKILL.md` avec `name: handoff` → invoque `/handoff`.
@@ -683,7 +687,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Agent & skills projet
 
-- Agent `doc-maintainer` (Task tool) · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
+- Agent `doc-maintainer` (Task tool) · rôles teammate `worker`/`front-end`/`back-end`/`tester`/`reviewer` (`/team`, cf `rules/agent-teams.md`) · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
 ```
 
 ---

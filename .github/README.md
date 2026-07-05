@@ -7,9 +7,10 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **10 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/feature-done`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
-- **1 agent** `doc-maintainer` (maintenance doc en batch, diff par diff)
-- **5 hooks** lifecycle : snapshot pré-compaction → `.claude/.cache/`, ré-injection, code-map, growth-detection, rappel `/handoff`
+- **11 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/feature-done`, `/team`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
+- **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + 5 rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` (protocole : `.claude/rules/agent-teams.md`)
+- **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/team`, débrief mémoire des rapports
+- **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
 - **Doc structurée** : cadrage / conception (PRD, ARCHITECTURE, specs) / ADR / ROADMAP / HANDOFF / code-map / stack…
 - **`CLAUDE.md` en index just-in-time** : ~1,5k tokens auto-chargés (vs ~14,6k si on charge tout)
 

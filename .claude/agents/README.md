@@ -22,15 +22,19 @@
 
 3. **Tout est dans le même espace de noms** — pas de collision possible avec namespacing par sous-dossier.
 
-## Invocation
+## Invocation — subagent OU teammate
 
-Les agents sont invoqués via le **Task tool** (pas en slash `/agent-name`) :
+Un même fichier `.claude/agents/*.md` s'invoque de **deux façons** (jamais en slash `/agent-name`) :
 
-```
-Lance l'agent doc-maintainer pour faire un audit complet du projet
-```
+1. **Subagent (Task tool)** — headless, invisible, one-shot ; le résultat revient comme
+   retour d'outil. Ex : `Lance l'agent doc-maintainer pour un audit complet`.
+2. **Teammate (agent teams)** — session Claude Code complète, **visible en tmux**
+   (`teammateMode: "tmux"` câblé dans `settings.json`), spawnée par le lead à partir de la
+   définition d'agent (tools + model honorés, body ajouté au system prompt). C'est le mode
+   des rôles d'équipe ci-dessous — en général via le skill `/team`.
 
-Claude utilisera automatiquement le Task tool avec `subagent_type: doc-maintainer`.
+Quand choisir quoi + protocole d'équipe (périmètre, cycle de vie, topologie) :
+**source unique** [.claude/rules/agent-teams.md](../rules/agent-teams.md).
 
 ## Importer un agent externe
 
@@ -46,6 +50,15 @@ Plugin agents ne supportent PAS les frontmatter fields : `hooks`, `mcpServers`, 
 
 ## Agents du template
 
-| Agent              | Quoi                                                                      |
-| ------------------ | ------------------------------------------------------------------------- |
-| `doc-maintainer`   | Maintient HANDOFF, ROADMAP, CHANGELOG, ADRs, pivots, archivage. Diff par diff. |
+| Agent            | Quoi                                                                           | Mode typique       |
+| ---------------- | ------------------------------------------------------------------------------ | ------------------ |
+| `doc-maintainer` | Maintient HANDOFF, ROADMAP, CHANGELOG, ADRs, pivots, archivage. Diff par diff. | Subagent (Task)    |
+| `worker`         | Teammate d'exécution généraliste (1 sous-tâche, rapport SendMessage)           | Teammate (`/team`) |
+| `front-end`      | Teammate UI — composants, styles, état client, a11y                            | Teammate (`/team`) |
+| `back-end`       | Teammate serveur — API, services, BDD, jobs                                    | Teammate (`/team`) |
+| `tester`         | Teammate QA — tests + repro bugs, ne touche pas au code de prod                | Teammate (`/team`) |
+| `reviewer`       | Teammate review **lecture seule** — findings triés 🔴/🟠/🟢 rapportés au lead  | Teammate (`/team`) |
+
+Les 5 rôles teammate portent chacun UNIQUEMENT leur spécialité ; le protocole d'équipe
+(communication, périmètre, cycle de vie, topologie) vit dans la **rule**
+[.claude/rules/agent-teams.md](../rules/agent-teams.md) — pas de duplication ici.

@@ -1,5 +1,9 @@
 {
   "autoMemoryEnabled": true,
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "tmux",
   "permissions": {
     "allow": [
       "Bash(pytest:*)",
@@ -13,6 +17,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git tag:*)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git worktree prune:*)",
       "Bash(uv:*)",
       "Bash(npm:*)",
       "Bash(find:*)",
@@ -22,6 +29,7 @@
       "Bash(chmod:*)",
       "Bash(git init:*)",
       "Bash(cp:*)",
+      "Bash(tmux -V)",
       "Bash(python3 .claude/skills/init-from-template/scripts/render.py:*)",
       "Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)",
       "Read(./**)",
@@ -32,6 +40,8 @@
     "ask": [
       "Bash(git push:*)",
       "Bash(git reset:*)",
+      "Bash(git merge:*)",
+      "Bash(git worktree remove:*)",
       "Bash(alembic downgrade:*)",
       "Bash(./scripts/deploy:*)"
     ],
@@ -67,6 +77,27 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionstart-inject-handoff.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionend-snapshot.py",
+            "timeout": 15
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -88,6 +119,39 @@
           {
             "type": "command",
             "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/posttooluse-growth-detection.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/teamtask-log.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/teamtask-log.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/teamtask-log.py",
             "timeout": 5
           }
         ]

@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 """
-SessionStart hook (matcher: "compact") — Re-inject HANDOFF.md après compaction.
+SessionStart hook — deux flux d'injection selon la source :
 
-Trigger : quand session démarre AFTER compaction (le matcher "compact" garantit ça).
-Action :
-  1. Lire le marker /tmp/claude-handoff-marker-<session_id>.json
-  2. Si needs_inject=true, lire le snapshot pointé par marker["snapshot_path"]
-     (cache non-versionné par-session : .claude/.cache/handoff-snapshot-<session_id>.md)
-  3. Injecter via stdout (injection auto par Claude Code en SessionStart)
-  4. Flip needs_inject=false dans le marker
+1. source="compact" (matcher compact) — comportement historique :
+   re-inject le snapshot pré-compaction pointé par le marker
+   /tmp/claude-handoff-marker-<session_id>.json (écrit par precompact-snapshot-handoff.py).
 
-Input stdin :
-  {
-    "session_id": "...",
-    "cwd": "/path/to/project",
-    "matcher": "compact"
-  }
+2. source="startup" (matcher startup) — filet « n'oublie rien » :
+   si .claude/.cache/session-end-snapshot.md (écrit par sessionend-snapshot.py) est
+   PLUS FRAIS que .claude/docs/HANDOFF.md → la session précédente s'est fermée sans
+   /handoff → injecter le snapshot. Dans TOUS les cas, le consommer (unlink) pour ne
+   jamais réinjecter un filet périmé.
+
+Payload sans champ "source" (schéma historique) → flux marker (1).
+Stdout = injecté automatiquement dans le contexte par Claude Code (documenté).
 """
 
 import json
@@ -25,43 +23,33 @@ import tempfile
 from pathlib import Path
 
 
-def read_snapshot(snapshot_path: Path) -> str:
-    """Lit le snapshot pré-compaction (cache non-versionné .claude/.cache/)."""
-    try:
-        return snapshot_path.read_text(encoding="utf-8")
-    except Exception:
-        return ""
-
-
-def main():
-    try:
-        data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        sys.exit(0)
-
+def inject_compact_marker(data) -> None:
+    """Flux 1 : ré-injection post-compaction via marker par-session."""
     session_id = data.get("session_id", "unknown")
-    cwd = data.get("cwd", os.getcwd())
 
     marker_path = Path(tempfile.gettempdir()) / f"claude-handoff-marker-{session_id}.json"
     if not marker_path.exists():
         # Pas de marker → pas de re-injection nécessaire (session normale)
-        sys.exit(0)
+        return
 
     try:
         marker = json.loads(marker_path.read_text())
     except Exception:
-        sys.exit(0)
+        return
 
     if not marker.get("needs_inject"):
-        sys.exit(0)
+        return
 
     snapshot_path = Path(marker.get("snapshot_path", ""))
     if not snapshot_path.exists():
-        sys.exit(0)
+        return
 
-    snapshot = read_snapshot(snapshot_path)
+    try:
+        snapshot = snapshot_path.read_text(encoding="utf-8")
+    except Exception:
+        return
     if not snapshot:
-        sys.exit(0)
+        return
 
     # Stdout direct = injection auto par Claude Code dans le contexte
     print(
@@ -78,6 +66,51 @@ Le contexte vient d'être compacté. Voici le snapshot HANDOFF.md récent pour r
     # Flip needs_inject à false
     marker["needs_inject"] = False
     marker_path.write_text(json.dumps(marker))
+
+
+def inject_session_end_net(data) -> None:
+    """Flux 2 : filet fin de session — injecte si plus frais que HANDOFF.md, puis consomme."""
+    cwd = data.get("cwd", os.getcwd())
+    snap = Path(cwd) / ".claude" / ".cache" / "session-end-snapshot.md"
+    if not snap.exists():
+        return
+
+    handoff = Path(cwd) / ".claude" / "docs" / "HANDOFF.md"
+    try:
+        snap_mtime = snap.stat().st_mtime
+        handoff_mtime = handoff.stat().st_mtime if handoff.exists() else 0.0
+        if snap_mtime > handoff_mtime:
+            content = snap.read_text(encoding="utf-8")[:5000]
+            print(
+                f"""## ⚠️ Filet mémoire — session précédente fermée sans /handoff
+
+Le snapshot auto de fin de session est plus récent que `.claude/docs/HANDOFF.md` (probable /handoff oublié) :
+
+{content}
+
+→ Croise avec `.claude/docs/HANDOFF.md` (possiblement stale) et propose à l'utilisateur de consolider via `/handoff`."""
+            )
+    except Exception:
+        pass
+    finally:
+        # Consommé dans tous les cas : un filet ne se réinjecte jamais deux fois,
+        # et si HANDOFF est plus frais c'est que /handoff a déjà capturé l'état.
+        try:
+            snap.unlink()
+        except OSError:
+            pass
+
+
+def main():
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
+
+    if data.get("source") == "startup":
+        inject_session_end_net(data)
+    else:
+        inject_compact_marker(data)
 
     sys.exit(0)
 

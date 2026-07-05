@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Suite de tests des 5 hooks du template (régression).
+"""Suite de tests des hooks du template (régression).
 
 Pourquoi : les hooks tournent à CHAQUE action Claude — un hook cassé dégrade en
 silence chaque session. Cette suite s'exécute sans dépendance externe (stdlib).
@@ -164,6 +164,64 @@ if has_git:
     ok("CLAUDE_HANDOFF_REMINDER=off → pas de rappel", r4.stdout.strip() == "")
 else:
     ok("git absent (skip test rappel)", True)
+shutil.rmtree(sb, ignore_errors=True)
+
+# 6. sessionend-snapshot → filet fin de session (cache, overwrite, reason rendu)
+print("\n== sessionend-snapshot ==")
+sb = sandbox()
+(sb / ".claude/docs/HANDOFF.md").write_text("# HANDOFF\n")
+for _ in range(2):
+    run_hook("sessionend-snapshot.py",
+             {"session_id": "end-A", "transcript_path": "", "cwd": str(sb), "reason": "other"}, sb)
+snap = sb / ".claude/.cache/session-end-snapshot.md"
+ok("snapshot fin de session écrit en cache", snap.exists())
+ok("overwrite (1 seul snapshot)", snap.exists() and snap.read_text().count("📸 Auto-snapshot") == 1)
+ok("reason rendu dans le header", snap.exists() and "fin de session (other)" in snap.read_text())
+
+# 7. sessionstart source=startup → injection du filet SI plus frais que HANDOFF, consommé ensuite
+print("\n== sessionstart-inject (source=startup, filet fin de session) ==")
+ho = sb / ".claude/docs/HANDOFF.md"
+old = time.time() - 3600
+os.utime(ho, (old, old))  # HANDOFF plus vieux que le snapshot → /handoff oublié
+r = run_hook("sessionstart-inject-handoff.py",
+             {"session_id": "new-sess", "cwd": str(sb), "source": "startup"}, sb)
+ok("snapshot plus frais → injection filet", "Filet mémoire" in r.stdout)
+ok("snapshot consommé après injection", not snap.exists())
+# cas /handoff fait (HANDOFF plus frais) → silencieux + purge quand même
+run_hook("sessionend-snapshot.py",
+         {"session_id": "end-B", "transcript_path": "", "cwd": str(sb), "reason": "logout"}, sb)
+future = time.time() + 60
+os.utime(ho, (future, future))
+r2 = run_hook("sessionstart-inject-handoff.py",
+              {"session_id": "n2", "cwd": str(sb), "source": "startup"}, sb)
+ok("HANDOFF plus frais → pas d'injection", r2.stdout.strip() == "")
+ok("snapshot purgé quand même (consume-once)", not snap.exists())
+r3 = run_hook("sessionstart-inject-handoff.py",
+              {"session_id": "n3", "cwd": str(sb), "source": "startup"}, sb)
+ok("pas de snapshot → exit 0 silencieux", r3.returncode == 0 and r3.stdout.strip() == "")
+# routing : source="compact" → flux marker (comportement historique préservé)
+run_hook("precompact-snapshot-handoff.py",
+         {"session_id": "cmp", "transcript_path": "", "cwd": str(sb), "trigger": "auto"}, sb)
+r5 = run_hook("sessionstart-inject-handoff.py",
+              {"session_id": "cmp", "cwd": str(sb), "source": "compact"}, sb)
+ok("source=compact → flux marker (ré-injection)", "Re-injection post-compaction" in r5.stdout)
+shutil.rmtree(sb, ignore_errors=True)
+
+# 8. teamtask-log → 1 ligne JSON/événement, append, jamais bloquant
+print("\n== teamtask-log ==")
+sb = sandbox()
+r = run_hook("teamtask-log.py",
+             {"hook_event_name": "TaskCompleted", "cwd": str(sb),
+              "task": {"id": "3", "subject": "Créer API", "status": "completed"}}, sb)
+lg = sb / ".claude/.cache/team-progress.log"
+ok("TaskCompleted loggé", lg.exists() and "TaskCompleted" in lg.read_text())
+ok("champs task_* extraits", lg.exists() and '"task_subject": "Créer API"' in lg.read_text())
+run_hook("teamtask-log.py",
+         {"hook_event_name": "TeammateIdle", "cwd": str(sb), "teammate_name": "front-end"}, sb)
+ok("append (2 lignes, 1 par événement)", lg.exists() and len(lg.read_text().strip().splitlines()) == 2)
+ok("exit 0 (jamais bloquant)", r.returncode == 0)
+r4 = run_hook("teamtask-log.py", {"hook_event_name": "TaskCreated", "cwd": "/nonexistent-dir-xyz"}, sb)
+ok("cwd inexistant → exit 0 silencieux", r4.returncode == 0 and r4.stdout.strip() == "")
 shutil.rmtree(sb, ignore_errors=True)
 
 print(f"\n{'🎉 TOUS LES HOOKS OK' if FAIL == 0 else '⚠️  ÉCHEC'} — {PASS} pass, {FAIL} fail")

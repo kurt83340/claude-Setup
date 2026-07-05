@@ -178,7 +178,7 @@ Claude va (8 étapes) :
 /doc-health
 ```
 
-Audit complet (12 étapes) qui scanne sans modifier :
+Audit complet qui scanne sans modifier :
 
 | Check                                                   | Seuil                          | Priorité |
 | ------------------------------------------------------- | ------------------------------ | -------- |
@@ -193,6 +193,7 @@ Audit complet (12 étapes) qui scanne sans modifier :
 | Specs `[~]` EN COURS stalled                            | > 30j                          | 🟠       |
 | Idées sans décision                                     | > 30j                          | 🟢       |
 | Liens cassés dans docs                                  | > 0                            | 🔴       |
+| Patterns auto-memory stables non consolidés             | informationnel                 | 🟢       |
 
 Rapport généré → tu suis les actions par priorité.
 
@@ -212,6 +213,7 @@ Rapport généré → tu suis les actions par priorité.
 | Audit hebdo                                | `/doc-health`                                                 |
 | BDD migration (Alembic)                    | `/db-migration` (stack BDD — copié depuis EXAMPLES/skills-db) |
 | Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                 |
+| Déléguer une feature à une équipe (tmux)   | `/team <spec-id>` — teammates + worktrees + débrief mémoire   |
 | Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)           |
 | Promotion leçon → ADR / rule               | `/lecon promote <date>`                                       |
 | Promotion idée → spec                      | `/idee promote <date>`                                        |
@@ -461,15 +463,42 @@ Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer to
 - **Dates ISO** (YYYY-MM-DD)
 - **Préserve les sections custom** de l'user (heuristique : non-templated → ne pas toucher)
 
+## 🧑‍🤝‍🧑 Agent teams — déléguer à une équipe visible (tmux)
+
+Le template est **câblé** pour les agent teams natifs : `settings.json` porte le flag
+(`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`) et `teammateMode: "tmux"` (chaque teammate
+dans son pane). Prérequis : `tmux` dans le PATH. ⚠️ Split panes non supportés dans le terminal
+VS Code / Windows Terminal — lance `claude` depuis un vrai terminal, ou passe
+`teammateMode: "in-process"` pour tout garder dans le terminal courant (moins visible).
+
+```
+/team 001-erp-connector
+```
+
+Le lead propose un **plan d'équipe** (rôles préconfigurés `worker`/`front-end`/`back-end`/
+`tester`/`reviewer` ou agents ad-hoc, 1 worktree par codeur, topologie de communication),
+attend ta **validation**, spawne, suit (task list native + rapports SendMessage +
+`.claude/.cache/team-progress.log`), merge, **débriefe la mémoire** et clôt proprement.
+
+**Cycle de vie** : un teammate spawné par le lead de sa propre initiative est fermé par lui à
+la clôture (lead-owned) ; un teammate que TU as demandé **persiste** — seul toi décides de le
+fermer (user-owned). **Topologie** : par défaut chaque teammate ne parle qu'au lead
+(hub-and-spoke) ; le mesh (teammates qui s'écrivent entre eux) est opt-in, scopé, décidé au spawn.
+
+→ Protocole complet (source unique) : [.claude/rules/agent-teams.md](.claude/rules/agent-teams.md).
+
 ## 🤖 Comprendre les hooks automatiques
 
 | Hook                       | Quand ça se déclenche         | Ce que ça fait                            |
 | -------------------------- | ----------------------------- | ----------------------------------------- |
 | `PreCompact`               | Avant compaction du contexte  | Snapshot dans `.claude/.cache/` (non-versionné) + marker `/tmp/`      |
 | `SessionStart(compact)`    | Reprise après compaction      | Re-inject le snapshot                     |
+| `SessionEnd`               | À CHAQUE fin de session       | Filet « n'oublie rien » : snapshot d'état dans `.claude/.cache/` |
+| `SessionStart(startup)`    | Nouveau démarrage             | Injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme |
 | `PreToolUse(Edit\|Write)`  | Avant Edit/Write fichier code | Réinjecte les règles de couplage + gotchas (non-déductibles) |
 | `PostToolUse(Edit\|Write)` | Après Edit/Write fichier      | Détecte API_KEY/deploy/RGPD → flag growth |
 | `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h        |
+| `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (`/team`) | Trace JSON dans `.claude/.cache/team-progress.log` |
 
 **Tous non-bloquants** : si un hook échoue, Claude continue.
 
