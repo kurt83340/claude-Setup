@@ -28,14 +28,17 @@ déjà payés), `stack.md`. → Écris « Contraintes retenues » en tête du `r
 Le bruit d'exploration tue la qualité du plan → il ne rentre PAS dans ton contexte principal.
 Spawne EN PARALLÈLE des **subagents** (Task tool — one-shot, invisibles ; pas des teammates) :
 
-1. **Explore code** : fichiers/modules touchés, patterns existants à imiter, points
-   d'intégration → rapporte des `chemin:ligne`, pas des impressions.
-2. **Explore docs** (si lib/API/service en jeu) : doc officielle À JOUR — par ordre de
-   préférence : **context7** (doc versionnée de la lib, si le MCP est connecté), tout autre
-   MCP de docs connecté (exa, `get_sdk_reference` n8n sur un projet n8n…), sinon
-   WebFetch/WebSearch — versions exactes, API réelles, pièges connus → URLs + versions.
-3. **Explore mémoire projet** : ADRs/leçons/idées liés au sujet → ce qui a déjà été
-   décidé ou tenté (et pourquoi ça a raté).
+1. **`explore-code`** (agent) : fichiers/modules touchés, patterns à imiter, points
+   d'intégration, couplages applicables → rapport en `chemin:ligne`.
+2. **`explore-docs`** (agent — si lib/API/service en jeu) : doc officielle À JOUR
+   (context7 → autres MCP docs → web) → API réelles, versions exactes, pièges, URLs.
+3. **`explore-memoire`** (agent) : ADRs/leçons/idées/cadrage liés au sujet → ce qui a
+   déjà été décidé ou tenté (et pourquoi ça a raté).
+
+Ces trois rôles sont des **agents réutilisables** (`.claude/agents/explore-*.md`) : le rôle
+et le format de rapport vivent dans leur définition (source unique) — toi tu fournis le
+brief spécifique (la spec, le sujet, où chercher). Invocables aussi HORS /conception, pour
+toute investigation.
 
 Chaque rapport, factuel et sourcé → `research.md` § « Explorations » (daté ISO).
 
@@ -70,7 +73,8 @@ Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `
 
 ## Étape 5 — Revue adverse à contexte frais
 
-Spawne UN subagent qui n'a PAS vu la genèse du plan, avec pour seule mission de le **casser** :
+Spawne le rôle **`reviewer`** (subagent — ou teammate visible), qui n'a PAS vu la genèse du
+plan, avec pour seule mission de le **casser** :
 hypothèse non vérifiée ? étape sans point de vérification ? violation code-map/ADR ? oubli
 (migration, gestion d'erreur, rollback) ? tasks non partitionnées ? → findings 🔴/🟠/🟢.
 Corrige le plan, et note dans `research.md` § « Revue adverse » ce qu'elle a attrapé.
@@ -85,13 +89,17 @@ HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
 
 Par défaut, explorateurs et critique sont des **subagents** (rapides, invisibles). Si
 l'utilisateur veut les VOIR travailler (ou qu'une équipe tmux est déjà ouverte) : spawne-les
-en **teammates** nommés (`explore-code`, `explore-docs`, critique = rôle `reviewer`) — mêmes
-prompts, rapport par `SendMessage`, **lead-owned** → ferme-les après débrief (rule
+en **teammates** (les rôles `explore-code`, `explore-docs`, `explore-memoire`, critique =
+`reviewer`) — mêmes briefs, rapport par `SendMessage`, **lead-owned** → ferme-les après débrief (rule
 agent-teams). Par défaut, les deux gates (choix d'option, validation finale) se jouent dans
 TA session — c'est là que vit la synthèse. Variante documentée : l'utilisateur peut répondre
 **directement dans le pane** d'un teammate ; dans ce cas le teammate pose sa question en
 texte, prévient le lead par `SendMessage` (« en attente décision utilisateur ») et lui
 rapporte la décision. Les prompts de permission, eux, remontent TOUJOURS au lead.
+Variante « pane dédié » (sans agent supplémentaire) : spawner un teammate **ad-hoc** (ex.
+nommé `planner`) et taper `/conception <spec-id>` **dans son pane** — il déroule CE skill
+là-bas (les teammates ont les skills du projet), l'utilisateur converse avec lui en direct,
+et il rapporte le plan arrêté au lead.
 
 ## Anti-patterns
 

@@ -62,7 +62,8 @@ mon-projet/
     │   ├── README.md
     │   ├── doc-maintainer.md       # agent qui maintient HANDOFF/ROADMAP/CHANGELOG (subagent)
     │   ├── worker.md               # teammate d'exécution généraliste (agent-teams)
-    │   └── front-end.md / back-end.md / tester.md / reviewer.md   # rôles teammate spécialisés (cf rules/agent-teams.md)
+    │   ├── front-end.md / back-end.md / tester.md / reviewer.md   # rôles teammate spécialisés (cf rules/agent-teams.md)
+    │   └── explore-code.md / explore-docs.md / explore-memoire.md # explorateurs lecture seule réutilisables (/conception + investigations)
     │
     │   # ⚠️ Invocation skills/agents = via le `name:` du frontmatter (qui DOIT matcher le dossier/fichier).
     │   # Ex : `.claude/skills/handoff/SKILL.md` avec `name: handoff` → invoque `/handoff`.
@@ -688,7 +689,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Agent & skills projet
 
-- Agent `doc-maintainer` (Task tool) · rôles teammate `worker`/`front-end`/`back-end`/`tester`/`reviewer` (`/team`, cf `rules/agent-teams.md`) · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
+- Agent `doc-maintainer` (Task tool) · rôles teammate `worker`/`front-end`/`back-end`/`tester`/`reviewer` (`/team`) · explorateurs `explore-code`/`explore-docs`/`explore-memoire` (`/conception`) — cf `rules/agent-teams.md` · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
 ```
 
 ---

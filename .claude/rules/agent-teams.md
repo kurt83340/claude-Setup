@@ -9,7 +9,7 @@
 
 - **Lead** = la session à qui l'utilisateur parle ; c'est elle qui spawne l'équipe.
 - **Teammate** = session spawnée par le lead — rôle préconfiguré (`worker`, `front-end`,
-  `back-end`, `tester`, `reviewer`) **ou ad-hoc** (nom + prompt). Si ta mission vient d'un
+  `back-end`, `tester`, `reviewer`, `explore-*`) **ou ad-hoc** (nom + prompt). Si ta mission vient d'un
   lead (pas de l'utilisateur), tu es teammate : applique § Teammate, même sans rôle préconfiguré.
 
 ## § Teammate (préconfiguré OU ad-hoc — pas d'exception)

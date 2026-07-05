@@ -62,6 +62,7 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 
 - `doc-maintainer` — subagent (Task tool), gère tout le workflow doc (HANDOFF, ROADMAP, ADRs, pivot, promotion)
 - `worker` · `front-end` · `back-end` · `tester` · `reviewer` — **rôles teammate** pour les agent-teams (spawnés par le lead, en général via `/team`, visibles en tmux). Protocole commun (SendMessage, périmètre, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh) : source unique [rules/agent-teams.md](rules/agent-teams.md)
+- `explore-code` · `explore-docs` · `explore-memoire` — **explorateurs lecture seule réutilisables** (subagents par défaut, teammates en mode visible) : étape Explore de `/conception` + toute investigation ; `reviewer` assure aussi la revue adverse des plans
 
 ---
 

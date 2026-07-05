@@ -237,10 +237,11 @@ diagrams/
 
 ### Agent perso (`.claude/agents/`)
 
-| Agent                                                       | Quand l'invoquer                                                                                                                                                                                                                                          |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer`                                            | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                             |
-| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | **Agent-teams** : rôles teammate (généraliste, UI, serveur, QA, review lecture-seule), spawnés par le lead — en général via `/team`. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [agent-teams.md](agent-teams.md). |
+| Agent                                                       | Quand l'invoquer                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc-maintainer`                                            | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                                              |
+| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | **Agent-teams** : rôles teammate (généraliste, UI, serveur, QA, review lecture-seule — diffs ET plans), spawnés par le lead — en général via `/team`. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [agent-teams.md](agent-teams.md). |
+| `explore-code` / `explore-docs` / `explore-memoire`         | **Explorateurs réutilisables** (lecture seule) — code en `chemin:ligne`, docs externes (context7→MCP→web), mémoire projet (ADRs/leçons). Subagents par défaut, teammates en mode visible. Utilisés par `/conception`, invocables pour toute investigation.                 |
 
 ### Skills built-in Claude Code utiles
 
@@ -294,6 +295,7 @@ diagrams/
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `doc-maintainer`                                            | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
 | `worker` / `front-end` / `back-end` / `tester` / `reviewer` | Rôles teammate agent-teams (spawn via `/team` ou à la demande) — protocole commun : [agent-teams.md](agent-teams.md).                                                |
+| `explore-code` / `explore-docs` / `explore-memoire`         | Explorateurs lecture seule réutilisables (subagents ou teammates) — étape Explore de `/conception` + toute investigation.                                            |
 
 ## Distinction `cadrage/` vs `idees/`
 
@@ -381,7 +383,7 @@ diagrams/
 >
 > Câblage : `settings.json` (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode: "tmux"`).
 > Orchestration d'une feature : skill `/team`. Rôles teammate : `.claude/agents/` (worker,
-> front-end, back-end, tester, reviewer).
+> front-end, back-end, tester, reviewer, explore-\*).
 >
 > Résumé en 3 lignes : le **lead** écrit les docs partagés et alloue les numéros specs/ADR ;
 > les **teammates** rapportent via `SendMessage` (jamais leur texte de réponse) et codent

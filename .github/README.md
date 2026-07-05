@@ -8,7 +8,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 ## Ce qu'il contient
 
 - **12 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
-- **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + 5 rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` (protocole : `.claude/rules/agent-teams.md`)
+- **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` — + 3 explorateurs lecture seule `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/team`, débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
 - **Doc structurée** : cadrage / conception (PRD, ARCHITECTURE, specs) / ADR / ROADMAP / HANDOFF / code-map / stack…

@@ -3,6 +3,18 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.4.0] — 2026-07-05
+
+### Added
+
+- **3 agents explorateurs réutilisables** (lecture seule) : `explore-code` (patterns/points d'intégration en `chemin:ligne`), `explore-docs` (doc officielle à jour — context7 → MCP docs → web, URLs + versions, jamais de mémoire), `explore-memoire` (ADRs/leçons/idées/cadrage — « qu'a-t-on déjà décidé/tenté ? »). Le rôle et le format de rapport vivent dans la définition (source unique) ; `/conception` ne fournit que le brief par spec. Subagents par défaut, teammates en mode visible, invocables hors `/conception` pour toute investigation. Justification : `/conception` tourne à chaque spec → le seuil create-on-demand de réutilisation est atteint par construction.
+
+### Changed
+
+- `reviewer` : couvre explicitement la **revue adverse de plans** (`/conception` étape 5) en plus des diffs.
+- Interaction directe user ↔ teammate **vérifiée sur doc officielle** et encodée : l'utilisateur peut répondre dans le pane d'un teammate (les gates de `/conception` peuvent s'y jouer) ; question utilisateur = texte dans le pane + `SendMessage` au lead « en attente décision » ; les prompts de permission remontent TOUJOURS au lead.
+- Inventaires synchronisés (9 agents) : `agents/README`, `.claude/CLAUDE.md`, `template-maintenance.md`, rule `agent-teams.md`, `STRUCTURE.md`, README repo. (La variante « planifier dans un pane dédié » reste documentée dans `/conception` § Mode visible — via teammate **ad-hoc**, sans agent supplémentaire.)
+
 ## [0.3.0] — 2026-07-05
 
 ### Added
