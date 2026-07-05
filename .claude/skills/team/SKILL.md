@@ -18,10 +18,15 @@ topologie hub-and-spoke/mesh, débrief mémoire) = la rule
 ```bash
 grep -q 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS' .claude/settings.json && echo "✅ teams câblées" || echo "❌ flag absent de settings.json"
 tmux -V || echo "⚠️ tmux absent → teammateMode retombera en in-process (agents dans TON terminal, pas en panes)"
+[ -n "$TMUX" ] && echo "✅ session lancée DANS tmux → panes visibles ici" || echo "⚠️ hors tmux : les teammates iront dans une session tmux SÉPARÉE (invisibles sans tmux attach)"
 git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un repo git (worktrees impossibles)"
 ```
 
 - Spec fournie ? Vérifie que `.claude/docs/conception/specs/<id>/tasks.md` existe (sinon propose `/spec` d'abord).
+- ⚠️ **Hors tmux** : `teammateMode: "tmux"` fonctionne quand même (Claude crée la session tmux
+  automatiquement — doc officielle, pas besoin d'être dedans), mais l'utilisateur **ne verra
+  rien** sans `tmux attach`. Si l'observabilité est le but (défaut de ce template), propose-lui
+  de relancer depuis tmux (`tmux new -s <projet>` puis `claude --resume`) AVANT de spawner.
 - Un point ne passe pas → le dire à l'utilisateur et demander AVANT de continuer en mode
   dégradé (subagents séquentiels, invisibles).
 
