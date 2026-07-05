@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **13 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
+- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×3), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
 - **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` — + 3 explorateurs lecture seule `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/team`, débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
@@ -23,6 +23,10 @@ cd /chemin/vers/mon-projet
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 claude   # puis, dans la session : /init-from-template
 ```
+
+**Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md`
+et `.env.example`), puis `/adopt-template` — merges non-destructifs + rétro-remplissage de la
+doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
 
 > `EXAMPLES/skills-*` (n8n, db-migration) est **conservé** : `/init-from-template` y copie les skills stack selon le type de projet. Seul l'exemple ACME est exclu. Tu peux retirer `EXAMPLES/` à la fin si tu n'en as plus besoin.
 

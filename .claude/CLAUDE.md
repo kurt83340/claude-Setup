@@ -39,9 +39,10 @@
 
 ### Bootstrap
 
-- `/init-from-template` — initialise un projet depuis ce template (UNE FOIS)
+- `/init-from-template` — initialise un projet depuis ce template (from scratch, UNE FOIS)
+- `/adopt-template` — greffe le template sur un projet EXISTANT (brownfield, UNE FOIS) : merges non-destructifs + rétro-remplissage doc depuis l'existant
 
-> 🗂️ **Inventaire canonique** : cette liste (**13 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**14 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills hors-template (stack-spécifiques — copiés à la demande depuis `EXAMPLES/skills-*`)
 

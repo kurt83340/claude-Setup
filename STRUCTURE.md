@@ -55,6 +55,7 @@ mon-projet/
     │   ├── codemap/SKILL.md
     │   ├── pivot/SKILL.md          # workflow 9 étapes
     │   ├── team/SKILL.md           # /team — orchestration agent-teams (worktrees, task list, débrief)
+    │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (brownfield, merges non-destructifs)
     │   └── init-from-template/SKILL.md
     │   # db-migration + skills n8n = hors-cœur → EXAMPLES/skills-{db,n8n}/ (copiés par /init-from-template selon le type)
     │   # Pour grouper par source : préfixe le nom (n8n-deploy, n8n-test) ou package en plugin

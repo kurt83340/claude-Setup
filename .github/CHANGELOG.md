@@ -3,6 +3,16 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.6.0] — 2026-07-05
+
+### Added
+
+- **Skill `/adopt-template`** (14e skill cœur) — pendant **brownfield** de `/init-from-template` : greffe le template sur un projet EXISTANT sans jamais rien écraser. Copie via `rsync --ignore-existing` (l'existant gagne toujours), état des lieux détecté (manifests → stack + commandes pré-remplies), merges **diff-par-diff** des collisions (CLAUDE.md user préservé + index just-in-time, settings.json fusionné, .gitignore append), mêmes scripts render/cleanup que l'init (source unique), puis **rétro-remplissage** de la doc depuis le projet : stack.md ← manifests, code-map ← `/codemap`, cadrage ← README existant, ROADMAP ← Phase 0 + scan TODO/FIXME, HANDOFF ← git log, ADRs rétroactifs optionnels (max 2-3 — pas d'archéologie).
+
+### Changed
+
+- Inventaires synchronisés (14 skills cœur) ; `cleanup-for-type.py` : `script-jetable` retire aussi `/adopt-template` ; USAGE § « Projet EXISTANT (brownfield) » ; README repo (variante brownfield).
+
 ## [0.5.0] — 2026-07-05
 
 Les « templates d'orchestration » : la chaîne implémentation existait déjà (`/spec` → `/conception` → `/team` → `/feature-done`, chaque maillon suggère le suivant) — cette version ajoute les chaînons manquants + le pipeline debugging.

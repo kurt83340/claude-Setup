@@ -74,6 +74,29 @@ git commit -m "feat: init projet <nom> depuis template"
 4. **Quand archi décidée** → `conception/ARCHITECTURE.md`
 5. **Démarrer 1ère feature** : `/spec "<titre>"`
 
+### Projet EXISTANT (brownfield) → `/adopt-template`
+
+Ton projet a déjà du code et une histoire ? **Ne pas** utiliser `/init-from-template`. À la place :
+
+```bash
+cd /chemin/vers/projet-existant     # working tree PROPRE (commit/stash avant)
+rsync -av --ignore-existing \
+  --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' \
+  --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
+  /chemin/vers/template/ .
+chmod +x .claude/hooks/*.py .claude/hooks/*.sh
+# (Recommandé) Dépose MAINTENANT tes matériaux — le skill les ingère :
+#   docs client → .claude/docs/cadrage/documents/   tickets → cadrage/tickets/
+#   transcriptions → cadrage/reunions/
+claude   # puis : /adopt-template
+```
+
+`--ignore-existing` = **l'existant gagne toujours** (tes CLAUDE.md / settings.json /
+.gitignore ne sont pas touchés). Le skill propose ensuite : merges des collisions **en diff**
+(jamais d'overwrite), questions CORE **pré-remplies** depuis tes manifests, et
+**rétro-remplissage** de la doc depuis le projet (stack.md ← manifests, code-map ←
+`/codemap`, cadrage ← README existant, HANDOFF ← git log, ADRs rétroactifs optionnels).
+
 ### Troubleshooting init
 
 - **`chmod: No such file or directory`** → tu es au mauvais endroit, vérifie `cd`
@@ -202,6 +225,7 @@ Rapport généré → tu suis les actions par priorité.
 | Situation                                  | Skill / Action                                                                |
 | ------------------------------------------ | ----------------------------------------------------------------------------- |
 | Nouveau projet                             | `/init-from-template`                                                         |
+| Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)   |
 | Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                             |
 | Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse) |
 | Fin de session                             | `/handoff`                                                                    |

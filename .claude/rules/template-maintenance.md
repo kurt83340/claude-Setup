@@ -200,7 +200,8 @@ diagrams/
 
 | Skill                      | Quand l'invoquer                                                                                                    |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `/init-from-template` ⭐   | UNE FOIS, début de projet — substitue les CORE placeholders (UPPER_SNAKE)                                           |
+| `/init-from-template` ⭐   | UNE FOIS, début de projet from scratch — substitue les CORE placeholders (UPPER_SNAKE)                              |
+| `/adopt-template`          | UNE FOIS, projet EXISTANT (brownfield) — merges non-destructifs + rétro-remplissage doc depuis l'existant           |
 | `/handoff` ⭐              | Fin de session — snapshot .claude/docs/HANDOFF.md (status + échecs + blockers + next)                               |
 | `/spec "<titre>"` ⭐       | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP                                     |
 | `/conception <spec-id>` ⭐ | Arrêter le plan — explore par subagents (code/docs/mémoire), 2-3 options, décision, plan vérifiable + revue adverse |
@@ -258,21 +259,22 @@ diagrams/
 
 ### Skills perso disponibles
 
-| Skill                    | Quoi                                                                                                                                                | Path                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `/init-from-template` ⭐ | Pose 10 questions, substitue les CORE placeholders + lance cleanup-for-type.py adapté au type projet (à exécuter UNE FOIS)                          | `.claude/skills/init-from-template/` |
-| `/handoff` ⭐            | Snapshot .claude/docs/HANDOFF.md fin de session (status + échecs + blockers + next). Détecte HANDOFF fresh (post-init)                              | `.claude/skills/handoff/`            |
-| `/spec` ⭐               | Scaffold nouvelle feature : 4 fichiers research/spec/plan/tasks depuis templates + update ROADMAP                                                   | `.claude/skills/spec/`               |
-| `/conception` ⭐         | Méthode de planification : explorations parallèles (subagents), tableau d'options, décision user, plan avec points de vérification, revue adverse   | `.claude/skills/conception/`         |
-| `/feature-done` ⭐       | Coche ROADMAP + CHANGELOG + HANDOFF + suggère ADRs + archive idées + marque leçons promues                                                          | `.claude/skills/feature-done/`       |
-| `/doc-health`            | Audit hebdo : docs stale, ADRs manquants, growth opportunities, code-map drift, specs stalled, leçons en attente                                    | `.claude/skills/doc-health/`         |
-| `/lecon`                 | Ajoute entry rapide dans .claude/docs/lecons.md (statut 🆕 new) + workflow promotion documenté                                                      | `.claude/skills/lecon/`              |
-| `/idee`                  | Capture/gère les idées perso (`idees/`) — capture / promote (→ spec) / discard / archive                                                            | `.claude/skills/idee/`               |
-| `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file. | `.claude/skills/codemap/`            |
-| `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                               | `.claude/skills/adr/`                |
-| `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                       | `.claude/skills/pivot/`              |
-| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire | `.claude/skills/team/`               |
-| `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                        | `.claude/skills/debug/`              |
+| Skill                    | Quoi                                                                                                                                                                                   | Path                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `/init-from-template` ⭐ | Pose 10 questions, substitue les CORE placeholders + lance cleanup-for-type.py adapté au type projet (à exécuter UNE FOIS)                                                             | `.claude/skills/init-from-template/` |
+| `/adopt-template`        | Brownfield : état des lieux détecté, merges diff-par-diff (CLAUDE.md/settings/.gitignore existants), mêmes scripts render/cleanup, rétro-remplissage doc (stack/code-map/HANDOFF/ADRs) | `.claude/skills/adopt-template/`     |
+| `/handoff` ⭐            | Snapshot .claude/docs/HANDOFF.md fin de session (status + échecs + blockers + next). Détecte HANDOFF fresh (post-init)                                                                 | `.claude/skills/handoff/`            |
+| `/spec` ⭐               | Scaffold nouvelle feature : 4 fichiers research/spec/plan/tasks depuis templates + update ROADMAP                                                                                      | `.claude/skills/spec/`               |
+| `/conception` ⭐         | Méthode de planification : explorations parallèles (subagents), tableau d'options, décision user, plan avec points de vérification, revue adverse                                      | `.claude/skills/conception/`         |
+| `/feature-done` ⭐       | Coche ROADMAP + CHANGELOG + HANDOFF + suggère ADRs + archive idées + marque leçons promues                                                                                             | `.claude/skills/feature-done/`       |
+| `/doc-health`            | Audit hebdo : docs stale, ADRs manquants, growth opportunities, code-map drift, specs stalled, leçons en attente                                                                       | `.claude/skills/doc-health/`         |
+| `/lecon`                 | Ajoute entry rapide dans .claude/docs/lecons.md (statut 🆕 new) + workflow promotion documenté                                                                                         | `.claude/skills/lecon/`              |
+| `/idee`                  | Capture/gère les idées perso (`idees/`) — capture / promote (→ spec) / discard / archive                                                                                               | `.claude/skills/idee/`               |
+| `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file.                                    | `.claude/skills/codemap/`            |
+| `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                                                                  | `.claude/skills/adr/`                |
+| `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                                                          | `.claude/skills/pivot/`              |
+| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | `.claude/skills/team/`               |
+| `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                                                           | `.claude/skills/debug/`              |
 
 > 🧩 Skills **hors-cœur** (stack-spécifiques) : `/db-migration` (Alembic) → `EXAMPLES/skills-db/`, `/n8n-*` → `EXAMPLES/skills-n8n/` — copiés dans `.claude/skills/` par `/init-from-template` selon le type. Inventaire complet → [`.claude/CLAUDE.md`](../CLAUDE.md).
 
