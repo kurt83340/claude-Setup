@@ -87,8 +87,11 @@ Par défaut, explorateurs et critique sont des **subagents** (rapides, invisible
 l'utilisateur veut les VOIR travailler (ou qu'une équipe tmux est déjà ouverte) : spawne-les
 en **teammates** nommés (`explore-code`, `explore-docs`, critique = rôle `reviewer`) — mêmes
 prompts, rapport par `SendMessage`, **lead-owned** → ferme-les après débrief (rule
-agent-teams). Les deux gates (choix d'option, validation finale) restent dans TA session —
-c'est pourquoi /conception est un skill du lead, pas un agent.
+agent-teams). Par défaut, les deux gates (choix d'option, validation finale) se jouent dans
+TA session — c'est là que vit la synthèse. Variante documentée : l'utilisateur peut répondre
+**directement dans le pane** d'un teammate ; dans ce cas le teammate pose sa question en
+texte, prévient le lead par `SendMessage` (« en attente décision utilisateur ») et lui
+rapporte la décision. Les prompts de permission, eux, remontent TOUJOURS au lead.
 
 ## Anti-patterns
 

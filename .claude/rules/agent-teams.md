@@ -22,6 +22,11 @@
   reste à faire / blocages**. Les échecs et pièges sont OBLIGATOIRES : c'est la matière
   première de la mémoire projet — toi tu ne peux pas la persister, le lead si.
 - Bloqué ? `SendMessage` immédiat au lead (le blocage + ce dont tu as besoin).
+- L'utilisateur peut te parler **directement dans ton pane** (documenté). Si tu attends une
+  décision de LUI : pose ta question en **texte** dans ton pane (le widget interactif n'est
+  pas garanti chez un teammate) **ET** préviens le lead par `SendMessage` (« en attente
+  décision utilisateur sur X ») — sinon il ne voit qu'un idle inexpliqué. Rapporte-lui
+  ensuite la décision reçue.
 - Autres teammates : ne leur écris directement QUE si ta mission l'autorise explicitement
   (topologie « mesh », accordée par le lead). Par défaut : **tout passe par le lead**.
 - Si le lead utilise la task list partagée : claim ta tâche (owner), passe-la `in_progress`
@@ -91,6 +96,8 @@ n'a pas besoin de worktree.
 **Suivi** : idle notifications (automatiques) + task list native (`TaskCreate`/`TaskList`,
 miroir de `specs/00X/tasks.md`) + trace `.claude/.cache/team-progress.log` (hook TaskCompleted).
 ⚠️ `/resume` ne restaure PAS les teammates → débriefe et merge **avant** de fermer la session.
+Les **prompts de permission** des teammates remontent chez TOI (un teammate ne peut pas
+s'auto-approuver) — c'est toi qui approuves, dans ta session.
 
 **Débrief mémoire (OBLIGATOIRE, à chaque rapport reçu)** — l'unique canal entre le contexte
 d'un teammate et la mémoire projet :
