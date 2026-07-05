@@ -35,7 +35,8 @@
       "Read(./**)",
       "Edit(./**)",
       "Write(./.claude/docs/**)",
-      "Write(./src/**)"
+      "Write(./src/**)",
+      "Write(./tests/**)"
     ],
     "ask": [
       "Bash(git push:*)",
