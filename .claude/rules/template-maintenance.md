@@ -233,7 +233,7 @@ diagrams/
 > **le template n'utilise plus que `.claude/skills/<nom>/SKILL.md`**.
 > Pour un `/nom` sensible (deploy…) : `disable-model-invocation: true` = slash-only.
 
-**Exemples stack disponibles** : [EXAMPLES/skills-n8n/](../../EXAMPLES/skills-n8n/) (3 skills n8n, préfixés `n8n-`, type `automation-n8n`) et [EXAMPLES/skills-db/](../../EXAMPLES/skills-db/) (`db-migration` Alembic, type `bdd-migration`) — copiés dans `.claude/skills/` par `/init-from-template`.
+**Exemples stack disponibles** : [EXAMPLES/skills-n8n/](../../EXAMPLES/skills-n8n/) (7 skills d'expertise n8n, préfixés `n8n-`, type `automation-n8n`) et [EXAMPLES/skills-db/](../../EXAMPLES/skills-db/) (`db-migration` Alembic, type `bdd-migration`) — copiés dans `.claude/skills/` par `/init-from-template`.
 
 > **Pas de namespacing par dossier en 2026** : Claude Code scanne `.claude/skills/<nom>/SKILL.md` à **1 niveau uniquement** (cf. [issue #18192](https://github.com/anthropics/claude-code/issues/18192), feature request OPEN). Si tu veux grouper des skills par thème → utilise des **préfixes de nom** (ex: `n8n-deploy`, `n8n-test`) ou package-les en **plugin** (`/<plugin>:<skill>`).
 

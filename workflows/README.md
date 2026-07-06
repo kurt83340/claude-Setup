@@ -22,7 +22,7 @@ Ou via UI n8n : Workflow > 3 dots > Download.
 ## Comment réimporter
 
 ```bash
-# Via API (utilisé par /n8n-push et /n8n-deploy)
+# Via API (ex. depuis un skill de déploiement projet, ou l'UI n8n)
 curl -X POST "https://n8n.acme.local/api/v1/workflows/import" \
   -H "X-N8N-API-KEY: $N8N_API_KEY" \
   -H "Content-Type: application/json" \

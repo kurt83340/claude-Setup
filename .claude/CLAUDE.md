@@ -48,7 +48,7 @@
 
 Hors du cœur (outillage non générique). `/init-from-template` les copie dans `.claude/skills/` selon le **type de projet** choisi :
 
-- **n8n** (type `automation-n8n`) → `/n8n-push`, `/n8n-seed-db`, `/n8n-deploy` (source : [`EXAMPLES/skills-n8n/`](../EXAMPLES/skills-n8n/))
+- **n8n** (type `automation-n8n`) → 7 skills d'expertise : `/n8n-node-configuration`, `/n8n-validation-expert`, `/n8n-workflow-patterns`, `/n8n-code-javascript`, `/n8n-code-python`, `/n8n-expression-syntax`, `/n8n-mcp-tools-expert` (source : [`EXAMPLES/skills-n8n/`](../EXAMPLES/skills-n8n/))
 - **BDD / Alembic** (type `bdd-migration`) → `/db-migration` (source : [`EXAMPLES/skills-db/`](../EXAMPLES/skills-db/))
 
 Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.claude/skills/` **et les recenser ici** : ce fichier reste l'inventaire unique de **tous** les skills — cœur ou stack.

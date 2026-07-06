@@ -79,16 +79,14 @@ AUTOMATION_N8N = {
         # RUNBOOK créé post-prod uniquement
         ".claude/docs/RUNBOOK.md",
     ],
-    "copy_examples": {
-        # Source EXAMPLES → destination .claude/
-        # Note: skills à plat dans .claude/skills/ (1 niveau, cf. issue #18192) ;
-        # mapping par skill car copy_from_examples skip si la destination existe
-        # (.claude/skills/ existe toujours).
-        "EXAMPLES/skills-n8n/n8n-push": ".claude/skills/n8n-push",
-        "EXAMPLES/skills-n8n/n8n-seed-db": ".claude/skills/n8n-seed-db",
-        "EXAMPLES/skills-n8n/n8n-deploy": ".claude/skills/n8n-deploy",
+    "copy_examples_glob": {
+        # Tous les skills d'expertise n8n (n8n-*) copiés à plat dans .claude/skills/
+        # (1 niveau, cf. issue #18192). Glob plutôt qu'une liste en dur → le script
+        # n'a pas à être mis à jour quand on ajoute/retire un skill dans EXAMPLES/skills-n8n/.
+        # copy_glob_from_examples skip toute destination déjà existante.
+        "EXAMPLES/skills-n8n/n8n-*": ".claude/skills",
     },
-    "keep_reason": "n8n full stack — copie skills n8n depuis EXAMPLES, retire RUNBOOK (créé post-prod)",
+    "keep_reason": "n8n full stack — copie les skills d'expertise n8n (n8n-*) depuis EXAMPLES, retire RUNBOOK (créé post-prod)",
 }
 
 # python-app : retire workflows/
@@ -173,10 +171,15 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     print(f"\n🎉 {prefix}Cleanup : {deleted_files} fichiers + {deleted_dirs} dossiers supprimés "
           f"({skipped} déjà absents)")
 
-    # Copy EXAMPLES si demandé par le profil (ex: automation-n8n copie skills n8n)
+    # Copy EXAMPLES si demandé par le profil (bdd-migration : mapping explicite)
     copy_examples = profile.get("copy_examples", {})
     if copy_examples:
         copy_from_examples(root, copy_examples, dry_run)
+
+    # Copy EXAMPLES par glob (automation-n8n : tous les n8n-* d'un coup)
+    copy_examples_glob = profile.get("copy_examples_glob", {})
+    if copy_examples_glob:
+        copy_glob_from_examples(root, copy_examples_glob, dry_run)
 
     # Post-cleanup : retirer les @-imports cassés de CLAUDE.md + les hooks fantômes de settings.json
     if not dry_run:
@@ -212,6 +215,30 @@ def copy_from_examples(root: Path, mapping: dict, dry_run: bool) -> None:
                 print(f"  📦 Copied EXAMPLE : {src_rel} → {dst_rel}")
             except Exception as e:
                 print(f"  ⚠️  Échec copie {src_rel} : {e}", file=sys.stderr)
+
+
+def copy_glob_from_examples(root: Path, mapping: dict, dry_run: bool) -> None:
+    """Copie tous les dossiers matchant un glob depuis EXAMPLES/ vers un dossier destination.
+    Chaque match `EXAMPLES/.../foo` → `<dst_dir>/foo`. Skip si la destination existe déjà
+    (évite l'écrasement). Glob (pas de liste en dur) → robuste à l'ajout/retrait de skills."""
+    for src_glob, dst_dir_rel in mapping.items():
+        matches = sorted(p for p in root.glob(src_glob) if p.is_dir())
+        if not matches:
+            print(f"  ⚠️  Aucun dossier ne matche : {src_glob} (skip)")
+            continue
+        for src in matches:
+            dst = root / dst_dir_rel / src.name
+            if dst.exists():
+                print(f"  ⚠️  Destination déjà existante : {dst.relative_to(root)} (skip)")
+                continue
+            if dry_run:
+                print(f"  [DRY] Would copy : {src.relative_to(root)} → {dst.relative_to(root)}")
+            else:
+                try:
+                    shutil.copytree(src, dst)
+                    print(f"  📦 Copied EXAMPLE : {src.relative_to(root)} → {dst.relative_to(root)}")
+                except Exception as e:
+                    print(f"  ⚠️  Échec copie {src.relative_to(root)} : {e}", file=sys.stderr)
 
 
 def fix_claude_md_imports(root: Path) -> None:

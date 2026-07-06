@@ -3,6 +3,14 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.7.0] — 2026-07-06
+
+### Changed
+
+- **Skills n8n hors-cœur remplacés** : les 3 skills d'exemple « jouets » (`n8n-push`, `n8n-seed-db`, `n8n-deploy` — déploiement) laissent place à **7 skills d'expertise n8n réels** dans `EXAMPLES/skills-n8n/` : `n8n-node-configuration`, `n8n-validation-expert`, `n8n-workflow-patterns`, `n8n-code-javascript`, `n8n-code-python`, `n8n-expression-syntax`, `n8n-mcp-tools-expert` (skills de référence auto-invoqués, avec fichiers de support type `DEPENDENCIES.md` / `OPERATION_PATTERNS.md`). Toujours copiés dans `.claude/skills/` par `/init-from-template` (type `automation-n8n`).
+- **`cleanup-for-type.py`** : la copie des skills n8n passe d'un **mapping en dur** (3 entrées) à un **glob** `EXAMPLES/skills-n8n/n8n-*` (nouvelle clé de profil `copy_examples_glob` + fonction `copy_glob_from_examples`) → robuste à l'ajout/retrait de skills n8n sans toucher le script.
+- Inventaires & doc synchronisés : `.claude/CLAUDE.md`, `.claude/rules/template-maintenance.md`, `USAGE.md`, `.github/README.md`, `EXAMPLES/skills-n8n/README.md`, `.env.example`, `workflows/README.md`.
+
 ## [0.6.0] — 2026-07-05
 
 ### Added

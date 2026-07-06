@@ -51,7 +51,7 @@ Claude va :
 | `script-jetable` | **-80%** | 3 (handoff, lecon, init)                      | 1-shot Python, < 1 jour          |
 | `python-app`     | léger    | 10 (cœur)                                     | App Python (FastAPI, scripts...) |
 | `web-app`        | léger    | 10 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 10 cœur + 3 skills n8n (depuis EXAMPLES)      | Workflow n8n + helpers Python    |
+| `automation-n8n` | léger    | 10 cœur + 7 skills n8n (depuis EXAMPLES)      | Workflow n8n + helpers Python    |
 | `bdd-migration`  | léger    | 10 cœur + `db-migration` (EXAMPLES/skills-db) | Migration BDD avec Alembic       |
 
 ### Vérification post-init
@@ -599,7 +599,7 @@ Skills/agents sont **à plat** dans leur dossier respectif. Claude Code scanne `
 │   ├── spec/SKILL.md            → /spec
 │   ├── feature-done/SKILL.md
 │   ├── adr/SKILL.md
-│   ├── n8n-push/SKILL.md        → /n8n-push (exemple stack, préfixé)
+│   ├── n8n-code-python/SKILL.md → /n8n-code-python (exemple stack, préfixé)
 │   ├── ...
 │   └── README.md
 │
