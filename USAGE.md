@@ -40,7 +40,7 @@ Claude va :
    - Batch 2 : `CLIENT_NAME`, `NOM_DECIDEUR`, `EMAIL_DECIDEUR`, `TON_NOM`, `TON_EMAIL`
    - Batch 3 : `COMMANDE_INSTALL`, `COMMANDE_TESTS`, `COMMANDE_RUN`
 3. **Substituer les CORE placeholders** auto (10 substitutions sur ~370 placeholders — le reste est CONTENT à remplir au fil de l'eau)
-4. **Lancer `cleanup-for-type.py`** selon le type choisi (adapte le template)
+4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée**
 5. **Copier auto depuis EXAMPLES** si pertinent (ex: type `automation-n8n` → copie les skills `skills-n8n/` dans `.claude/skills/`)
 6. **Te proposer le commit initial** : `feat: init projet <nom> depuis template`
 

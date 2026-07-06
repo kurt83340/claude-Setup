@@ -3,6 +3,20 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.8.0] — 2026-07-06
+
+Hygiène d'init : un projet **généré** ne doit hériter d'**aucun** artefact de maintenance du template — sinon sa CI casse (elle teste des chemins que l'init supprime) et il traîne du cruft.
+
+### Changed
+
+- **`cleanup-for-type.py` retire les artefacts de maintenance DU template pour TOUS les types** (nouveau `TEMPLATE_MAINTENANCE` + `strip_template_maintenance`) : `.github/` (self-CI qui testait `render.py` / `EXAMPLES` / l'inventaire des skills → **CI rouge héritée**, la cause racine), `test/`, `EXAMPLES/` (après copie des skills stack) et les skills bootstrap `adopt-template` + `init-from-template` (retiré **en dernier** — il contient le script). Résultat : le projet généré démarre **propre, sans CI héritée**.
+- **Suppression déplacée du shell vers Python** : le SKILL `init-from-template` ne fait plus de `rm -rf` / `git rm` à la main (Étape 4 = simple `git add -A` + commit) — tout passe par `shutil.rmtree` dans `cleanup-for-type.py`, donc plus jamais bloqué par la règle `deny Bash(rm -rf:*)` (source de refus + retries à chaque init).
+- Nouveau `prune_dead_permissions` : purge de `settings.json` les allow-rules pointant vers un script `.claude/…` supprimé (ex. les 2 règles `init-from-template` render/cleanup, mortes une fois le skill bootstrap retiré).
+
+### Fixed
+
+- **`settings.json` : deny `Read(./.env.*)` trop large** — il bloquait aussi `.env.example` (fichier template sain, committé). Remplacé par un set énuméré (`.env`, `.env.local`, `.env.*.local`, `.env.{development,staging,production,test}`) : les vrais secrets restent bloqués, `.env.example` / `.sample` / `.template` redeviennent lisibles.
+
 ## [0.7.0] — 2026-07-06
 
 ### Changed

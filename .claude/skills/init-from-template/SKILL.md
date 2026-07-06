@@ -139,29 +139,24 @@ Pour TOUS les types : `handoff`, `lecon`, `init-from-template` restent disponibl
 
 Choisir `automation-n8n` ou `python-app` par défaut (impact léger, peut affiner ensuite avec un autre cleanup).
 
-## Étape 4 — Cleanup final
+## Étape 4 — Commit initial
 
-Demander au user pour chaque action (optionnel) :
+> L'Étape 3 (`cleanup-for-type.py`) a **déjà** retiré, pour **tous** les types, les artefacts de
+> maintenance **DU template** — inutiles (et cassants pour la CI) dans un projet généré : `.github/`
+> (self-CI + README/CHANGELOG du template), `test/`, `EXAMPLES/` (après copie des skills stack) et les
+> skills bootstrap `adopt-template` + `init-from-template`. Elle a aussi purgé de `settings.json` les
+> allow-rules mortes (scripts init supprimés). **Rien à supprimer à la main ici** — donc **pas de
+> `rm -rf`** (que le template interdit de toute façon). Ces artefacts restent dans le **repo template
+> source** ; l'init ne touche qu'à la copie du projet.
 
-1. **`EXAMPLES/`** — supprimer du projet actif ?
-   - ⚠️ **Note** : le quick-start exclut seulement `EXAMPLES/acme-sync-erp-notion-docs/` (l'exemple navigable). Les `EXAMPLES/skills-*` sont la **source** des skills stack copiés selon ton type de projet ; une fois l'init faite (skills copiés dans `.claude/skills/`), tu peux retirer `EXAMPLES/` :
+Committer le résultat — `git add -A` embarque les suppressions faites par le script :
 
-   ```bash
-   rm -rf EXAMPLES/  # uniquement si présent et user confirme
-   ```
+```bash
+git add -A
+git commit -m "feat: init projet <nom> depuis template"
+```
 
-   - Le dossier `EXAMPLES/` reste dans le template source pour servir de référence aux futurs projets.
-
-2. **Skill `init-from-template`** — supprimer ? (utilisé qu'une fois mais peut servir pour re-init partielle / re-cleanup type)
-   ```bash
-   rm -rf .claude/skills/init-from-template/  # uniquement si user confirme
-   ```
-3. **Commit initial** :
-   ```bash
-   git add .
-   git commit -m "feat: init projet <nom> depuis template"
-   ```
-4. Confirmer à l'user : "Projet initialisé. Prochaines étapes : remplir `.claude/docs/cadrage/README.md` (verbatim demande client) + planifier le kickoff."
+Puis confirmer à l'user : « Projet initialisé et **propre** (aucune CI ni scaffolding du template hérité). Prochaines étapes : remplir `.claude/docs/cadrage/README.md` (verbatim demande client) + planifier le kickoff. »
 
 ## Sortie attendue
 

@@ -50,7 +50,11 @@
       "Bash(rm -rf:*)",
       "Read(./.env)",
       "Read(./.env.local)",
-      "Read(./.env.*)",
+      "Read(./.env.*.local)",
+      "Read(./.env.development)",
+      "Read(./.env.staging)",
+      "Read(./.env.production)",
+      "Read(./.env.test)",
       "Read(./secrets.*)",
       "Read(./.claude/docs/ACCESS.md)"
     ]

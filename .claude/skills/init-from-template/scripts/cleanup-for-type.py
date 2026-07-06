@@ -127,6 +127,21 @@ PROFILES = {
     "bdd-migration": BDD_MIGRATION,
 }
 
+# ── Artefacts de maintenance DU TEMPLATE (retirés pour TOUS les types) ─────────
+# N'existent que pour développer/tester le template lui-même. Un projet GÉNÉRÉ n'en a
+# aucun usage — et la self-CI (.github/workflows/ci.yml) teste render.py / EXAMPLES /
+# l'inventaire des skills, que l'init vient justement de supprimer → CI ROUGE dans le
+# projet généré. Retirés APRÈS la copie des skills stack (qui lit EXAMPLES/). init-from-template/
+# est retiré EN DERNIER : il contient CE script (suppression OK sous POSIX — le process
+# tourne déjà en mémoire). Réversible : le snapshot git « chore: snapshot pre-init » garde tout.
+TEMPLATE_MAINTENANCE = [
+    ".github/",                            # self-CI + README/CHANGELOG DU template
+    "test/",                               # tests + rapports d'audit DU template
+    "EXAMPLES/",                           # exemples + sources skills stack (déjà copiés au besoin)
+    ".claude/skills/adopt-template/",      # bootstrap brownfield one-shot (exclusif avec init)
+    ".claude/skills/init-from-template/",  # bootstrap one-shot — EN DERNIER (contient ce script)
+]
+
 
 def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     if profile_name not in PROFILES:
@@ -181,10 +196,14 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     if copy_examples_glob:
         copy_glob_from_examples(root, copy_examples_glob, dry_run)
 
-    # Post-cleanup : retirer les @-imports cassés de CLAUDE.md + les hooks fantômes de settings.json
+    # Retrait des artefacts de maintenance DU template (tous types) — APRÈS la copie stack
+    strip_template_maintenance(root, dry_run)
+
+    # Post-cleanup : réparer CLAUDE.md + purger settings.json (hooks fantômes + allow-rules mortes)
     if not dry_run:
         fix_claude_md_imports(root)
         prune_dead_hooks(root)
+        prune_dead_permissions(root)
 
     return 0
 
@@ -239,6 +258,59 @@ def copy_glob_from_examples(root: Path, mapping: dict, dry_run: bool) -> None:
                     print(f"  📦 Copied EXAMPLE : {src.relative_to(root)} → {dst.relative_to(root)}")
                 except Exception as e:
                     print(f"  ⚠️  Échec copie {src.relative_to(root)} : {e}", file=sys.stderr)
+
+
+def strip_template_maintenance(root: Path, dry_run: bool) -> int:
+    """Retire les artefacts qui ne servent qu'à maintenir LE TEMPLATE (self-CI, tests, exemples,
+    skills bootstrap — voir TEMPLATE_MAINTENANCE). Appelé pour TOUS les types, APRÈS la copie des
+    skills stack. Réversible via le snapshot git pre-init."""
+    print("\n🧹 Artefacts de maintenance du template (inutiles dans un projet généré) :")
+    removed = 0
+    for rel in TEMPLATE_MAINTENANCE:
+        target = root / rel
+        if not target.exists():
+            continue
+        if dry_run:
+            print(f"  [DRY] Would delete : {rel}")
+            removed += 1
+            continue
+        try:
+            shutil.rmtree(target) if target.is_dir() else target.unlink()
+            print(f"  🗑️  Deleted : {rel}")
+            removed += 1
+        except Exception as e:
+            print(f"  ⚠️  Échec sur {rel} : {e}", file=sys.stderr)
+    if removed == 0:
+        print("  (rien à retirer — déjà propre)")
+    return removed
+
+
+def prune_dead_permissions(root: Path) -> None:
+    """Retire de settings.json les allow-rules Bash pointant vers un script `.claude/…(.py|.sh)`
+    désormais absent — ex. les 2 règles init-from-template (render.py / cleanup-for-type.py),
+    mortes une fois le skill bootstrap retiré. Générique : matche le chemin, teste l'existence."""
+    settings_path = root / ".claude" / "settings.json"
+    if not settings_path.exists():
+        return
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+    perms = settings.get("permissions")
+    if not isinstance(perms, dict) or not isinstance(perms.get("allow"), list):
+        return
+    script_re = re.compile(r"\.claude/[^\s:\"']+\.(?:py|sh)")
+    kept, removed = [], 0
+    for rule in perms["allow"]:
+        m = script_re.search(rule) if isinstance(rule, str) else None
+        if m and not (root / m.group(0)).exists():
+            removed += 1
+            continue
+        kept.append(rule)
+    if removed:
+        perms["allow"] = kept
+        settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+        print(f"🔧 settings.json : {removed} allow-rule(s) morte(s) retirée(s) (script absent)")
 
 
 def fix_claude_md_imports(root: Path) -> None:
