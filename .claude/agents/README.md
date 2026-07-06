@@ -22,6 +22,8 @@
 
 3. **Tout est dans le même espace de noms** — pas de collision possible avec namespacing par sous-dossier.
 
+4. **Rôle teammate → `SendMessage` OBLIGATOIRE dans `tools:`** (tout agent, sauf subagent pur type `doc-maintainer`). Spawné **nommé**, un agent tourne en teammate et ne peut rapporter au lead QUE via `SendMessage` — sans lui : rapport perdu, idle muet, zombie qui ping. **Vérifié en CI** (étape « Défs teammate — SendMessage »), donc pas besoin d'y penser : l'oubli fait échouer le build. Détail : [agent-teams.md](../rules/agent-teams.md).
+
 ## Invocation — subagent OU teammate
 
 Un même fichier `.claude/agents/*.md` s'invoque de **deux façons** (jamais en slash `/agent-name`) :

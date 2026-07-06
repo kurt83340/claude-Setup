@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.8.2] — 2026-07-06
+
+### Added
+
+- **Garde-fou CI « teammate → SendMessage »** — nouvelle étape CI + règle #4 dans `agents/README.md` : toute déf `.claude/agents/*.md` (hors subagent pur `doc-maintainer`) DOIT lister `SendMessage` dans `tools:`, sinon le build **échoue**. Empêche de recréer le bug v0.8.1 (teammate muet) en ajoutant un futur rôle — plus besoin d'y penser, l'oubli est attrapé automatiquement.
+
 ## [0.8.1] — 2026-07-06
 
 ### Fixed

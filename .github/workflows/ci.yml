@@ -47,6 +47,18 @@ jobs:
           if [ "$rc" -ne 0 ]; then exit 1; fi
           echo "✅ Tous les skills cœur sont recensés dans .claude/CLAUDE.md"
 
+      - name: Defs teammate ont SendMessage dans tools
+        run: |
+          rc=0
+          # doc-maintainer = subagent pur (jamais teammate) → exempté
+          for f in .claude/agents/*.md; do
+            name=$(basename "$f" .md)
+            case "$name" in README|doc-maintainer) continue;; esac
+            grep -qE '^tools:.*\bSendMessage\b' "$f" || { echo "❌ Agent '$name' : SendMessage absent de tools: (teammate muet garanti)"; rc=1; }
+          done
+          if [ "$rc" -ne 0 ]; then exit 1; fi
+          echo "✅ Tous les rôles teammate ont SendMessage dans tools:"
+
       - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 3 @-imports
         run: |
           n=$(grep -oE '@\.claude/[^ ]+' EXAMPLES/acme-sync-erp-notion-docs/_CLAUDE.md | wc -l)
