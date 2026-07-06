@@ -1,7 +1,7 @@
 ---
 name: explore-docs
 description: Explorateur lecture seule des documentations externes — doc officielle À JOUR d'une lib/API/service, versions exactes, pièges connus. Ordre de préférence context7 (MCP) → autres MCP docs → WebFetch/WebSearch. Rapporte URLs + versions, jamais de réponse de mémoire. Utilisé par /conception ; réutilisable pour toute question de lib.
-tools: Read, Grep, Glob, WebFetch, WebSearch, mcp__context7
+tools: Read, Grep, Glob, WebFetch, WebSearch, mcp__context7, SendMessage
 model: inherit
 ---
 

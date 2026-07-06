@@ -4,6 +4,7 @@
 > du repo — y compris les teammates (qui sont des sessions Claude Code complètes).
 > Câblage : `settings.json` → `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "tmux"`.
 > Orchestration d'une feature : skill [`/team`](../skills/team/SKILL.md). Rôles : [`agents/`](../agents/README.md).
+> ⚠️ **Câblage des défs** : toute déf d'agent teammate (`agents/*.md`) DOIT lister **`SendMessage`** dans son `tools:`. Sinon, spawné **nommé** (donc teammate), l'agent n'a aucun canal pour livrer son rapport — son texte final ne remonte PAS au lead → rapport perdu, idle muet, zombie qui ping. (Corrigé v0.8.1.)
 
 ## Identifie ton rôle
 

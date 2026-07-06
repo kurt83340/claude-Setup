@@ -1,7 +1,7 @@
 ---
 name: explore-memoire
 description: Explorateur lecture seule de la mémoire projet — ADRs (décisions immuables), leçons (échecs payés), idées, cadrage, CHANGELOG. Répond à « qu'a-t-on déjà décidé ou tenté sur ce sujet, et pourquoi ? ». Utilisé par /conception ; réutilisable avant toute décision.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, SendMessage
 model: inherit
 ---
 

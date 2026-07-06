@@ -1,7 +1,7 @@
 ---
 name: front-end
 description: Teammate spécialisé UI pour les agent-teams — composants, styles, état client, accessibilité. À spawner (en général via /team) pour les sous-tâches front d'une spec. Protocole d'équipe unique dans .claude/rules/agent-teams.md.
-tools: Read, Edit, Write, Bash, Grep, Glob
+tools: Read, Edit, Write, Bash, Grep, Glob, SendMessage
 model: inherit
 ---
 

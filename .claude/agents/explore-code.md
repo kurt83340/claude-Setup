@@ -1,7 +1,7 @@
 ---
 name: explore-code
 description: Explorateur lecture seule du code du projet — fichiers impactés, patterns existants à imiter, points d'intégration, couplages applicables. Rapporte du factuel en chemin:ligne, jamais des impressions. Utilisé par /conception (étape Explore) en subagent ou teammate visible ; réutilisable pour toute investigation de code.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, SendMessage
 model: inherit
 ---
 

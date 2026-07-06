@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.8.1] — 2026-07-06
+
+### Fixed
+
+- **Teammates muets : `SendMessage` absent des défs d'agents** — spawné **nommé**, un agent tourne en **teammate** (session à boîte aux lettres) et son texte final ne remonte PAS au lead : le seul canal est l'outil `SendMessage`. Or **aucune** déf `agents/*.md` ne le listait dans son `tools:` (bug révélé par les explorateurs de `/conception` spawnés nommés → rapport évaporé, idle muet, zombie qui ping). `SendMessage` ajouté aux **8 rôles teammate** (`worker`, `front-end`, `back-end`, `tester`, `reviewer`, `explore-code`, `explore-docs`, `explore-memoire`) + garde-fou dans `.claude/rules/agent-teams.md` (§ intro). `doc-maintainer` (subagent pur, jamais teammate) laissé tel quel.
+
 ## [0.8.0] — 2026-07-06
 
 Hygiène d'init : un projet **généré** ne doit hériter d'**aucun** artefact de maintenance du template — sinon sa CI casse (elle teste des chemins que l'init supprime) et il traîne du cruft.

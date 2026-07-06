@@ -1,7 +1,7 @@
 ---
 name: worker
 description: Teammate d'exécution généraliste pour les agent-teams. Exécute UNE sous-tâche assignée par le lead, dans son périmètre (idéalement son git worktree), et rapporte au lead via SendMessage. Protocole d'équipe unique dans .claude/rules/agent-teams.md.
-tools: Read, Edit, Write, Bash, Grep, Glob
+tools: Read, Edit, Write, Bash, Grep, Glob, SendMessage
 model: inherit
 ---
 
