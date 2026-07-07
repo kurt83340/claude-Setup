@@ -3,6 +3,24 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.11.0] — 2026-07-07
+
+Étape 2 du plan plugins : l'**exécution d'équipe** sort du cœur — un projet solo/n8n n'embarque plus les rôles web.
+
+### Added
+
+- **Plugin `agent-teams`** (3e plugin du marketplace) : skill **`/agent-teams:team`** (orchestration tmux — plan validé, worktrees, task list native, TDD opt-in, merge, débrief mémoire) + **rôles d'exécution** `worker`/`front-end`/`back-end`/`tester` + **hook de trace** `teamtask-log` (TaskCreated/TaskCompleted/TeammateIdle via `hooks.json` du plugin). Install : `claude plugin install agent-teams@claude-setup --scope project`.
+- Matrice « quand créer un fichier » : trigger **STAKEHOLDERS.md** (> 4-5 interlocuteurs → modèle prêt dans STRUCTURE.md § STAKEHOLDERS) — clôt **F9**, le dernier item du backlog TEST-REPORT.
+
+### Changed
+
+- **Restent dans le cœur** (dépendances des skills cœur) : `reviewer` (revue adverse `/conception` + diffs d'équipe), les 3 explorateurs, la rule `agent-teams.md` (protocole, SOURCE UNIQUE) et le câblage `settings.json` (flag agent-teams + `teammateMode` — inertes sans le plugin). **13 skills cœur** (comptes et inventaires synchronisés : `.claude/CLAUDE.md`, README repo, USAGE, STRUCTURE, template-maintenance, agents/README).
+- `settings.json` : hooks TaskCreated/TaskCompleted/TeammateIdle retirés (livrés par le plugin) ; `test_hooks.py` teste le hook à son emplacement plugin ; CI : la garde SendMessage couvre aussi `plugins/*/agents/*.md`.
+
+### Removed
+
+- **`test/build-plugin.py`** (proto « tout-`.claude/`-en-un-plugin ») — supplanté par le vrai marketplace `claude-setup` : les composants distribuables sont désormais des plugins dédiés (`plugins/`), le cœur reste un scaffold copié par rsync+init (rules, docs et settings ne sont pas transportables en plugin).
+
 ## [0.10.0] — 2026-07-07
 
 ### Added

@@ -3,7 +3,7 @@
 > Date : 2026-05-25
 > Méthode : 3 scénarios représentatifs (A=script jetable, B=automation n8n, C=web app enterprise) initialisés avec `render.py` + simulation workflow.
 
-> ⚠️ **Document historique** : ce rapport référence l'ancienne structure namespace (`memoireprojet/`). Depuis 2026-05-28, les skills et agents sont à plat (`.claude/skills/<nom>/`, `.claude/agents/<nom>.md`) car Claude Code ne scanne pas récursivement ([issue #18192](https://github.com/anthropics/claude-code/issues/18192)). Le script `validate-namespaces.py` a été supprimé. **⚠️ Ne pas se fier à ce rapport pour l'état actuel du template** (chemins `memoireprojet/` + chiffres périmés) — conservé uniquement comme trace d'itération historique. Statut backlog : **F6** (promote leçon/idée) est **résolu** via les modes `/lecon promote` & `/idee promote` ; **F9** (scaffold `STAKEHOLDERS.md`) reste **ouvert**.
+> ⚠️ **Document historique** : ce rapport référence l'ancienne structure namespace (`memoireprojet/`). Depuis 2026-05-28, les skills et agents sont à plat (`.claude/skills/<nom>/`, `.claude/agents/<nom>.md`) car Claude Code ne scanne pas récursivement ([issue #18192](https://github.com/anthropics/claude-code/issues/18192)). Le script `validate-namespaces.py` a été supprimé. **⚠️ Ne pas se fier à ce rapport pour l'état actuel du template** (chemins `memoireprojet/` + chiffres périmés) — conservé uniquement comme trace d'itération historique. Statut backlog : **F6** (promote leçon/idée) est **résolu** via les modes `/lecon promote` & `/idee promote` ; **F9** (scaffold `STAKEHOLDERS.md`) est **résolu** (2026-07-07 : trigger ajouté à la matrice « quand créer un fichier » de template-maintenance + modèle prêt-à-copier dans STRUCTURE.md § STAKEHOLDERS).
 
 ## Setup test
 

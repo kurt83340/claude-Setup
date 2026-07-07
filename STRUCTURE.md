@@ -55,17 +55,16 @@ mon-projet/
     │   ├── doc-health/SKILL.md
     │   ├── codemap/SKILL.md
     │   ├── pivot/SKILL.md          # workflow 9 étapes
-    │   ├── team/SKILL.md           # /team — orchestration agent-teams (worktrees, task list, débrief)
     │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (brownfield, merges non-destructifs)
     │   └── init-from-template/SKILL.md
-    │   # db-migration + skills n8n = PLUGINS (marketplace claude-setup, dossier plugins/) → /plugin install, pas copiés
+    │   # db-migration + skills n8n + agent-teams (/team + rôles d'exécution + hook) = PLUGINS (marketplace claude-setup) → /plugin install, pas copiés
     │   # Pour grouper des skills : préfixe le nom, ou package en plugin (cf. plugins/ + .claude-plugin/marketplace.json)
     │
     ├── agents/                     # custom agents — à plat aussi (subagents ET rôles teammate)
     │   ├── README.md
     │   ├── doc-maintainer.md       # agent qui maintient HANDOFF/ROADMAP/CHANGELOG (subagent)
-    │   ├── worker.md               # teammate d'exécution généraliste (agent-teams)
-    │   ├── front-end.md / back-end.md / tester.md / reviewer.md   # rôles teammate spécialisés (cf rules/agent-teams.md)
+    │   ├── reviewer.md             # review lecture seule — revue adverse (/conception) + diffs d'équipe
+    │   │                           # rôles d'exécution (worker/front-end/back-end/tester) + /team → plugin agent-teams
     │   └── explore-code.md / explore-docs.md / explore-memoire.md # explorateurs lecture seule réutilisables (/conception + investigations)
     │
     │   # ⚠️ Invocation skills/agents = via le `name:` du frontmatter (qui DOIT matcher le dossier/fichier).
@@ -679,7 +678,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Skills (`.claude/skills/`)
 
-- /handoff /spec /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap · /init-from-template (10 cœur)
+- /handoff /spec /conception /debug /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap · /init-from-template /adopt-template (13 cœur)
 - Skills stack (`n8n-expertise`, `db-migration`) = **plugins** (marketplace `claude-setup`, dossier `plugins/`) → `/plugin install`, auto-découverts (rien à recenser).
 
 ## Workflow features
@@ -692,7 +691,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Agent & skills projet
 
-- Agent `doc-maintainer` (Task tool) · rôles teammate `worker`/`front-end`/`back-end`/`tester`/`reviewer` (`/team`) · explorateurs `explore-code`/`explore-docs`/`explore-memoire` (`/conception`) — cf `rules/agent-teams.md` · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
+- Agent `doc-maintainer` (Task tool) · `reviewer` (revue adverse) — rôles d'exécution + `/agent-teams:team` = plugin `agent-teams` · explorateurs `explore-code`/`explore-docs`/`explore-memoire` (`/conception`) — cf `rules/agent-teams.md` · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
 ```
 
 ---

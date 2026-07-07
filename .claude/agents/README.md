@@ -33,7 +33,7 @@ Un même fichier `.claude/agents/*.md` s'invoque de **deux façons** (jamais en 
 2. **Teammate (agent teams)** — session Claude Code complète, **visible en tmux**
    (`teammateMode: "tmux"` câblé dans `settings.json`), spawnée par le lead à partir de la
    définition d'agent (tools + model honorés, body ajouté au system prompt). C'est le mode
-   des rôles d'équipe ci-dessous — en général via le skill `/team`.
+   des rôles d'équipe — en général via `/agent-teams:team` (plugin `agent-teams`).
 
 Quand choisir quoi + protocole d'équipe (périmètre, cycle de vie, topologie) :
 **source unique** [.claude/rules/agent-teams.md](../rules/agent-teams.md).
@@ -55,11 +55,7 @@ Plugin agents ne supportent PAS les frontmatter fields : `hooks`, `mcpServers`, 
 | Agent             | Quoi                                                                           | Mode typique                         |
 | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------ |
 | `doc-maintainer`  | Maintient HANDOFF, ROADMAP, CHANGELOG, ADRs, pivots, archivage. Diff par diff. | Subagent (Task)                      |
-| `worker`          | Teammate d'exécution généraliste (1 sous-tâche, rapport SendMessage)           | Teammate (`/team`)                   |
-| `front-end`       | Teammate UI — composants, styles, état client, a11y                            | Teammate (`/team`)                   |
-| `back-end`        | Teammate serveur — API, services, BDD, jobs                                    | Teammate (`/team`)                   |
-| `tester`          | Teammate QA — tests + repro bugs, ne touche pas au code de prod                | Teammate (`/team`)                   |
-| `reviewer`        | Review **lecture seule** — diffs ET plans (`/conception`), findings 🔴/🟠/🟢   | Teammate (`/team`)                   |
+| `reviewer`        | Review **lecture seule** — diffs ET plans (`/conception`), findings 🔴/🟠/🟢   | Subagent ou teammate                 |
 | `explore-code`    | Explorateur code (lecture seule) — patterns/intégration en `chemin:ligne`      | Subagent ou teammate (`/conception`) |
 | `explore-docs`    | Explorateur docs externes — context7 → MCP → web, URLs + versions              | Subagent ou teammate (`/conception`) |
 | `explore-memoire` | Explorateur mémoire projet — ADRs/leçons/idées : « déjà décidé/tenté ? »       | Subagent ou teammate (`/conception`) |
@@ -67,3 +63,7 @@ Plugin agents ne supportent PAS les frontmatter fields : `hooks`, `mcpServers`, 
 Les rôles portent chacun UNIQUEMENT leur spécialité ; le protocole d'équipe
 (communication, périmètre, cycle de vie, topologie) vit dans la **rule**
 [.claude/rules/agent-teams.md](../rules/agent-teams.md) — pas de duplication ici.
+
+> 🧩 Les **rôles d'exécution** (`worker` · `front-end` · `back-end` · `tester`) +
+> `/agent-teams:team` + le hook de trace vivent dans le **plugin `agent-teams`**
+> (`/plugin install agent-teams@claude-setup`) — auto-découverts à l'installation.

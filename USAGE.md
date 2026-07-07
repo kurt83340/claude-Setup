@@ -54,11 +54,11 @@ Claude va :
 
 | Type             | Impact   | Skills installés                              | Use case                         |
 | ---------------- | -------- | --------------------------------------------- | -------------------------------- |
-| `script-jetable` | **-80%** | 3 (handoff, lecon, init)                      | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | 10 (cœur)                                     | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | 10 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 10 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
-| `bdd-migration`  | léger    | 10 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
+| `script-jetable` | **-80%** | 2 (handoff, lecon)                      | 1-shot Python, < 1 jour          |
+| `python-app`     | léger    | 11 (cœur)                                     | App Python (FastAPI, scripts...) |
+| `web-app`        | léger    | 11 (cœur)                                     | Next.js, React, etc.             |
+| `automation-n8n` | léger    | 11 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
+| `bdd-migration`  | léger    | 11 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 
@@ -248,7 +248,7 @@ Rapport généré → tu suis les actions par priorité.
 | Audit hebdo                                | `/doc-health`                                                                 |
 | BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
 | Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                                 |
-| Déléguer une feature à une équipe (tmux)   | `/team <spec-id>` — teammates + worktrees + débrief mémoire                   |
+| Déléguer une feature à une équipe (tmux)   | `/agent-teams:team <spec-id>` (plugin) — teammates + worktrees + débrief mémoire                   |
 | Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
 | Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                       |
 | Promotion idée → spec                      | `/idee promote <date>`                                                        |
@@ -504,12 +504,15 @@ Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer to
 
 Le template est **câblé** pour les agent teams natifs : `settings.json` porte le flag
 (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`) et `teammateMode: "tmux"` (chaque teammate
-dans son pane). Prérequis : `tmux` dans le PATH. ⚠️ Split panes non supportés dans le terminal
+dans son pane). Le skill `/agent-teams:team`, les rôles d'exécution (`worker`/`front-end`/
+`back-end`/`tester`) et le hook de trace viennent du **plugin `agent-teams`**
+(`/plugin install agent-teams@claude-setup`). Prérequis : `tmux` dans le PATH. ⚠️ Split panes non supportés dans le terminal
 VS Code / Windows Terminal — lance `claude` depuis un vrai terminal, ou passe
 `teammateMode: "in-process"` pour tout garder dans le terminal courant (moins visible).
 
 ```
-/team 001-erp-connector
+/plugin install agent-teams@claude-setup   # une fois (marketplace kurt83340/claude-Setup)
+/agent-teams:team 001-erp-connector
 ```
 
 Le lead propose un **plan d'équipe** (rôles préconfigurés `worker`/`front-end`/`back-end`/
@@ -543,7 +546,7 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 | `PreToolUse(Edit\|Write)`  | Avant Edit/Write fichier code | Réinjecte les règles de couplage + gotchas (non-déductibles) |
 | `PostToolUse(Edit\|Write)` | Après Edit/Write fichier      | Détecte API_KEY/deploy/RGPD → flag growth |
 | `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h        |
-| `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (`/team`) | Trace JSON dans `.claude/.cache/team-progress.log` |
+| `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (plugin `agent-teams`) | Trace JSON dans `.claude/.cache/team-progress.log` |
 
 **Tous non-bloquants** : si un hook échoue, Claude continue.
 

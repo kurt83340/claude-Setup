@@ -120,6 +120,7 @@ Le « n'oublie rien » durable passe par la **promotion** vers les couches versi
 | Décision tech qui impacte plusieurs features OU survit à la feature                 | Créer `.claude/docs/adr/00XX-<scope>-titre.md` (voir convention ci-dessous)                                        |
 | Décision tech **locale à UNE feature** (choix de lib pour cette feature uniquement) | Section `## Décisions` dans `specs/00X/plan.md` (PAS d'ADR séparé)                                                 |
 | > 3 références à un terme métier non documenté                                      | Créer/enrichir `.claude/docs/GLOSSARY.md`                                                                          |
+| > 4-5 interlocuteurs / plusieurs équipes côté client                                | Créer `.claude/docs/STAKEHOLDERS.md` — modèle prêt : **STRUCTURE.md § STAKEHOLDERS** (sinon : section Interlocuteurs de `cadrage/README.md`) |
 | Démarrage d'une feature                                                             | Créer `.claude/docs/conception/specs/00X-feature/{research,spec,plan,tasks}.md`                                    |
 | Nouvelle idée pas mûre                                                              | Créer `.claude/docs/idees/YYYY-MM-DD-idee.md`                                                                      |
 | Bug / pattern / observation à capturer                                              | Append dans `.claude/docs/lecons.md` (statut 🆕 new, décider promotion plus tard)                                  |
@@ -207,7 +208,7 @@ diagrams/
 | `/conception <spec-id>` ⭐ | Arrêter le plan — explore par subagents (code/docs/mémoire), 2-3 options, décision, plan vérifiable + revue adverse |
 | `/feature-done <id>` ⭐    | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées                                          |
 | `/pivot "<raison>"`        | Workflow pivot client 9 étapes orchestrées                                                                          |
-| `/team <spec-id>` ⭐       | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, mode TDD opt-in, débrief              |
+| `/agent-teams:team <spec-id>` ⭐ (plugin) | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, mode TDD opt-in, débrief              |
 | `/debug "<symptôme>"`      | Bug non trivial — reproduire (test rouge) → explorer → hypothèses → fix minimal → test pérennisé + leçon            |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
@@ -242,7 +243,7 @@ diagrams/
 | Agent                                                       | Quand l'invoquer                                                                                                                                                                                                                                                           |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `doc-maintainer`                                            | Via Task tool. Couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, **pivot 9-étapes**, **promotion lecon→ADR**, **archivage idées**. Diff par diff, jamais d'overwrite.                                                                                                              |
-| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | **Agent-teams** : rôles teammate (généraliste, UI, serveur, QA, review lecture-seule — diffs ET plans), spawnés par le lead — en général via `/team`. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [agent-teams.md](agent-teams.md). |
+| `reviewer` (cœur) · `worker`/`front-end`/`back-end`/`tester` (**plugin `agent-teams`**) | Rôles teammate — review lecture seule (diffs ET plans) dans le cœur ; rôles d'exécution spawnés via `/agent-teams:team`. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [agent-teams.md](agent-teams.md). |
 | `explore-code` / `explore-docs` / `explore-memoire`         | **Explorateurs réutilisables** (lecture seule) — code en `chemin:ligne`, docs externes (context7→MCP→web), mémoire projet (ADRs/leçons). Subagents par défaut, teammates en mode visible. Utilisés par `/conception`, invocables pour toute investigation.                 |
 
 ### Skills built-in Claude Code utiles
@@ -273,7 +274,7 @@ diagrams/
 | `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file.                                    | `.claude/skills/codemap/`            |
 | `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                                                                  | `.claude/skills/adr/`                |
 | `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                                                          | `.claude/skills/pivot/`              |
-| `/team` ⭐               | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | `.claude/skills/team/`               |
+| `/agent-teams:team` ⭐   | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | plugin `agent-teams` (marketplace)   |
 | `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                                                           | `.claude/skills/debug/`              |
 
 > 🧩 Skills **stack** = plugins : `db-migration` (Alembic) + `n8n-expertise` (×7) → dossier `plugins/`, marketplace `claude-setup`. Installés par projet via `/plugin install …@claude-setup`, auto-découverts (pas de listing manuel). Inventaire cœur → [`.claude/CLAUDE.md`](../CLAUDE.md).
@@ -298,7 +299,7 @@ diagrams/
 | Agent                                                       | Quoi                                                                                                                                                                 |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `doc-maintainer`                                            | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
-| `worker` / `front-end` / `back-end` / `tester` / `reviewer` | Rôles teammate agent-teams (spawn via `/team` ou à la demande) — protocole commun : [agent-teams.md](agent-teams.md).                                                |
+| `reviewer` (cœur) · rôles d'exécution (plugin `agent-teams`) | Rôles teammate (spawn via `/agent-teams:team` ou à la demande) — protocole commun : [agent-teams.md](agent-teams.md).                                            |
 | `explore-code` / `explore-docs` / `explore-memoire`         | Explorateurs lecture seule réutilisables (subagents ou teammates) — étape Explore de `/conception` + toute investigation.                                            |
 
 ## Distinction `cadrage/` vs `idees/`
@@ -386,8 +387,8 @@ diagrams/
 > [agent-teams.md](agent-teams.md) — une rule auto-chargée, comme celle-ci. Ne pas redupliquer ici.
 >
 > Câblage : `settings.json` (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode: "tmux"`).
-> Orchestration d'une feature : skill `/team`. Rôles teammate : `.claude/agents/` (worker,
-> front-end, back-end, tester, reviewer, explore-\*).
+> Orchestration : `/agent-teams:team` + rôles d'exécution + hook de trace = **plugin `agent-teams`**
+> (`/plugin install agent-teams@claude-setup`). Reviewer + explore-\* : `.claude/agents/` (cœur).
 >
 > Résumé en 3 lignes : le **lead** écrit les docs partagés et alloue les numéros specs/ADR ;
 > les **teammates** rapportent via `SendMessage` (jamais leur texte de réponse) et codent

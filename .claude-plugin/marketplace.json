@@ -14,6 +14,11 @@
       "name": "db-migration",
       "description": "Skill de migration de base de données (Alembic) : génération, revue et application de migrations de schéma.",
       "source": "./plugins/db-migration"
+    },
+    {
+      "name": "agent-teams",
+      "description": "Exécution d'équipe : skill /team (orchestration tmux, worktrees, task list, débrief mémoire) + rôles worker/front-end/back-end/tester + hook de trace team-progress.",
+      "source": "./plugins/agent-teams"
     }
   ]
 }

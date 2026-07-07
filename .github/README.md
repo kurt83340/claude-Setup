@@ -7,9 +7,9 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`. Inventaire cœur → `.claude/CLAUDE.md`.
-- **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` — + 3 explorateurs lecture seule `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` (protocole : `.claude/rules/agent-teams.md`)
-- **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/team`, débrief mémoire des rapports
+- **13 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook). Inventaire cœur → `.claude/CLAUDE.md`.
+- **Agents cœur** : `doc-maintainer` (subagent, maintenance doc en batch) + `reviewer` (revue adverse lecture seule) + 3 explorateurs `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` — les rôles d'exécution (`worker`, `front-end`, `back-end`, `tester`) viennent du plugin `agent-teams` (protocole : `.claude/rules/agent-teams.md`)
+- **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/agent-teams:team` (plugin), débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
 - **Doc structurée** : cadrage / conception (PRD, ARCHITECTURE, specs) / ADR / ROADMAP / HANDOFF / code-map / stack…
 - **`CLAUDE.md` en index just-in-time** : ~1,5k tokens auto-chargés (vs ~14,6k si on charge tout)
@@ -37,8 +37,7 @@ doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
 ## Maintenance du template
 
 - Audit & décisions vérifiées : [test/AUDIT-2026-06-28.md](../test/AUDIT-2026-06-28.md)
-- Tests des hooks : `python3 test/test_hooks.py` · tests init : `python3 test/test_render.py` (rejoués en CI à chaque push)
-- Packaging plugin (proto) : `python3 test/build-plugin.py --out dist`
+- Tests : `python3 test/test_hooks.py` · `test_render.py` · `test_cleanup.py` (rejoués en CI à chaque push)
 - Historique des versions : [CHANGELOG.md](CHANGELOG.md)
 
 ## Licence

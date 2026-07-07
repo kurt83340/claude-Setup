@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 HOOKS = ROOT / ".claude" / "hooks"
+TEAM_HOOKS = ROOT / "plugins" / "agent-teams" / "hooks"  # hooks packagés dans le plugin agent-teams
 DOCS = ROOT / ".claude" / "docs"
 PASS = FAIL = 0
 
@@ -22,7 +23,10 @@ def ok(label, cond):
 
 
 def run_hook(name, payload, cwd):
-    exe = ["bash", str(HOOKS / name)] if name.endswith(".sh") else [sys.executable, str(HOOKS / name)]
+    path = HOOKS / name
+    if not path.exists():  # hooks livrés par un plugin (ex. teamtask-log.py → agent-teams)
+        path = TEAM_HOOKS / name
+    exe = ["bash", str(path)] if name.endswith(".sh") else [sys.executable, str(path)]
     return subprocess.run(exe, input=json.dumps(payload), capture_output=True, text=True, cwd=cwd)
 
 
@@ -34,7 +38,7 @@ def sandbox():
 
 # 0. Compilation
 print("== compilation ==")
-for h in HOOKS.glob("*.py"):
+for h in list(HOOKS.glob("*.py")) + list(TEAM_HOOKS.glob("*.py")):
     try:
         py_compile.compile(str(h), doraise=True); ok(f"compile {h.name}", True)
     except py_compile.PyCompileError as e:

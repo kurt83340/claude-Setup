@@ -58,7 +58,6 @@ SCRIPT_JETABLE = {
         ".claude/skills/spec/",
         ".claude/skills/pivot/",
         ".claude/skills/idee/",
-        ".claude/skills/team/",
         ".claude/skills/conception/",
         ".claude/skills/debug/",
         # (adopt-template : déjà retiré pour tous les types via TEMPLATE_MAINTENANCE)

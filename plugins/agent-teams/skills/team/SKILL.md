@@ -8,10 +8,12 @@ disable-model-invocation: false
 # /team — Orchestrer une équipe de teammates sur une feature
 
 Tu es le **LEAD**. Le protocole (rôles, périmètres, cycle de vie lead-owned/user-owned,
-topologie hub-and-spoke/mesh, débrief mémoire) = la rule
-[`agent-teams.md`](../../rules/agent-teams.md), auto-chargée. Ce skill = la **séquence opératoire**.
+topologie hub-and-spoke/mesh, débrief mémoire) = la rule **`agent-teams.md`** du template
+(`.claude/rules/`, auto-chargée dans chaque session). Ce skill = la **séquence opératoire**.
 
-**Argument** : `/team <spec-id>` (ex. `/team 001-erp-connector`) ou `/team "<mission libre>"`.
+**Argument** : `/agent-teams:team <spec-id>` (ex. `/agent-teams:team 001-erp-connector`) ou
+`/agent-teams:team "<mission libre>"`. Les rôles d'exécution (`worker`, `front-end`,
+`back-end`, `tester`) sont fournis par CE plugin ; `reviewer` + `explore-*` par le cœur.
 
 ## Étape 0 — Préflight
 

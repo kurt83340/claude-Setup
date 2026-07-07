@@ -3,7 +3,9 @@
 > Protocole multi-agent du template (lead + teammates). Auto-chargée dans **chaque** session
 > du repo — y compris les teammates (qui sont des sessions Claude Code complètes).
 > Câblage : `settings.json` → `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "tmux"`.
-> Orchestration d'une feature : skill [`/team`](../skills/team/SKILL.md). Rôles : [`agents/`](../agents/README.md).
+> Orchestration d'une feature : **`/agent-teams:team`** — plugin `agent-teams` (rôles d'exécution
+> `worker`/`front-end`/`back-end`/`tester` + hook de trace ; `/plugin install agent-teams@claude-setup`).
+> Rôles lecture seule du cœur (`reviewer`, `explore-*`) : [`agents/`](../agents/README.md).
 > ⚠️ **Câblage des défs** : toute déf d'agent teammate (`agents/*.md`) DOIT lister **`SendMessage`** dans son `tools:`. Sinon, spawné **nommé** (donc teammate), l'agent n'a aucun canal pour livrer son rapport — son texte final ne remonte PAS au lead → rapport perdu, idle muet, zombie qui ping. (Corrigé v0.8.1.)
 
 ## Identifie ton rôle
@@ -64,7 +66,7 @@ courtes (scan, doc) restent en subagents.
 
 **Cycle de vie — qui possède un teammate, qui le ferme :**
 
-- Teammate spawné à **ton initiative** (délégation que TU as décidée, ex. via `/team`) →
+- Teammate spawné à **ton initiative** (délégation que TU as décidée, ex. via `/agent-teams:team`) →
   **lead-owned** : tu le fermes toi-même après débrief + merge. Pas de session zombie.
 - Teammate **demandé par l'utilisateur** (« lance-moi un agent front-end sur X ») →
   **user-owned** : il **persiste**. Tu ne le fermes JAMAIS de ta propre initiative — seul

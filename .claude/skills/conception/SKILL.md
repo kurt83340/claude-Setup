@@ -13,7 +13,7 @@ nouveau type de fichier — on les remplit avec méthode au lieu de les remplir 
 
 **Arguments** : `/conception <spec-id>` (micro, défaut — ex. `/conception 001-livre-d-or`)
 · `/conception macro` (projet entier : `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`).
-**Chaîne** : `/spec` (scaffold) → **`/conception`** (méthode) → exécution (solo ou `/team`) → `/feature-done`.
+**Chaîne** : `/spec` (scaffold) → **`/conception`** (méthode) → exécution (solo ou `/agent-teams:team` — plugin) → `/feature-done`.
 **Interdit ici** : écrire du code. Ce skill produit un PLAN, rien d'autre.
 
 ## Étape 0 — Charger les contraintes (ce qui borne le plan)
@@ -66,11 +66,11 @@ Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `
 - `plan.md` : étapes numérotées, fichiers touchés par étape, risques + parades, et **un point
   de vérification exécutable par étape** (test/build/curl — jamais « ça devrait marcher »).
 - `tasks.md` : checklist `- [ ]` avec DoD mesurable, **partitionnée par fichiers disjoints**
-  si une exécution `/team` est envisagée (2 teammates sur les mêmes fichiers = interdit).
+  si une exécution `/agent-teams:team` est envisagée (2 teammates sur les mêmes fichiers = interdit).
 - **Mode d'exécution — décide-le ICI, par spec** (note-le dans `plan.md` § Décisions) :
   **TDD** si les comportements sont spécifiables a priori (logique métier, parsing, contrats
   d'API — le test rouge devient le point de vérification de l'étape) ; **tests-après + E2E
-  ciblés** si exploratoire (UI mouvante, intégration à découvrir). `/team` lira ce choix.
+  ciblés** si exploratoire (UI mouvante, intégration à découvrir). `/agent-teams:team` lira ce choix.
 - `spec.md` : scope / non-scope ajustés à la décision.
 
 (Mode `macro` : mêmes étapes, sur `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`.)
@@ -87,7 +87,7 @@ Corrige le plan, et note dans `research.md` § « Revue adverse » ce qu'elle a 
 
 Validation utilisateur finale → ROADMAP à jour (`[ ]` → `[~]` si démarrage immédiat),
 HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
-`/team <spec-id>` (les tasks sont déjà partitionnées pour).
+`/agent-teams:team <spec-id>` (plugin `agent-teams` ; les tasks sont déjà partitionnées pour).
 
 ## Mode visible (tmux) — optionnel
 
