@@ -3,6 +3,16 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.10.0] — 2026-07-07
+
+### Added
+
+- **Rule `doc-lookup.md`** (SOURCE UNIQUE, auto-chargée) : politique de recherche de doc externe pour toute session, skill et agent — **jamais de réponse de mémoire** pour une API/version ; ordre **context7 (MCP)** → autres MCP docs → WebFetch/WebSearch ; toute affirmation sourcée (version + URL) ; recherche large → `explore-docs`. context7 supposé connecté **user-level** (fallback web sinon).
+
+### Changed
+
+- **Câblage de la politique là où elle manquait** : `/debug` étape 2 spawn aussi `explore-docs` quand une lib/API externe est en jeu (+ `mcp__context7` dans ses allowed-tools) ; `mcp__context7` ajouté aux **5 rôles teammate** (`worker`, `front-end`, `back-end`, `tester`, `reviewer`) — doc versionnée en direct sans ouvrir le web aux codeurs ; pointeurs vers la rule dans `explore-docs`, le plugin `db-migration` (doc Alembic à jour), le `CLAUDE.md` racine (liens conventions), `STRUCTURE.md` (arbre rules/) ; prérequis « MCP context7 user-level » documenté dans USAGE. (`/conception` + `explore-docs` étaient déjà câblés.)
+
 ## [0.9.1] — 2026-07-07
 
 Post-review complète (workflow multi-agents : 15 findings confirmés + vérifs inline + sweep) — durcissement init/adopt et correctifs de cohérence.

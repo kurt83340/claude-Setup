@@ -25,7 +25,7 @@
 
 > Les règles dans `.claude/rules/*.md` sont **déjà auto-chargées** par Claude Code — pas besoin de `@-import` ici (ce serait du double chargement). Idéalement, scope-les par chemin (frontmatter `paths:`) pour qu'elles ne chargent que sur les fichiers concernés.
 
-- [code-style](.claude/rules/code-style.md) · [testing](.claude/rules/testing.md) · [git-workflow](.claude/rules/git-workflow.md)
+- [code-style](.claude/rules/code-style.md) · [testing](.claude/rules/testing.md) · [git-workflow](.claude/rules/git-workflow.md) · [doc-lookup](.claude/rules/doc-lookup.md)
 
 ## Reminders critiques
 

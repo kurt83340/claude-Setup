@@ -27,6 +27,11 @@ git init && git add . && git commit -m "chore: snapshot pre-init"
 claude
 ```
 
+> 🔌 **Prérequis recommandé : MCP `context7` connecté en user-level** (installé une fois,
+> dispo dans toutes les sessions). La rule [`doc-lookup`](.claude/rules/doc-lookup.md) du
+> template s'appuie dessus (doc officielle versionnée) pour `/conception`, `/debug`, les
+> explorateurs et les teammates ; fallback automatique WebFetch/WebSearch s'il est absent.
+
 Dans la session Claude :
 
 ```

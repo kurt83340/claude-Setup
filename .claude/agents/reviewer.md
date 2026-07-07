@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Teammate review pour les agent-teams — relit les diffs des autres teammates ET les plans (revue adverse de /conception) — correctness, sécurité, couplage code-map, simplicité, vérifiabilité. Rapporte des findings triés au lead. Lecture seule, ne fixe rien. Protocole d'équipe unique dans .claude/rules/agent-teams.md.
-tools: Read, Grep, Glob, Bash, SendMessage
+tools: Read, Grep, Glob, Bash, mcp__context7, SendMessage
 model: inherit
 ---
 

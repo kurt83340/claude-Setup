@@ -1,7 +1,7 @@
 ---
 name: tester
 description: Teammate QA pour les agent-teams — écrit/répare les tests (unit, intégration, e2e) d'une spec et reproduit les bugs. Ne modifie pas le code de prod. Protocole d'équipe unique dans .claude/rules/agent-teams.md.
-tools: Read, Edit, Write, Bash, Grep, Glob, SendMessage
+tools: Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage
 model: inherit
 ---
 

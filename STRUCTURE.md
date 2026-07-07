@@ -38,6 +38,7 @@ mon-projet/
     │   ├── code-style.md           # outils + conventions code (ruff, eslint, naming, longueur ligne, etc.)
     │   ├── testing.md              # framework + structure tests + coverage minimum + lancement
     │   ├── git-workflow.md         # convention commits (Conventional Commits), branches, PRs, tags
+    │   ├── doc-lookup.md           # recherche de doc externe : context7 (MCP) → MCP docs → web — SOURCE UNIQUE
     │   ├── agent-teams.md          # protocole agent-teams (lead/teammate, cycle de vie, topologie) — SOURCE UNIQUE
     │   └── template-maintenance.md # méta-doc : comment vivre avec ce template (workflows, skills, agents)
     │

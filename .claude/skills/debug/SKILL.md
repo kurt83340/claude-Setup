@@ -1,7 +1,7 @@
 ---
 name: debug
 description: Pipeline de debugging méthodique — capturer le symptôme exact (verbatim), REPRODUIRE avant de corriger (test rouge minimal), explorer (explore-code + git log + leçons), hypothèses discriminées par instrumentation, fix minimal, le test de repro reste dans la suite, leçon capturée. À invoquer sur un bug non trivial - /debug "<symptôme>".
-allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, Bash(git log:*), Bash(git diff:*), Bash(git status), Bash(pytest:*), Bash(npm test:*), Bash(ruff:*), Bash(grep:*), Bash(find:*)
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, mcp__context7, Bash(git log:*), Bash(git diff:*), Bash(git status), Bash(pytest:*), Bash(npm test:*), Bash(ruff:*), Bash(grep:*), Bash(find:*)
 disable-model-invocation: false
 ---
 
@@ -29,7 +29,10 @@ En parallèle (subagents) :
 
 - `explore-code` sur la zone suspecte → chemins:lignes, couplages, gotchas code-map ;
 - `git log` / `git diff` sur la fenêtre depuis le connu-bon → qu'est-ce qui a **changé** ? ;
-- `explore-memoire` → ce piège a-t-il déjà été payé ? (`lecons.md` a peut-être la réponse).
+- `explore-memoire` → ce piège a-t-il déjà été payé ? (`lecons.md` a peut-être la réponse) ;
+- `explore-docs` (si une **lib/API externe** est en jeu) → doc officielle À JOUR — context7 →
+  MCP docs → web (rule [doc-lookup](../../rules/doc-lookup.md)) : le « bug » est parfois un
+  changement d'API documenté ou un comportement de version connu.
 
 ## Étape 3 — Hypothèses discriminées (pas de fix au pif)
 

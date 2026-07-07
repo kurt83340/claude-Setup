@@ -13,6 +13,9 @@ Workflow standardisé pour créer une migration Alembic propre.
 > (marketplace `claude-setup`), pas dans le cœur du template. Installer :
 > `/plugin marketplace add kurt83340/claude-Setup` puis `claude plugin install db-migration@claude-setup --scope project`.
 
+> 📚 Doc Alembic/SQLAlchemy **à jour** avant toute migration non triviale : **context7 d'abord**
+> (rule `doc-lookup` du template) — les APIs de migration bougent entre versions.
+
 ## Étapes
 
 1. **Comprendre le besoin** : demande quelle modif de schéma (colonne, table, contrainte ?)
