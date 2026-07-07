@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook). Inventaire cœur → `.claude/CLAUDE.md`.
+- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook) — stack n8n = plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills). Inventaire cœur → `.claude/CLAUDE.md`.
 - **Agents cœur** : `doc-maintainer` (subagent, maintenance doc en batch) + `reviewer` (revue adverse lecture seule) + 3 explorateurs `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` — les rôles d'exécution (`worker`, `front-end`, `back-end`, `tester`) viennent du plugin `agent-teams` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/agent-teams:team` (plugin), débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
@@ -23,14 +23,14 @@ rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude
 cd /chemin/vers/mon-projet
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 claude   # puis, dans la session : /init-from-template
-# Stack ? installe le plugin : /plugin marketplace add kurt83340/claude-Setup ; /plugin install n8n-expertise@claude-setup
+# Stack n8n ? plugin officiel : /plugin marketplace add czlonkowski/n8n-skills ; /plugin install n8n-mcp-skills@n8n-mcp-skills
 ```
 
 **Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md`
 et `.env.example`), puis `/adopt-template` — merges non-destructifs + rétro-remplissage de la
 doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
 
-> Les **plugins stack** (`n8n-expertise`, `db-migration`) vivent dans `plugins/` (marketplace `claude-setup`) — un projet les **installe** via `/plugin install …@claude-setup`, il ne les embarque pas (le rsync exclut `plugins/` + `.claude-plugin/`). L'exemple ACME (`EXAMPLES/`) est aussi exclu du projet généré.
+> Les **plugins maison** (`db-migration`, `agent-teams`) vivent dans `plugins/` (marketplace `claude-setup`) ; la stack **n8n** = plugin **officiel** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) (14 skills + hooks, czlonkowski). Un projet **installe** via `/plugin`, il n'embarque rien (le rsync exclut `plugins/` + `.claude-plugin/` ; ACME aussi).
 
 → Guide complet : **[USAGE.md](../USAGE.md)** · Convention : **[STRUCTURE.md](../STRUCTURE.md)** · Exemple rempli : **[EXAMPLES/](../EXAMPLES/)**
 

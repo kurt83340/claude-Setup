@@ -25,7 +25,7 @@ Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB
 
 ## Skills projet (stack n8n)
 
-- Plugin **`n8n-expertise`** (7 skills de référence n8n, installé via `/plugin install n8n-expertise@claude-setup`)
+- Plugin officiel **`n8n-mcp-skills`** (14 skills n8n + hooks — `/plugin marketplace add czlonkowski/n8n-skills`)
 - `/deploy` (skill projet maison, push prod — `disable-model-invocation: true`)
 - Skills cœur (`/handoff`, `/spec`, `/feature-done`, …) → inventaire dans [.claude/CLAUDE.md](.claude/CLAUDE.md)
 

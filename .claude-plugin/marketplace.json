@@ -6,11 +6,6 @@
   "owner": { "name": "Julien Leroy" },
   "plugins": [
     {
-      "name": "n8n-expertise",
-      "description": "7 skills d'expertise n8n : configuration de nœuds, validation, patterns de workflow, code JS/Python, syntaxe d'expressions, outils MCP n8n-mcp.",
-      "source": "./plugins/n8n-expertise"
-    },
-    {
       "name": "db-migration",
       "description": "Skill de migration de base de données (Alembic) : génération, revue et application de migrations de schéma.",
       "source": "./plugins/db-migration"

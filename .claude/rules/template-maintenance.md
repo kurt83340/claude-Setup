@@ -195,7 +195,7 @@ diagrams/
 
 ### Skills perso (`.claude/skills/`)
 
-> 🗂️ **Inventaire canonique** (liste + 1-ligne + chemin) → [`.claude/CLAUDE.md`](../CLAUDE.md). Ici = **quand** invoquer. Les skills stack-spécifiques (`db-migration`, `n8n-expertise`) sont des **plugins** (marketplace `claude-setup`, dossier `plugins/`), installés par projet via `/plugin`.
+> 🗂️ **Inventaire canonique** (liste + 1-ligne + chemin) → [`.claude/CLAUDE.md`](../CLAUDE.md). Ici = **quand** invoquer. Les skills stack sont des **plugins** installés par projet via `/plugin` : `db-migration` (marketplace `claude-setup`) ; stack n8n → plugin **officiel** `n8n-mcp-skills` (czlonkowski/n8n-skills).
 
 #### Session & feature
 
@@ -235,7 +235,7 @@ diagrams/
 > **le template n'utilise plus que `.claude/skills/<nom>/SKILL.md`**.
 > Pour un `/nom` sensible (deploy…) : `disable-model-invocation: true` = slash-only.
 
-**Plugins stack disponibles** : plugin `n8n-expertise` (7 skills n8n, type `automation-n8n`) et plugin `db-migration` (Alembic, type `bdd-migration`) — dans `plugins/` (marketplace `claude-setup`), installés par projet via `/plugin install …@claude-setup` (auto-découverts).
+**Plugins stack disponibles** : n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills) — 14 skills + hooks) ; BDD → plugin `db-migration` (marketplace `claude-setup`). Installés par projet via `/plugin` (auto-découverts).
 
 > **Pas de namespacing par dossier en 2026** : Claude Code scanne `.claude/skills/<nom>/SKILL.md` à **1 niveau uniquement** (cf. [issue #18192](https://github.com/anthropics/claude-code/issues/18192), feature request OPEN). Si tu veux grouper des skills par thème → utilise des **préfixes de nom** (ex: `n8n-deploy`, `n8n-test`) ou package-les en **plugin** (`/<plugin>:<skill>`).
 
@@ -278,7 +278,7 @@ diagrams/
 | `/agent-teams:team` ⭐   | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | plugin `agent-teams` (marketplace)   |
 | `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                                                           | `.claude/skills/debug/`              |
 
-> 🧩 Skills **stack** = plugins : `db-migration` (Alembic) + `n8n-expertise` (×7) → dossier `plugins/`, marketplace `claude-setup`. Installés par projet via `/plugin install …@claude-setup`, auto-découverts (pas de listing manuel). Inventaire cœur → [`.claude/CLAUDE.md`](../CLAUDE.md).
+> 🧩 Skills **stack** = plugins installés par projet, auto-découverts (pas de listing manuel) : `db-migration` (Alembic) → marketplace `claude-setup` ; n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)). Inventaire cœur → [`.claude/CLAUDE.md`](../CLAUDE.md).
 
 ### Hooks configurés (cf `.claude/settings.json`)
 

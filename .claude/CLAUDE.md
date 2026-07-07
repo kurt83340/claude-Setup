@@ -48,7 +48,7 @@
 
 Hors du cœur. Packagés en **plugins** installés par projet via `/plugin` — **auto-découverts** (aucun listing à maintenir ici) :
 
-- **n8n** (type `automation-n8n`) → plugin **`n8n-expertise`** (7 skills : node-configuration, validation-expert, workflow-patterns, code-javascript, code-python, expression-syntax, mcp-tools-expert) → `claude plugin install n8n-expertise@claude-setup --scope project`
+- **n8n** (type `automation-n8n`) → plugin **OFFICIEL** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) (czlonkowski — **14 skills + hooks d'enforcement**, MIT, activement maintenu) : `/plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope project`
 - **BDD / Alembic** (type `bdd-migration`) → plugin **`db-migration`** → `claude plugin install db-migration@claude-setup --scope project`
 - **Équipe d'exécution** (toute stack, opt-in) → plugin **`agent-teams`** : `/agent-teams:team` + rôles `worker`/`front-end`/`back-end`/`tester` + hook de trace → `claude plugin install agent-teams@claude-setup --scope project`
 
@@ -60,7 +60,7 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 
 - **standard** : Planifier (`/spec`+`/conception`) → Coder (solo | `/agent-teams:team`) → Tester → Review adverse → Vérifier → Persister (`/feature-done`)
 - **tdd** : Planifier → **Écrire les tests (rouges)** → Coder (vert, sans toucher aux tests) → Review adverse → Vérifier → Persister
-- **n8n** : Planifier (pattern via `n8n-workflow-patterns`) → Construire (n8n-mcp + skills `n8n-expertise`) → Valider → Tester en réel → Review adverse (export JSON) → Persister (JSON versionné dans `workflows/`)
+- **n8n** : Planifier (pattern via `n8n-workflow-patterns`) → Construire (n8n-mcp + skills `n8n-mcp-skills`) → Valider → Tester en réel → Review adverse (export JSON) → Persister (JSON versionné dans `workflows/`)
 - **bug** : `/debug` — Reproduire (test rouge) → Explorer → Hypothèses discriminées → Fix minimal → Pérenniser (leçon)
 
 > **1 pipeline = 1 fichier déposable** dans `.claude/skills/feature/pipelines/` — ajoutes-en au fil de l'eau (format documenté dans le SKILL `/feature`). `/conception` note le mode (TDD/standard) par spec dans `plan.md § Décisions` → `/feature` le lit pour auto-choisir.

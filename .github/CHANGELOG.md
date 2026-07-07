@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.14.0] — 2026-07-07
+
+### Changed
+
+- **Stack n8n : plugin vendored → plugin OFFICIEL upstream.** Les 7 skills du plugin `n8n-expertise` provenaient du projet [n8n-mcp](https://github.com/czlonkowski/n8n-mcp) (MIT) — et czlonkowski les distribue **lui-même** comme plugin Claude Code via le repo dédié [`n8n-skills`](https://github.com/czlonkowski/n8n-skills) : marketplace `n8n-mcp-skills`, **14 skills** (nos 7 + error-handling, subworkflows, agents, binary-and-data, code-tool, multi-instance, self-hosting + skill routeur) **+ hooks d'enforcement**, v1.23.0, activement maintenu. Notre copie (sous-ensemble driftant, auteur mal attribué) est **supprimée** ; le template référence l'officiel : `/plugin marketplace add czlonkowski/n8n-skills` puis `/plugin install n8n-mcp-skills@n8n-mcp-skills`. Le marketplace `claude-setup` ne garde que les plugins **maison** (`db-migration`, `agent-teams`). Pipeline `n8n` re-namespacé `/n8n-mcp-skills:*` (+ appui `n8n-error-handling` à l'étape Tester).
+
 ## [0.13.0] — 2026-07-07
 
 ### Added

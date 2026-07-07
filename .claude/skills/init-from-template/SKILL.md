@@ -128,10 +128,10 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
 **Skills stack = PLUGINS (plus de copie)** — proposer à l'user d'installer le plugin adapté au type depuis le marketplace (= ce repo template) :
 
-- `automation-n8n` → `/plugin marketplace add kurt83340/claude-Setup` puis `claude plugin install n8n-expertise@claude-setup --scope project`
+- `automation-n8n` → plugin **officiel** ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills), 14 skills + hooks) : `/plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope project`
 - `bdd-migration` → (marketplace ajouté) `claude plugin install db-migration@claude-setup --scope project`
 
-  Les plugins sont **auto-découverts** (aucun ajout à `.claude/CLAUDE.md`). Skills namespacés `/n8n-expertise:<skill>`.
+  Les plugins sont **auto-découverts** (aucun ajout à `.claude/CLAUDE.md`). Skills namespacés `/n8n-mcp-skills:<skill>`.
 
 ### Garantie : skills "vitaux" toujours conservés
 

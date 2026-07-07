@@ -47,7 +47,7 @@ Claude va :
    - Batch 3 : `COMMANDE_INSTALL`, `COMMANDE_TESTS`, `COMMANDE_RUN`
 3. **Substituer les CORE placeholders** auto (10 substitutions sur ~370 placeholders — le reste est CONTENT à remplir au fil de l'eau)
 4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée**
-5. **Proposer d'installer le plugin stack** si pertinent (type `automation-n8n` → `/plugin install n8n-expertise@claude-setup` ; `bdd-migration` → `db-migration`)
+5. **Proposer d'installer le plugin stack** si pertinent (type `automation-n8n` → plugin **officiel** `n8n-mcp-skills` via `/plugin marketplace add czlonkowski/n8n-skills` ; `bdd-migration` → `db-migration@claude-setup`)
 6. **Te proposer le commit initial** : `feat: init projet <nom> depuis template`
 
 ### Les 5 types de projet (impact sur cleanup)
@@ -57,7 +57,7 @@ Claude va :
 | `script-jetable` | **-80%** | 2 (handoff, lecon)                      | 1-shot Python, < 1 jour          |
 | `python-app`     | léger    | 12 (cœur)                                     | App Python (FastAPI, scripts...) |
 | `web-app`        | léger    | 12 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 12 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
+| `automation-n8n` | léger    | 12 cœur + plugin officiel `n8n-mcp-skills` (×14) | Workflow n8n + helpers Python |
 | `bdd-migration`  | léger    | 12 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
 
 ### Vérification post-init

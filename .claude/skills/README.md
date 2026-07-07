@@ -82,7 +82,7 @@ Pas livrés dans `.claude/skills/` — packagés en **plugins** installés par p
 
 | Plugin          | Skills                 | Install (selon type projet)                                     |
 | --------------- | ---------------------- | --------------------------------------------------------------- |
-| `n8n-expertise` | 7 skills n8n (`n8n-*`) | `automation-n8n` → `/plugin install n8n-expertise@claude-setup` |
+| `n8n-mcp-skills` (**officiel**, [czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)) | 14 skills n8n + hooks | `automation-n8n` → `/plugin marketplace add czlonkowski/n8n-skills` + install |
 | `db-migration`  | `db-migration`         | `bdd-migration` → `/plugin install db-migration@claude-setup`   |
 
 ## Skills built-in Claude Code (hors `.claude/skills/`)
