@@ -1,0 +1,219 @@
+# Protocole E2E — tester le template sur un projet jetable
+
+> **Ce que les suites mécaniques ne couvrent pas.** `test_*.py` + la CI gardent les scripts,
+> hooks et manifests. CE protocole teste l'**agentique** : une session Claude qui suit les
+> skills produit-elle les bons artefacts, et les garde-fous refusent-ils ce qu'ils doivent
+> refuser ? À rejouer **à chaque version majeure** (successeur méthodologique de
+> `TEST-REPORT.md` — la boucle qui avait produit les fixes F1→F10).
+>
+> Étalonné le 2026-07-07 sur v0.17.0 (fixture « caisse », rapport en fin de fichier).
+
+## Verdicts
+
+- **PASS** — artefacts conformes aux critères observables
+- **PARTIEL** — artefact produit mais friction notée (→ F-note)
+- **FAIL** — critère non atteint
+- **N-T** — non testable headless → § Phase M (manuel assisté)
+
+Toute friction = **F-note numérotée** en fin de rapport → candidate fix pour la version suivante.
+
+## Prérequis
+
+- Template à jour, **batterie CI locale verte** (sinon on teste du cassé)
+- `python3`, `git`, `rsync` ; le jetable vit dans un dossier temporaire isolé (jamais dans un vrai projet)
+- Phase M uniquement : `tmux` + session Claude interactive
+
+## Fixture fil rouge « caisse »
+
+Mini-app Python réaliste (les skills ont besoin de matière) :
+
+```python
+# src/caisse.py
+TVA = 0.20
+
+def total_ht(lignes):            # lignes = [(prix_unitaire, qte), ...]
+    return sum(p * q for p, q in lignes)
+
+def total_ttc(lignes, remise=0.0):
+    # ⚠️ BUG DORMANT pour la Phase 6 — version buggée à activer :
+    #   ht = total_ht(lignes) - remise        # remise soustraite en MONTANT ABSOLU
+    # (⚠️ ne PAS utiliser « remise après TVA » comme bug : c'est mathématiquement
+    # ÉQUIVALENT — commutativité — aucun test ne rougit. Friction F1 de l'étalonnage.)
+    ht = total_ht(lignes) * (1 - remise)
+    return round(ht * (1 + TVA), 2)
+```
+
+```python
+# tests/test_caisse.py — 2 tests verts au départ
+import sys, unittest
+sys.path.insert(0, "src")
+from caisse import total_ht, total_ttc
+
+class TestCaisse(unittest.TestCase):
+    def test_total_ht(self):
+        self.assertEqual(total_ht([(10, 2), (5, 1)]), 25)
+    def test_total_ttc_sans_remise(self):
+        self.assertEqual(total_ttc([(10, 2), (5, 1)]), 30.0)
+```
+
+**Variante brownfield** (Phase 0bis) : la même app + un `README.md` maison, un `CLAUDE.md`
+maison (2 lignes), un `.github/workflows/deploy.yml` maison, un historique git — pour
+vérifier que l'adoption **ne détruit rien**.
+
+---
+
+## Phase 0 — Greenfield : init complet
+
+**Actions** : rsync documenté (USAGE §Setup) → `chmod +x hooks` → `git init` + snapshot →
+`vars.json` (10 CORE) → `render.py --vars` → `--check` → `cleanup-for-type.py --type
+python-app` → traçabilité version dans `stack.md` → commit init.
+
+**PASS si** : 0 CORE restant (grep du périmètre substitué) · skills bootstrap absents ·
+inventaires purgés (0 réf `/init-from-template`) · allow-rules mortes purgées ·
+`.claude/template-version` présent · ligne `Template claude-Setup vX.Y.Z` dans `stack.md` ·
+3 `@-imports` dans CLAUDE.md · hooks exécutables.
+
+## Phase 0bis — Brownfield : adoption
+
+**Actions** : sur la fixture brownfield, rsync `--ignore-existing` (excludes documentés) →
+render → `--check` → `cleanup --type python-app --brownfield` → étapes agentiques : merge
+CLAUDE.md existant (≤3 @-imports au total), rétro-remplissage `stack.md` (+ version) et
+`HANDOFF` (← git log).
+
+**PASS si** : fichiers USER **intacts** (README, CLAUDE.md à lui, `.github/` à lui, code) ·
+scaffold `.claude/` posé · **aucun strip** · permissions non purgées · skills bootstrap
+encore là (retrait = Étape 5 d'adopt, manuel) · stack.md rétro-rempli.
+
+## Phase 1 — Cadrage (+ piège bucket)
+
+**Actions** : remplir `cadrage/README.md` (verbatim + interlocuteurs), 1 ticket
+`cadrage/tickets/`, 1 réunion `cadrage/reunions/YYYY-MM-DD-*.md`. **Piège** : énoncer
+« j'ai eu une idée perso : X » → doit finir dans `idees/YYYY-MM-DD-*.md`, PAS dans cadrage.
+
+**PASS si** : nommage ISO respecté · distinction cadrage(externe)/idees(interne) respectée.
+
+## Phase 2 — `/spec`
+
+**PASS si** : `specs/001-<kebab>/` avec les 4 fichiers · 0 `{{SPEC_*}}` restant ·
+ROADMAP a la ligne liée · numérotation démarre à 001.
+
+## Phase 3 — `/conception` (calibrable en allégé : sans subagents)
+
+**Actions** : contraintes chargées (code-map/ADR/leçons) → ≥2 options tracées dans
+`research.md` → décision → `plan.md` avec points de vérification + **mode d'exécution
+(TDD/standard) noté § Décisions** → `tasks.md` partitionné → trace de revue adverse.
+
+**PASS si** : `plan.md § Décisions` non vide (mode présent) · `research.md` ≥2 options ·
+tasks atomiques cochables.
+
+## Phase 4 — `/feature` pipeline `tdd`
+
+**PASS si** : auto-sélection du pipeline depuis `plan.md § Décisions` · tests écrits AVANT
+le code et **ROUGES pour la bonne raison** · verts sans modification des tests · trace de
+review adverse · DoD relu · gates respectés (pas d'étape sautée).
+
+## Phase 5 — Cycle de vie des artefacts
+
+**Actions** : `/lecon` capture puis `promote` → ADR · `/adr` capture puis `supersede` ·
+`/idee` capture puis `promote` → spec 002.
+
+**PASS si** : frontmatter/statuts corrects · **ADR ancien intact** hors champ status
+(immuabilité) · index `adr/README.md` à jour (section superseded) · leçon promue marquée
+`📜 → ADR-XXXX` · numérotation continue (002 après 001, pas de reset).
+
+## Phase 6 — `/debug` (bug injecté)
+
+**Actions** : activer le bug dormant de la fixture (remise soustraite en montant absolu), symptôme verbatim. Le bug DOIT faire rougir un test existant ou un test de repro écrit sur-le-champ.
+
+**PASS si** : test de repro écrit et ROUGE **avant** tout fix · fix minimal (le diff ne
+touche que la cause) · le test de repro RESTE dans la suite · leçon capturée · CHANGELOG
+`### Fixed`.
+
+## Phase 7 — `/feature-done` + `/pivot` (léger)
+
+**PASS feature-done si** : ROADMAP `[x]` daté · CHANGELOG entry · HANDOFF à jour · idée
+source archivée (`✅ Promu en spec 00X`).
+**PASS pivot si** : réunion datée · `research.md` § Pivot daté · PRD v1→v2 · ROADMAP
+section v2 · ADR si pivot technique.
+
+## Phase 8 — `/doc-health` + `/codemap`
+
+**PASS doc-health si** : le rapport reflète l'état RÉEL du jetable (leçons 🆕 restantes,
+CORE=0, specs stalled…) et **ne modifie rien**.
+**PASS codemap si** : règles de couplage + gotchas écrits · **aucun** file-by-file.
+
+## Phase 9 — `/scaffold`
+
+**Actions** : créer 1 skill projet bidon (mode skill).
+**PASS si** : `name:` = dossier · ligne d'inventaire ajoutée dans `.claude/CLAUDE.md` ·
+(si agent teammate testé : `SendMessage` dans tools).
+
+## Phase 10 — `/handoff`
+
+**PASS si** : HANDOFF réel (0 placeholder `{{ }}`) · sections Échecs tentés / Blocked /
+Next remplies avec du contenu de la session.
+
+## Phase E — Cas d'erreur (tester les REFUS)
+
+| # | Provocation | Attendu |
+|---|---|---|
+| E1 | « Modifie l'ADR 0001 » (accepted) | Refus + proposition `supersede` |
+| E2 | Déposer une idée perso dans `cadrage/` | Redirection vers `idees/` |
+| E3 | Pipeline référençant un maillon absent | `/feature` le signale + propose l'alternative (pas d'échec silencieux) |
+| E4 | `/feature-done` avec tasks non cochées | Demande de confirmation explicite |
+| E5 | Committer HANDOFF « depuis un worktree teammate » | Refus (règle agent-teams) |
+
+## Phase M — Manuel assisté (session interactive requise, N-T en headless)
+
+| # | Quoi | Procédure |
+|---|---|---|
+| M1 | Auto-invocation par description | Dire « j'ai eu une idée : … » sans slash → `/idee` doit se déclencher |
+| M2 | Hooks réels | éditer `src/` → injection code-map visible ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder |
+| M3 | Permissions | `rm -rf` → deny · `Read .env` → deny · `.env.example` → prompt ask |
+| M4 | Plugins | `/plugin marketplace add` + install `agent-teams` → `/agent-teams:team` sur spec 002 (tmux) |
+| M5 | Compaction | `/compact` → snapshot réinjecté (SessionStart compact) |
+
+## Vérification finale scriptée
+
+```bash
+python3 <template>/test/verify-e2e.py --root <jetable>   # exit 0 = invariants OK
+```
+
+## Gabarit de rapport
+
+```markdown
+# Rapport E2E — vX.Y.Z — YYYY-MM-DD
+| Phase | Verdict | Notes |
+|---|---|---|
+| 0 greenfield | PASS/… | |
+| 0bis brownfield | | |
+| 1..10, E, M | | |
+Frictions : F1 … / F2 …
+verify-e2e.py : N/N ✅
+```
+
+---
+
+## Rapport d'étalonnage — v0.17.0, 2026-07-07 (fixture « caisse »)
+
+| Phase | Verdict | Notes |
+|---|---|---|
+| 0 greenfield | **PASS** | 10/10 critères |
+| 0bis brownfield | **PASS** (mécanique) | merges CLAUDE.md agentiques = spot-check |
+| 1 cadrage + piège | **PASS** | idée correctement routée vers `idees/` |
+| 2 /spec | **PASS** | |
+| 3 /conception | **PASS** (allégé, sans subagents) | 2 options tracées, mode TDD noté |
+| 4 /feature tdd | **PASS** | rouge→vert, tests non modifiés |
+| 5 artefacts | **PASS** | supersede + promote OK, immuabilité respectée |
+| 6 /debug | **PASS** (après F1) | 1er bug choisi était un non-bug (commutatif, 0 rouge) → fixture corrigée, rejoué : rouge `11.4 != 6.0` observé → fix minimal → vert |
+| 7 feature-done + pivot | **PASS** (pivot léger) | |
+| 8 doc-health + codemap | **PASS** | audit fidèle, 0 modification |
+| 9 /scaffold | **PASS** | inventaire mis à jour |
+| 10 /handoff | **PASS** | 0 placeholder |
+| E1–E5 | **PASS** (E1–E4) / N-T (E5 partiel) | refus par règles auto-chargées |
+| M1–M5 | **N-T** | à jouer en session interactive |
+
+**verify-e2e.py : 18/18 ✅ (premier run)**
+
+Frictions :
+- **F1** — le bug dormant initialement conçu (« remise après TVA ») était **mathématiquement équivalent** au code correct (commutativité) → aucun test ne rougissait, la Phase 6 ne testait rien. Corrigé dans la fixture : remise soustraite en montant absolu. **Leçon de protocole : toujours vérifier que le bug injecté fait ROUGIR avant de dérouler le debug.**

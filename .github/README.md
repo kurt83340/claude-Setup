@@ -37,7 +37,8 @@ doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
 ## Maintenance du template
 
 - Audit & décisions vérifiées : [test/AUDIT-2026-06-28.md](../test/AUDIT-2026-06-28.md)
-- Tests : `python3 test/test_hooks.py` · `test_render.py` · `test_cleanup.py` (rejoués en CI à chaque push)
+- Tests mécaniques : `python3 test/test_hooks.py` · `test_render.py` · `test_cleanup.py` (rejoués en CI à chaque push)
+- **Test agentique** : [test/PROTOCOL-E2E.md](../test/PROTOCOL-E2E.md) (12 phases sur projet jetable, à rejouer à chaque version majeure) + `python3 test/verify-e2e.py --root <jetable>` (invariants post-run)
 - Historique des versions : [CHANGELOG.md](CHANGELOG.md)
 
 ## Licence

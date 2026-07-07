@@ -3,6 +3,18 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.17.0] — 2026-07-07
+
+### Added
+
+- **Protocole E2E agentique** (`test/PROTOCOL-E2E.md`) — le trou de couverture restant : les suites mécaniques gardent scripts/hooks/manifests, RIEN ne testait qu'une session Claude suivant les skills produit les bons artefacts. Protocole rejouable à chaque version majeure : fixture « caisse » (mini-app réelle + bug dormant), **12 phases** (greenfield, brownfield, cadrage+piège bucket, spec, conception, pipeline tdd, artefacts+supersede, debug, feature-done+pivot, doc-health+codemap, scaffold, handoff), **cas d'erreur E1-E5** (tester les REFUS : ADR immuable, buckets, maillon absent…), **phases M** manuel-assisté (auto-invocation, hooks réels, permissions, plugins, compaction — honnêtement classées non-testables headless), verdicts PASS/PARTIEL/FAIL/N-T + F-notes (successeur méthodologique de TEST-REPORT F1→F10).
+- **`test/verify-e2e.py`** — vérificateur scripté des invariants post-run (stdlib, tolérant à la matière absente) : CORE=0, bootstrap purgé, 4 fichiers/spec, numérotation continue, specs↔ROADMAP, statuts ADR + cohérence `supersedes`, leçons statutées, HANDOFF sans placeholder, version tracée dans stack.md.
+
+### Notes — étalonnage réel (fixture « caisse »)
+
+- 12 phases + E1-E4 jouées : **PASS** ; `verify-e2e.py` : **18/18 au premier run**.
+- **F1 attrapée par l'étalonnage** : le bug dormant conçu pour la Phase 6 (« remise après TVA ») était mathématiquement équivalent au code correct (commutativité) → aucun rouge, le debug ne testait rien. Fixture corrigée (remise en montant absolu), phase rejouée avec rouge observé. Un protocole jamais joué ment.
+
 ## [0.16.0] — 2026-07-07
 
 Durcissement final post-revue de système : gardes permanentes, fin des comptes dupliqués, traçabilité de version, régime de contexte.
