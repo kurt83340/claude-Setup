@@ -181,7 +181,7 @@ supersedes: null # ou 0003
 
 **Changement d'avis** : créer un nouvel ADR avec `supersedes: 00XX`, l'ancien passe en `status: superseded`. Ne JAMAIS éditer un ADR existant.
 
-Détails complets : [@.claude/docs/adr/README.md](.claude/docs/adr/README.md)
+Détails complets : [adr/README.md](../docs/adr/README.md)
 
 ## Convention diagrammes (3 formats)
 

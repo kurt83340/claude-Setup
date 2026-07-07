@@ -160,6 +160,8 @@ doute, montrer d'abord le `--dry-run` des deux types et faire trancher.
 **Traçabilité** : ajoute en tête de `.claude/docs/stack.md` la ligne
 `> Généré depuis le template claude-Setup vX.Y.Z le YYYY-MM-DD` (version : lire
 `.claude/template-version`, qui RESTE dans le projet — c'est lui qui permettra un futur upgrade).
+⚠️ En `script-jetable`, `stack.md` vient d'être supprimé par le profil → sauter cette ligne
+(la trace vit alors uniquement dans `.claude/template-version`).
 
 Committer le résultat — `git add -A` embarque les suppressions faites par le script :
 

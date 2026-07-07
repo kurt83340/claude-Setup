@@ -62,16 +62,22 @@ vérifier que l'adoption **ne détruit rien**.
 
 ---
 
-## Phase 0 — Greenfield : init complet
+## Phase 0 — Greenfield : init complet (× 5 types)
 
 **Actions** : rsync documenté (USAGE §Setup) → `chmod +x hooks` → `git init` + snapshot →
-`vars.json` (10 CORE) → `render.py --vars` → `--check` → `cleanup-for-type.py --type
-python-app` → traçabilité version dans `stack.md` → commit init.
+`vars.json` (10 CORE) → `render.py --vars` → `--check` → `cleanup-for-type.py --type <t>` →
+traçabilité version dans `stack.md` (si conservé par le profil) → commit init.
+⚠️ **Rejouer pour CHAQUE `--type`** (`script-jetable`, `automation-n8n`, `python-app`,
+`web-app`, `bdd-migration`) — cette étape est purement mécanique, un harnais scripté suffit
+(boucle rsync→render→cleanup→verify-e2e ; le déroulé agentique complet reste sur UN type).
 
 **PASS si** : 0 CORE restant (grep du périmètre substitué) · skills bootstrap absents ·
-inventaires purgés (0 réf `/init-from-template`) · allow-rules mortes purgées ·
-`.claude/template-version` présent · ligne `Template claude-Setup vX.Y.Z` dans `stack.md` ·
-3 `@-imports` dans CLAUDE.md · hooks exécutables.
+inventaires SANS skill mort (bootstrap + skills supprimés par le profil ; compte « N skills
+cœur » recalé) · nav sans lien mort (pointeurs create-on-demand ACCESS/GLOSSARY/RUNBOOK
+conservés) · allow-rules mortes purgées · `.claude/template-version` présent · ligne
+`Template claude-Setup vX.Y.Z` dans `stack.md` (**sauf** `script-jetable` qui supprime
+stack.md — la trace = `template-version` seul) · @-imports CLAUDE.md tous vivants (3 ;
+1 en `script-jetable`, ROADMAP/code-map supprimés par le profil) · hooks exécutables.
 
 ## Phase 0bis — Brownfield : adoption
 
@@ -217,3 +223,26 @@ verify-e2e.py : N/N ✅
 
 Frictions :
 - **F1** — le bug dormant initialement conçu (« remise après TVA ») était **mathématiquement équivalent** au code correct (commutativité) → aucun test ne rougissait, la Phase 6 ne testait rien. Corrigé dans la fixture : remise soustraite en montant absolu. **Leçon de protocole : toujours vérifier que le bug injecté fait ROUGIR avant de dérouler le debug.**
+
+---
+
+## Rapport complémentaire — Phase 0 × 5 types (mécanique), 2026-07-08
+
+Phase 0 rejouée sur les **5 profils** de `cleanup-for-type.py` via harnais scripté
+(rsync documenté → render → cleanup → verify-e2e + scan liens morts/inventaire) :
+
+| Type | verify-e2e | Liens morts | Inventaire mort |
+|---|---|---|---|
+| script-jetable · automation-n8n · python-app · web-app · bdd-migration | **PASS ×5** | 0 ×5 | 0 ×5 |
+
+Frictions trouvées puis corrigées en v0.18.0 (détail : `.github/CHANGELOG.md`) :
+- **F2** — `verify-e2e.py` FAIL sur tout jetable Phase-0-only (HANDOFF jamais exercé compté
+  comme raté ; « 3 @-imports » faux pour `script-jetable`) → checks rendus type/état-aware.
+- **F3** — `script-jetable` laissait un projet **incohérent** : inventaire avec 11 skills
+  morts, section Agent perso vers `agents/` supprimé, 6+ liens de nav morts (conception,
+  ADR, stack, cadrage/sous-dossiers) → purges généralisées dans `cleanup-for-type.py`.
+- **F4** — le message de fin `automation-n8n` recommandait le plugin **retiré**
+  `n8n-expertise` (mort depuis v0.14.0) → plugin officiel `n8n-mcp-skills`.
+- **F5** — liens shippés morts dans TOUT projet généré : `../plugins/`, `../EXAMPLES/…`
+  (dossiers strippés à l'init) et lien relatif `adr/README.md` cassé depuis `rules/`
+  (résolvait `.claude/rules/.claude/docs/…`) → délinkés/corrigés côté template.

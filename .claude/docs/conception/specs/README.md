@@ -59,4 +59,4 @@ cp .claude/skills/spec/templates/{research,spec,plan,tasks}.md \
 ## Template d'une spec (à copier dans 00X-feature/)
 
 Source de vérité = les templates bundlés `.claude/skills/spec/templates/`.
-Exemple rempli (référence optionnelle) : [EXAMPLES/acme-sync-erp-notion-docs/conception/specs/001-erp-connector/](../../../../EXAMPLES/acme-sync-erp-notion-docs/conception/specs/001-erp-connector/).
+Exemple rempli (référence optionnelle) : `EXAMPLES/acme-sync-erp-notion-docs/conception/specs/001-erp-connector/` — dans le **repo template claude-Setup** (exclu des projets générés).

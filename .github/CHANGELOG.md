@@ -3,6 +3,47 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.18.0] — 2026-07-08
+
+Phase 0 du protocole E2E rejouée mécaniquement sur les **5 types** de `cleanup-for-type.py`
+(harnais rsync→render→cleanup→verify-e2e + scan liens/inventaire) : 4 frictions corrigées
+(F2-F5, détail dans `test/PROTOCOL-E2E.md` § Rapport complémentaire). Résultat : **PASS ×5,
+0 lien mort, 0 inventaire mort** sur les cinq profils.
+
+### Added
+
+- **Cohérence post-cleanup par profil** (`cleanup-for-type.py`) : la purge d'inventaire est
+  généralisée des seuls skills bootstrap à **tous les skills supprimés par le profil** —
+  bullets et rangées de table dans `.claude/CLAUDE.md`, `rules/template-maintenance.md`,
+  `USAGE.md` et `CLAUDE.md` racine (forme d'invocation backtickée `` `/nom `` uniquement,
+  jamais les chemins), compte « **N skills cœur** » recalé, sous-sections vidées repliées,
+  sections structurellement mortes retirées (« Agent perso »/« Agents disponibles » si
+  `agents/` part, « Pipelines récurrents » si `/feature` part, « Agent teams » si la rule
+  part). Nouvelle purge des **liens de navigation morts** (CLAUDE.md racine,
+  `cadrage/README.md`, `template-maintenance.md`) avec recouture des séparateurs « · » —
+  les pointeurs create-on-demand (ACCESS/GLOSSARY/RUNBOOK/STAKEHOLDERS) et les
+  liens-patterns sont **conservés**. Greenfield uniquement (jamais en `--brownfield`).
+- `script-jetable` supprime aussi `.claude/rules/agent-teams.md` — protocole d'équipe
+  auto-chargé à chaque session, sans objet sur un 1-shot (agents déjà retirés).
+- `test/test_cleanup.py` : bloc 5 « cohérence script-jetable » + assertions non-régression
+  python-app/dry-run (40 → 67 checks).
+
+### Fixed
+
+- **`cleanup-for-type.py` (type `automation-n8n`)** : le message de fin recommandait encore
+  le plugin **retiré** `n8n-expertise` (`/plugin install n8n-expertise@claude-setup`,
+  mort depuis v0.14.0) → plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills).
+- **`verify-e2e.py`** ne FAIL plus sur un jetable qui n'a joué que la Phase 0 : HANDOFF
+  jamais exercé (template intact) → **skip** au lieu de fail ; « 3 @-imports » strict →
+  « 1-3 @-imports, tous vivants » (`script-jetable` en garde légitimement 1 après purge).
+- **Liens shippés morts dans tout projet généré** : réfs `../plugins/` et `../EXAMPLES/…`
+  délinkées dans `.claude/CLAUDE.md` + `conception/specs/README.md` (dossiers strippés à
+  l'init) ; lien `adr/README.md` de `rules/template-maintenance.md` **cassé partout**
+  (relatif depuis `rules/` → résolvait `.claude/rules/.claude/docs/…`) corrigé en
+  `../docs/adr/README.md`.
+- `init-from-template/SKILL.md` Étape 4 : la traçabilité `stack.md` est sautée en
+  `script-jetable` (le profil supprime le fichier — la trace = `.claude/template-version`).
+
 ## [0.17.0] — 2026-07-07
 
 ### Added

@@ -61,8 +61,14 @@ def main():
     ok(".claude/template-version présent", tcl.is_file())
     claude_md = root / "CLAUDE.md"
     if claude_md.is_file():
-        n = len(re.findall(r"@\.claude/\S+", claude_md.read_text(encoding="utf-8")))
-        ok(f"CLAUDE.md = 3 @-imports (trouvés : {n})", n == 3)
+        # 3 @-imports en profil complet ; script-jetable en garde légitimement moins
+        # (ROADMAP/code-map supprimés par le profil) → invariant : 1 à 3, tous vivants.
+        imps = re.findall(r"@(\.claude/\S+)", claude_md.read_text(encoding="utf-8"))
+        broken = [i for i in imps if not (root / i).exists()]
+        ok(f"CLAUDE.md : 1-3 @-imports, tous vivants (trouvés : {len(imps)})",
+           1 <= len(imps) <= 3 and not broken)
+        if broken:
+            print(f"     → morts : {broken}")
     inv = root / ".claude" / "CLAUDE.md"
     if inv.is_file():
         t = inv.read_text(encoding="utf-8")
@@ -145,7 +151,11 @@ def main():
         skip("lecons.md (aucune entrée)")
     ho = docs / "HANDOFF.md"
     if ho.is_file():
-        ok("HANDOFF sans placeholder {{ }}", "{{" not in ho.read_text(encoding="utf-8"))
+        ht = ho.read_text(encoding="utf-8")
+        if ht.startswith("# HANDOFF — {{"):
+            skip("HANDOFF jamais exercé (template intact — Phase 10 non jouée)")
+        else:
+            ok("HANDOFF sans placeholder {{ }}", "{{" not in ht)
     st = docs / "stack.md"
     if st.is_file():
         ok("stack.md trace la version du template",

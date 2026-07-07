@@ -71,7 +71,7 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 > Les « custom commands » (`.claude/commands/`) ont **fusionné avec les skills** — le template
 > n'utilise plus que le format skill ([doc officielle](https://code.claude.com/docs/en/skills) :
 > "Skills are recommended"). Pour ajouter un `/nom` projet : `.claude/skills/<nom>/SKILL.md`
-> (plugins stack : [plugins/](../plugins/)).
+> (plugins stack : marketplace `claude-setup` — source `plugins/` dans le repo template).
 
 ## Agent perso (`.claude/agents/`)
 
@@ -81,4 +81,4 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 
 ---
 
-> 💡 **Exemple complet rempli (référence optionnelle)** : [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/) — projet ACME (Sync ERP→Notion). Présent dans le **repo template uniquement** (exclu de ton projet par le rsync d'init). À consulter pour voir « à quoi ça ressemble une fois rempli ». Ce n'est **pas** le mécanisme de scaffolding (ça, c'est `/spec` + ses templates bundlés `.claude/skills/spec/templates/`).
+> 💡 **Exemple complet rempli (référence optionnelle)** : `EXAMPLES/acme-sync-erp-notion-docs/` — projet ACME (Sync ERP→Notion). Présent dans le **repo template uniquement** (exclu de ton projet par le rsync d'init — pas de lien : le dossier n'existe pas ici). À consulter pour voir « à quoi ça ressemble une fois rempli ». Ce n'est **pas** le mécanisme de scaffolding (ça, c'est `/spec` + ses templates bundlés `.claude/skills/spec/templates/`).

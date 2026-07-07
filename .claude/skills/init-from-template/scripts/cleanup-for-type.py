@@ -65,6 +65,9 @@ SCRIPT_JETABLE = {
         # (adopt-template : déjà retiré pour tous les types via TEMPLATE_MAINTENANCE)
         # Agents (pas besoin doc-maintainer pour 1-shot)
         ".claude/agents/",
+        # Protocole d'équipe auto-chargé à CHAQUE session : sans objet en 1-shot
+        # (agents retirés ci-dessus, pas de specs à partitionner)
+        ".claude/rules/agent-teams.md",
         # Hooks code (pas de code structuré)
         ".claude/hooks/pretooluse-inject-codemap.py",
         ".claude/hooks/posttooluse-growth-detection.py",
@@ -80,7 +83,9 @@ AUTOMATION_N8N = {
         # RUNBOOK créé post-prod uniquement
         ".claude/docs/RUNBOOK.md",
     ],
-    "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod). Skills n8n = plugin 'n8n-expertise' à installer (/plugin install n8n-expertise@claude-setup), plus de copie.",
+    "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod). Skills n8n = plugin OFFICIEL "
+                   "'n8n-mcp-skills' (czlonkowski/n8n-skills) : /plugin marketplace add czlonkowski/n8n-skills "
+                   "puis /plugin install n8n-mcp-skills@n8n-mcp-skills — plus de copie.",
 }
 
 # python-app : retire workflows/
@@ -223,7 +228,8 @@ def cleanup(root: Path, profile_name: str, dry_run: bool, brownfield: bool = Fal
         prune_dead_hooks(root)
         if not brownfield:
             prune_dead_permissions(root)
-            prune_bootstrap_inventory(root)
+            prune_dead_inventory(root, profile)
+            prune_dead_nav_links(root)
 
     return 0
 
@@ -258,22 +264,150 @@ def strip_template_maintenance(root: Path, dry_run: bool) -> int:
     return removed
 
 
-def prune_bootstrap_inventory(root: Path) -> None:
-    """Le strip vient de supprimer les skills bootstrap (init-from-template / adopt-template) :
-    retire leurs lignes d'inventaire (puces et lignes de tableau) des index SHIPPÉS — sinon
-    chaque projet généré recense 2 skills morts. Greenfield uniquement."""
-    pat = re.compile(r"/(?:init-from-template|adopt-template)\b")
-    for rel in (".claude/CLAUDE.md", ".claude/rules/template-maintenance.md", "USAGE.md"):
+def _profile_skill_names(profile: dict) -> list:
+    """Noms des skills que le profil supprime (entrées `.claude/skills/<nom>/`)."""
+    return [m.group(1) for rel in profile["delete"]
+            if (m := re.match(r"^\.claude/skills/([a-z0-9-]+)/$", rel))]
+
+
+def _drop_section(text: str, heading_prefix: str) -> str:
+    """Retire une section entière : du heading matché au prochain heading de niveau ≤
+    (ou séparateur `---`), exclus. Gère `##` comme `###`."""
+    out, skipping, level = [], False, 0
+    for line in text.split("\n"):
+        m = re.match(r"(#{1,4}) ", line)
+        if skipping and ((m and len(m.group(1)) <= level) or line.startswith("---")):
+            skipping = False
+        if not skipping and line.startswith(heading_prefix) and m:
+            level = len(m.group(1))
+            skipping = True
+        if not skipping:
+            out.append(line)
+    return "\n".join(out)
+
+
+def _drop_empty_sections(text: str) -> str:
+    """Replie les headings dont la section a été intégralement vidée par la purge (le
+    prochain contenu non vide est un heading de niveau ≤ — ex. `### Audit` sans plus
+    aucun bullet). Une section dont il reste du texte (blockquote, prose) est conservée."""
+    lines = text.split("\n")
+    changed = True
+    while changed:
+        changed = False
+        out = []
+        for i, line in enumerate(lines):
+            m = re.match(r"(#{2,4}) ", line)
+            if m:
+                nxt = next((x for x in lines[i + 1:] if x.strip()), "")
+                nm = re.match(r"(#{1,4}) ", nxt)
+                if not nxt or nxt.startswith("---") or (nm and len(nm.group(1)) <= len(m.group(1))):
+                    changed = True
+                    continue
+            out.append(line)
+        lines = out
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines))
+
+
+def _fix_core_count(text: str) -> str:
+    """Recale le compte « **N skills cœur** » de l'inventaire sur les bullets restants."""
+    m = re.search(r"\*\*(\d+) skills cœur\*\*", text)
+    if m:
+        n = len({s for s in re.findall(r"^- `/([a-z0-9-]+)", text, re.M)})
+        if n != int(m.group(1)):
+            text = re.sub(r"\*\*\d+ skills cœur\*\*", f"**{n} skills cœur**", text, count=1)
+    return text
+
+
+def prune_dead_inventory(root: Path, profile: dict) -> None:
+    """Purge des index shippés (inventaire `.claude/CLAUDE.md`, tables des rules/USAGE,
+    reminders du CLAUDE.md racine) les lignes — bullets et rangées de table — qui
+    référencent un skill ABSENT : bootstrap (init/adopt, retirés pour tous les types)
+    + skills supprimés par le profil (ex. script-jetable). Replie les sections
+    structurellement liées (« Agent perso » si `agents/` supprimé, « Pipelines
+    récurrents » si `/feature` parti), les sous-sections vidées, et recale le compte
+    « N skills cœur ». Greenfield uniquement — sinon chaque projet généré recense des
+    composants morts (l'inventaire est la carte d'invocation)."""
+    names = ["init-from-template", "adopt-template"]
+    names += [n for n in _profile_skill_names(profile)
+              if not (root / ".claude" / "skills" / n).exists()]
+    # Forme d'invocation UNIQUEMENT (backtick + slash : `/nom`) — jamais les chemins
+    # (`.claude/docs/adr/` contient « /adr » mais n'est pas une réf de skill).
+    pat = re.compile("`/(?:%s)(?![\\w-])" % "|".join(re.escape(n) for n in names))
+    for rel in ("CLAUDE.md", ".claude/CLAUDE.md",
+                ".claude/rules/template-maintenance.md", "USAGE.md"):
         p = root / rel
         if not p.exists():
             continue
-        lines = p.read_text(encoding="utf-8").split("\n")
+        text = p.read_text(encoding="utf-8")
+        lines = text.split("\n")
         kept = [l for l in lines
                 if not (pat.search(l) and l.lstrip().startswith(("-", "|")))]
         removed = len(lines) - len(kept)
+        new = "\n".join(kept)
+        if rel == ".claude/CLAUDE.md":
+            if not (root / ".claude" / "agents").exists():
+                new = _drop_section(new, "## Agent perso")
+            if not (root / ".claude" / "skills" / "feature").exists():
+                new = _drop_section(new, "## 🔁 Pipelines récurrents")
+            new = _fix_core_count(_drop_empty_sections(new))
+        if rel == ".claude/rules/template-maintenance.md":
+            if not (root / ".claude" / "agents").exists():
+                new = _drop_section(new, "### Agent perso")
+                new = _drop_section(new, "### Agents disponibles")
+            if not (root / ".claude" / "rules" / "agent-teams.md").exists():
+                new = _drop_section(new, "## Agent teams")
+            new = _drop_empty_sections(new)
+        if new != text:
+            p.write_text(new, encoding="utf-8")
+            print(f"🔧 {rel} : inventaire purgé ({removed} ligne(s) morte(s))")
+
+
+_ON_DEMAND_LINKS = {"ACCESS.md", "GLOSSARY.md", "RUNBOOK.md", "STAKEHOLDERS.md"}
+_PATTERN_HINTS = ("{{", "}}", "XXX", "YYY", "00X", "YYYY", "...", "…", "*")
+
+
+def prune_dead_nav_links(root: Path) -> None:
+    """Purge des hubs de navigation (CLAUDE.md racine, cadrage/README.md) les liens
+    markdown relatifs dont la cible vient d'être supprimée par le profil. Conserve les
+    pointeurs create-on-demand (_ON_DEMAND_LINKS — fichiers créés par trigger, jamais
+    shippés) et les liens-patterns/exemples. Ligne sans plus aucun lien vivant →
+    retirée ; sinon seuls les liens morts sont retirés (séparateurs « · » recousus).
+    Greenfield uniquement (en brownfield, ces fichiers appartiennent à l'utilisateur)."""
+    link_re = re.compile(r"\[[^\]]*\]\(([^)\s#]+)\)")
+    for rel in ("CLAUDE.md", ".claude/docs/cadrage/README.md",
+                ".claude/rules/template-maintenance.md"):
+        p = root / rel
+        if not p.exists():
+            continue
+        out, removed = [], 0
+        for line in p.read_text(encoding="utf-8").split("\n"):
+            spans, alive = [], 0
+            for m in link_re.finditer(line):
+                target = m.group(1)
+                if target.startswith(("http", "mailto:", "/")) or \
+                        any(h in target for h in _PATTERN_HINTS):
+                    alive += 1
+                    continue
+                resolved = (p.parent / target).resolve()
+                if resolved.exists() or resolved.name in _ON_DEMAND_LINKS:
+                    alive += 1
+                else:
+                    spans.append((m.start(), m.end()))
+            if not spans:
+                out.append(line)
+                continue
+            removed += len(spans)
+            if not alive:  # plus aucun lien vivant → la ligne entière est morte
+                continue
+            for s, e in reversed(spans):
+                line = line[:s] + line[e:]
+            line = re.sub(r"(?:\s*·\s*){2,}", " · ", line)  # séparateurs orphelins
+            line = re.sub(r":\s*·\s*", ": ", line)
+            line = re.sub(r"\s*·\s*$", "", line).rstrip()
+            out.append(line)
         if removed:
-            p.write_text("\n".join(kept), encoding="utf-8")
-            print(f"🔧 {rel} : {removed} ligne(s) d'inventaire bootstrap retirée(s)")
+            p.write_text("\n".join(out), encoding="utf-8")
+            print(f"🔧 {rel} : {removed} lien(s) mort(s) retiré(s) (cible supprimée par le profil)")
 
 
 def prune_dead_permissions(root: Path) -> None:

@@ -14,6 +14,10 @@ Garde-fous testés ici :
   3. précision de prune_dead_permissions — globs et chemins hors-projet CONSERVÉS
   4. purge des lignes d'inventaire bootstrap dans les index shippés
   5. --dry-run — ne supprime rien
+  6. cohérence post-profil (E2E Phase 0 × 5 types, 2026-07-08) — script-jetable : inventaire
+     purgé des skills supprimés (forme `/nom` backtickée UNIQUEMENT, jamais les chemins),
+     compte « N skills cœur » recalé, sections mortes repliées (Agent perso, Pipelines,
+     Agent teams), liens de nav morts recousus, pointeurs create-on-demand CONSERVÉS
 
 Usage : python3 test/test_cleanup.py   (exit 0 = tout vert)
 """
@@ -61,20 +65,118 @@ ALLOW_RULES = [
 ]
 
 
+NAV_CLAUDE_MD = """# projet
+
+### 🔄 Auto-chargés
+
+- Reprise session : @.claude/docs/HANDOFF.md ⭐
+- Roadmap : @.claude/docs/ROADMAP.md
+
+### 📂 Lus à la demande
+
+- 🎨 **Conception** : [PRD](.claude/docs/conception/PRD.md) · [tasks](.claude/docs/conception/tasks.md)
+- 🔄 **Suivi** : [ACCESS](.claude/docs/ACCESS.md) · [CHANGELOG](.claude/docs/CHANGELOG.md) · [stack](.claude/docs/stack.md)
+- 📚 **Transversaux** : [ADR](.claude/docs/adr/) · [GLOSSARY](.claude/docs/GLOSSARY.md)
+
+## Reminders
+
+- Décision structurante → ADR (via `/adr`)
+- Fin de session : `/handoff`
+"""
+
+INDEX_CLAUDE_MD = """# tpl — skills & agents
+
+## Skills
+
+### Session & feature
+
+- `/handoff` ⭐ — snapshot fin de session
+- `/spec "<titre>"` ⭐ — scaffold feature
+
+### Cycle de vie
+
+- `/adr [mode] <args>` — ADRs
+- `/lecon [mode] <args>` — leçons
+
+### Bootstrap
+
+- `/init-from-template` — init one-shot
+- `/adopt-template` — brownfield one-shot
+
+> 🗂️ **Inventaire canonique** : cette liste (**6 skills cœur**) est la source de vérité.
+
+## 🔁 Pipelines récurrents (orchestrés par `/feature`)
+
+- **standard** : `/spec` → coder → tests
+
+## Agent perso (`.claude/agents/`)
+
+- `doc-maintainer` — subagent doc
+
+## Marketplace
+
+> plugins stack via `/plugin install db-migration@claude-setup`.
+"""
+
+MAINTENANCE_MD = """| `/init-from-template` ⭐ | UNE FOIS |
+| `/handoff` ⭐ | fin de session |
+| `/spec` ⭐ | démarrer une feature |
+
+Détails complets : [adr/README.md](../docs/adr/README.md)
+
+### Agent perso (`.claude/agents/`)
+
+| doc-maintainer | Task tool |
+
+### Agents disponibles
+
+→ [table](../agents/README.md)
+
+## Agent teams — anti-collision
+
+> Source unique : [agent-teams.md](agent-teams.md)
+
+## Fin
+
+ok
+"""
+
+CADRAGE_MD = """# Cadrage
+
+**Docs reçus :** voir [documents/](documents/)
+**Diagrammes** : [diagrams/README.md](diagrams/README.md)
+**Tickets liés :** {{[TICKET-XXX](tickets/TICKET-XXX-...md)}}
+"""
+
+
 def scaffold_template_bits(root: Path):
-    """Le scaffold que le template pose dans tout projet (bootstrap skills, docs)."""
+    """Le scaffold que le template pose dans tout projet (bootstrap skills, docs, nav)."""
     write(root / ".claude" / "skills" / "init-from-template" / "scripts" / "cleanup-for-type.py")
     write(root / ".claude" / "skills" / "adopt-template" / "SKILL.md")
     write(root / ".claude" / "skills" / "handoff" / "SKILL.md")
+    write(root / ".claude" / "skills" / "spec" / "SKILL.md")
+    write(root / ".claude" / "skills" / "lecon" / "SKILL.md")
+    write(root / ".claude" / "skills" / "feature" / "SKILL.md")
+    write(root / ".claude" / "agents" / "doc-maintainer.md")
+    write(root / ".claude" / "rules" / "agent-teams.md")
     write(root / ".claude" / "docs" / "RUNBOOK.md")
-    write(root / "CLAUDE.md", "# projet\n")
-    write(root / ".claude" / "CLAUDE.md",
-          "## Bootstrap\n\n- `/init-from-template` — init one-shot\n"
-          "- `/adopt-template` — brownfield one-shot\n- `/handoff` — fin de session\n")
+    write(root / ".claude" / "docs" / "HANDOFF.md")
+    write(root / ".claude" / "docs" / "ROADMAP.md")
+    write(root / ".claude" / "docs" / "stack.md")
+    write(root / ".claude" / "docs" / "CHANGELOG.md")
+    write(root / ".claude" / "docs" / "lecons.md")
+    write(root / ".claude" / "docs" / "conception" / "PRD.md")
+    write(root / ".claude" / "docs" / "conception" / "tasks.md")
+    write(root / ".claude" / "docs" / "adr" / "README.md")
+    write(root / ".claude" / "docs" / "cadrage" / "README.md", CADRAGE_MD)
+    write(root / ".claude" / "docs" / "cadrage" / "documents" / "src.md")
+    write(root / ".claude" / "docs" / "cadrage" / "diagrams" / "README.md")
+    write(root / "CLAUDE.md", NAV_CLAUDE_MD)
+    write(root / ".claude" / "CLAUDE.md", INDEX_CLAUDE_MD)
     write(root / "USAGE.md",
-          "| Nouveau projet | `/init-from-template` |\n| Fin de session | `/handoff` |\n")
-    write(root / ".claude" / "rules" / "template-maintenance.md",
-          "| `/init-from-template` ⭐ | UNE FOIS |\n| `/handoff` ⭐ | fin de session |\n")
+          "| Nouveau projet | `/init-from-template` |\n| Fin de session | `/handoff` |\n"
+          "| Feature | `/spec` |\n")
+    write(root / ".claude" / "rules" / "template-maintenance.md", MAINTENANCE_MD)
     write(root / ".claude" / "tools" / "mytool.py")
     write(root / ".claude" / "settings.json",
           json.dumps({"permissions": {"allow": list(ALLOW_RULES)}}, indent=2))
@@ -89,7 +191,7 @@ def make_greenfield(tmp: Path) -> Path:
     write(root / ".github" / "CHANGELOG.md")
     write(root / "test" / "test_hooks.py")
     write(root / "EXAMPLES" / "acme-sync-erp-notion-docs" / "_CLAUDE.md")
-    write(root / "plugins" / "n8n-expertise" / ".claude-plugin" / "plugin.json", "{}\n")
+    write(root / "plugins" / "db-migration" / ".claude-plugin" / "plugin.json", "{}\n")
     write(root / ".claude-plugin" / "marketplace.json", "{}\n")
     write(root / "workflows" / "README.md")
     return root
@@ -133,9 +235,19 @@ with tempfile.TemporaryDirectory() as td:
     inv = (g / ".claude" / "CLAUDE.md").read_text()
     ok("inventaire : bullets bootstrap purgés", "/init-from-template" not in inv and "/adopt-template" not in inv)
     ok("inventaire : bullet /handoff conservé", "/handoff" in inv)
+    ok("inventaire : /spec conservé (profil sans skills supprimés)", "`/spec" in inv)
+    ok("inventaire : compte « skills cœur » recalé (6→4)", "**4 skills cœur**" in inv)
+    ok("inventaire : sections Pipelines + Agent perso conservées",
+       "Pipelines récurrents" in inv and "Agent perso" in inv)
     ok("inventaire USAGE : ligne bootstrap purgée", "/init-from-template" not in (g / "USAGE.md").read_text())
-    ok("inventaire rules : ligne bootstrap purgée",
-       "/init-from-template" not in (g / ".claude/rules/template-maintenance.md").read_text())
+    tm = (g / ".claude/rules/template-maintenance.md").read_text()
+    ok("inventaire rules : ligne bootstrap purgée", "/init-from-template" not in tm)
+    ok("rules : sections agents/teams + lien adr conservés",
+       "Agent teams" in tm and "Agents disponibles" in tm and "adr/README.md" in tm)
+    nav = (g / "CLAUDE.md").read_text()
+    ok("nav intacte : @-imports + liens vivants + pointeurs on-demand conservés",
+       "@.claude/docs/ROADMAP.md" in nav and "[tasks]" in nav
+       and "[ACCESS]" in nav and "[GLOSSARY]" in nav)
 
     print("\n== 2. HOMONYMES : dossiers user SANS sentinelle → jamais touchés (même sans flag) ==")
     h = tmp / "homonymes"
@@ -176,6 +288,55 @@ with tempfile.TemporaryDirectory() as td:
     ok("rien supprimé (.github toujours là)", (d / ".github/workflows/ci.yml").exists())
     ok("rien supprimé (plugins toujours là)", (d / "plugins").exists())
     ok("settings intact", allow_of(d) == ALLOW_RULES)
+    ok("inventaire/nav non modifiés en dry-run",
+       "**6 skills cœur**" in (d / ".claude/CLAUDE.md").read_text())
+    ok("message n8n → plugin OFFICIEL n8n-mcp-skills (plus n8n-expertise)",
+       "n8n-mcp-skills" in r.stdout and "n8n-expertise" not in r.stdout)
+
+    print("\n== 5. SCRIPT-JETABLE : cohérence post-profil (inventaire, sections, nav) ==")
+    j = make_greenfield(tmp)
+    r = run(j, "--type", "script-jetable")
+    ok("exit 0", r.returncode == 0)
+    ok("rule agent-teams supprimée (protocole équipe sans objet en 1-shot)",
+       not (j / ".claude/rules/agent-teams.md").exists())
+    ok("vitaux conservés : lecons.md + CHANGELOG + skills handoff/lecon",
+       (j / ".claude/docs/lecons.md").exists() and (j / ".claude/docs/CHANGELOG.md").exists()
+       and (j / ".claude/skills/handoff/SKILL.md").exists()
+       and (j / ".claude/skills/lecon/SKILL.md").exists())
+    inv = (j / ".claude" / "CLAUDE.md").read_text()
+    ok("inventaire : skills du profil purgés (`/spec`, `/adr`)",
+       "`/spec" not in inv and "`/adr" not in inv)
+    ok("inventaire : vitaux conservés (`/handoff`, `/lecon`)",
+       "`/handoff" in inv and "`/lecon" in inv)
+    ok("inventaire : compte recalé (6→2 skills cœur)", "**2 skills cœur**" in inv)
+    ok("inventaire : sections mortes repliées (Agent perso, Pipelines)",
+       "Agent perso" not in inv and "Pipelines récurrents" not in inv)
+    ok("inventaire : section suivante intacte (Marketplace)", "## Marketplace" in inv)
+    nav = (j / "CLAUDE.md").read_text()
+    ok("nav : @-import HANDOFF conservé, ROADMAP mort retiré",
+       "@.claude/docs/HANDOFF.md" in nav and "ROADMAP" not in nav)
+    ok("nav : ligne Conception (100% morte) retirée", "Conception" not in nav)
+    ok("nav : lien stack mort retiré, CHANGELOG recousu",
+       "[stack]" not in nav and "[CHANGELOG](.claude/docs/CHANGELOG.md)" in nav)
+    ok("nav : pointeurs create-on-demand CONSERVÉS (ACCESS, GLOSSARY)",
+       "[ACCESS]" in nav and "[GLOSSARY]" in nav)
+    ok("nav : segment ADR mort retiré (chemin ≠ réf skill)", "(.claude/docs/adr/)" not in nav)
+    ok("nav : recousue sans séparateur orphelin",
+       "·  ·" not in nav and ": ·" not in nav
+       and not any(l.rstrip().endswith("·") for l in nav.split("\n")))
+    ok("nav : reminder `/adr` purgé, `/handoff` conservé",
+       "(via `/adr`)" not in nav and "`/handoff`" in nav)
+    cad = (j / ".claude/docs/cadrage/README.md").read_text()
+    ok("cadrage : liens vers sous-dossiers supprimés purgés",
+       "[documents/]" not in cad and "diagrams/README.md" not in cad)
+    ok("cadrage : ligne pattern (TICKET-XXX) conservée", "TICKET-XXX" in cad)
+    tm = (j / ".claude/rules/template-maintenance.md").read_text()
+    ok("rules : rangée `/spec` purgée, `/handoff` conservée",
+       "`/spec" not in tm and "`/handoff" in tm)
+    ok("rules : sections agents/teams repliées",
+       "Agent perso" not in tm and "Agents disponibles" not in tm and "Agent teams" not in tm)
+    ok("rules : lien adr mort purgé, section suivante intacte",
+       "adr/README.md" not in tm and "## Fin" in tm)
 
 print(f"\n{'🎉 CLEANUP OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)
