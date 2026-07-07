@@ -1,5 +1,7 @@
 # Audit multi-agent & qualité — 2026-06-28
 
+> ⚠️ **Document historique** (audit du 2026-06-28) : plusieurs conclusions sont périmées — not. « skills-n8n/ à garder » (remplacé en v0.14.0 par le plugin officiel [czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)) et les chemins `EXAMPLES/skills-*`. État actuel → [.github/CHANGELOG.md](../.github/CHANGELOG.md).
+
 > Complément à `AUDIT-2026-06-28.md` (qui couvrait coût-contexte/bloat/keys mais **excluait explicitement le multi-agent**). Méthode : fan-out de 4 agents (docs / skills+agent / hooks+settings / méta-alignement), chemins & lignes vérifiés.
 
 ## Verdict
