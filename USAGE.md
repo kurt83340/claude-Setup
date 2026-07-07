@@ -9,8 +9,9 @@
 ### Procédure complète (6 étapes, ~5 min)
 
 ```bash
-# 1. Copier le template (exclut l'exemple ACME + test ; garde EXAMPLES/skills-* pour l'init)
-rsync -av --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+# 1. Copier le template (exclut l'exemple ACME, test, la CI, et la source plugins/marketplace)
+rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+  --exclude='plugins/' --exclude='.claude-plugin/' \
   /chemin/vers/template/ /chemin/vers/mon-nouveau-projet/
 
 # 2. Aller dedans
@@ -41,7 +42,7 @@ Claude va :
    - Batch 3 : `COMMANDE_INSTALL`, `COMMANDE_TESTS`, `COMMANDE_RUN`
 3. **Substituer les CORE placeholders** auto (10 substitutions sur ~370 placeholders — le reste est CONTENT à remplir au fil de l'eau)
 4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée**
-5. **Copier auto depuis EXAMPLES** si pertinent (ex: type `automation-n8n` → copie les skills `skills-n8n/` dans `.claude/skills/`)
+5. **Proposer d'installer le plugin stack** si pertinent (type `automation-n8n` → `/plugin install n8n-expertise@claude-setup` ; `bdd-migration` → `db-migration`)
 6. **Te proposer le commit initial** : `feat: init projet <nom> depuis template`
 
 ### Les 5 types de projet (impact sur cleanup)
@@ -51,8 +52,8 @@ Claude va :
 | `script-jetable` | **-80%** | 3 (handoff, lecon, init)                      | 1-shot Python, < 1 jour          |
 | `python-app`     | léger    | 10 (cœur)                                     | App Python (FastAPI, scripts...) |
 | `web-app`        | léger    | 10 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 10 cœur + 7 skills n8n (depuis EXAMPLES)      | Workflow n8n + helpers Python    |
-| `bdd-migration`  | léger    | 10 cœur + `db-migration` (EXAMPLES/skills-db) | Migration BDD avec Alembic       |
+| `automation-n8n` | léger    | 10 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
+| `bdd-migration`  | léger    | 10 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 
@@ -237,7 +238,7 @@ Rapport généré → tu suis les actions par priorité.
 | Idée perso à capturer                      | `/idee "<titre>"`                                                             |
 | Refacto majeur sur le code                 | `/codemap`                                                                    |
 | Audit hebdo                                | `/doc-health`                                                                 |
-| BDD migration (Alembic)                    | `/db-migration` (stack BDD — copié depuis EXAMPLES/skills-db)                 |
+| BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
 | Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                                 |
 | Déléguer une feature à une équipe (tmux)   | `/team <spec-id>` — teammates + worktrees + débrief mémoire                   |
 | Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
@@ -599,7 +600,7 @@ Skills/agents sont **à plat** dans leur dossier respectif. Claude Code scanne `
 │   ├── spec/SKILL.md            → /spec
 │   ├── feature-done/SKILL.md
 │   ├── adr/SKILL.md
-│   ├── n8n-code-python/SKILL.md → /n8n-code-python (exemple stack, préfixé)
+│   ├── deploy/SKILL.md          → /deploy (skill projet ; stacks n8n/BDD = plugins)
 │   ├── ...
 │   └── README.md
 │

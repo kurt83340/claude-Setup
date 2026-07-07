@@ -1,6 +1,6 @@
 ---
 name: init-from-template
-description: Initialise un nouveau projet depuis le template. Pose 10 questions via AskUserQuestion (PROJECT_NAME, type projet, CLIENT_NAME, décideur, commandes stack), substitue les CORE placeholders (UPPER_SNAKE) via render.py, puis lance cleanup-for-type.py adapté au type (script-jetable -80%, automation-n8n copie les skills n8n depuis EXAMPLES, etc.). À invoquer UNE FOIS après copy du template.
+description: Initialise un nouveau projet depuis le template. Pose 10 questions via AskUserQuestion (PROJECT_NAME, type projet, CLIENT_NAME, décideur, commandes stack), substitue les CORE placeholders (UPPER_SNAKE) via render.py, puis lance cleanup-for-type.py adapté au type (script-jetable -80%, etc.). Les stacks (n8n, BDD) sont des plugins installables via /plugin (marketplace claude-setup). À invoquer UNE FOIS après copy du template.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(find:*), Bash(sed:*), Bash(python3:*), Bash(chmod:*), Bash(git init:*), Bash(git add:*), Bash(git commit:*), AskUserQuestion
 disable-model-invocation: true
 ---
@@ -126,10 +126,12 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 | `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
 | `bdd-migration`  | léger    | `workflows/`                                                                                                                                                                                                                                          |
 
-**Copie depuis `EXAMPLES/` (stack-spécifique, hors cœur)** :
+**Skills stack = PLUGINS (plus de copie)** — proposer à l'user d'installer le plugin adapté au type depuis le marketplace (= ce repo template) :
 
-- `automation-n8n` → copie les skills n8n (`EXAMPLES/skills-n8n/n8n-*`)
-- `bdd-migration` → copie le skill `db-migration` (Alembic, `EXAMPLES/skills-db/db-migration`)
+- `automation-n8n` → `/plugin marketplace add kurt83340/claude-Setup` puis `claude plugin install n8n-expertise@claude-setup --scope project`
+- `bdd-migration` → (marketplace ajouté) `claude plugin install db-migration@claude-setup --scope project`
+
+  Les plugins sont **auto-découverts** (aucun ajout à `.claude/CLAUDE.md`). Skills namespacés `/n8n-expertise:<skill>`.
 
 ### Garantie : skills "vitaux" toujours conservés
 

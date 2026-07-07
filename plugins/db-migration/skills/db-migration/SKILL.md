@@ -9,9 +9,9 @@ disable-model-invocation: false
 
 Workflow standardisé pour créer une migration Alembic propre.
 
-> 📦 **Skill stack-spécifique** (Alembic / SQLAlchemy) — vit dans `EXAMPLES/` et n'est PAS
-> dans le cœur du template. Copié dans `.claude/skills/` par `/init-from-template` (type
-> `bdd-migration`), ou à la main : `cp -r EXAMPLES/skills-db/db-migration .claude/skills/`.
+> 📦 **Skill stack-spécifique** (Alembic / SQLAlchemy) — livré par le **plugin `db-migration`**
+> (marketplace `claude-setup`), pas dans le cœur du template. Installer :
+> `/plugin marketplace add kurt83340/claude-Setup` puis `claude plugin install db-migration@claude-setup --scope project`.
 
 ## Étapes
 

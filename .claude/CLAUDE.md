@@ -44,12 +44,14 @@
 
 > 🗂️ **Inventaire canonique** : cette liste (**14 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
-### Skills hors-template (stack-spécifiques — copiés à la demande depuis `EXAMPLES/skills-*`)
+### Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
 
-Hors du cœur (outillage non générique). `/init-from-template` les copie dans `.claude/skills/` selon le **type de projet** choisi :
+Hors du cœur. Packagés en **plugins** installés par projet via `/plugin` — **auto-découverts** (aucun listing à maintenir ici) :
 
-- **n8n** (type `automation-n8n`) → 7 skills d'expertise : `/n8n-node-configuration`, `/n8n-validation-expert`, `/n8n-workflow-patterns`, `/n8n-code-javascript`, `/n8n-code-python`, `/n8n-expression-syntax`, `/n8n-mcp-tools-expert` (source : [`EXAMPLES/skills-n8n/`](../EXAMPLES/skills-n8n/))
-- **BDD / Alembic** (type `bdd-migration`) → `/db-migration` (source : [`EXAMPLES/skills-db/`](../EXAMPLES/skills-db/))
+- **n8n** (type `automation-n8n`) → plugin **`n8n-expertise`** (7 skills : node-configuration, validation-expert, workflow-patterns, code-javascript, code-python, expression-syntax, mcp-tools-expert) → `claude plugin install n8n-expertise@claude-setup --scope project`
+- **BDD / Alembic** (type `bdd-migration`) → plugin **`db-migration`** → `claude plugin install db-migration@claude-setup --scope project`
+
+> Marketplace = ce repo : `/plugin marketplace add kurt83340/claude-Setup`. Source : [`plugins/`](../plugins/) · manifeste : [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json).
 
 Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.claude/skills/` **et les recenser ici** : ce fichier reste l'inventaire unique de **tous** les skills — cœur ou stack.
 
@@ -58,7 +60,7 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 > Les « custom commands » (`.claude/commands/`) ont **fusionné avec les skills** — le template
 > n'utilise plus que le format skill ([doc officielle](https://code.claude.com/docs/en/skills) :
 > "Skills are recommended"). Pour ajouter un `/nom` projet : `.claude/skills/<nom>/SKILL.md`
-> (exemples stack : [EXAMPLES/skills-n8n/](../EXAMPLES/skills-n8n/)).
+> (plugins stack : [plugins/](../plugins/)).
 
 ## Agent perso (`.claude/agents/`)
 

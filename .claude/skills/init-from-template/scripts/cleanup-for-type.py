@@ -11,7 +11,7 @@ Types supportés :
   - automation-n8n : ajustement léger (retire RUNBOOK pas-encore-prod)
   - python-app    : retire workflows/, garde tout sinon
   - web-app       : retire workflows/ (pas n8n)
-  - bdd-migration : copie le skill db-migration depuis EXAMPLES/skills-db
+  - bdd-migration : retire workflows/ (skill db-migration = plugin à installer)
 
 Usage:
     python3 cleanup-for-type.py --type script-jetable [--root .] [--dry-run]
@@ -73,20 +73,13 @@ SCRIPT_JETABLE = {
     "keep_reason": "1-shot script — minimum vital : cadrage, HANDOFF, CHANGELOG, /handoff, /lecon",
 }
 
-# automation-n8n : ajustement léger + copie skills n8n depuis EXAMPLES
+# automation-n8n : ajustement léger (les skills n8n sont un PLUGIN, plus de copie)
 AUTOMATION_N8N = {
     "delete": [
         # RUNBOOK créé post-prod uniquement
         ".claude/docs/RUNBOOK.md",
     ],
-    "copy_examples_glob": {
-        # Tous les skills d'expertise n8n (n8n-*) copiés à plat dans .claude/skills/
-        # (1 niveau, cf. issue #18192). Glob plutôt qu'une liste en dur → le script
-        # n'a pas à être mis à jour quand on ajoute/retire un skill dans EXAMPLES/skills-n8n/.
-        # copy_glob_from_examples skip toute destination déjà existante.
-        "EXAMPLES/skills-n8n/n8n-*": ".claude/skills",
-    },
-    "keep_reason": "n8n full stack — copie les skills d'expertise n8n (n8n-*) depuis EXAMPLES, retire RUNBOOK (créé post-prod)",
+    "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod). Skills n8n = plugin 'n8n-expertise' à installer (/plugin install n8n-expertise@claude-setup), plus de copie.",
 }
 
 # python-app : retire workflows/
@@ -107,16 +100,12 @@ WEB_APP = {
     "keep_reason": "Web app — retire workflows/ (pas n8n)",
 }
 
-# bdd-migration : copie le skill db-migration (Alembic) depuis EXAMPLES (hors cœur)
+# bdd-migration : retire workflows/ (le skill db-migration est un PLUGIN, plus de copie)
 BDD_MIGRATION = {
     "delete": [
         "workflows/",
     ],
-    "copy_examples": {
-        # db-migration est stack-spécifique (Alembic) → vit dans EXAMPLES, copié à la demande
-        "EXAMPLES/skills-db/db-migration": ".claude/skills/db-migration",
-    },
-    "keep_reason": "BDD migration — copie le skill db-migration (Alembic) depuis EXAMPLES/skills-db",
+    "keep_reason": "BDD migration — retire workflows/. Skill db-migration (Alembic) = plugin à installer (/plugin install db-migration@claude-setup), plus de copie.",
 }
 
 PROFILES = {
@@ -128,16 +117,18 @@ PROFILES = {
 }
 
 # ── Artefacts de maintenance DU TEMPLATE (retirés pour TOUS les types) ─────────
-# N'existent que pour développer/tester le template lui-même. Un projet GÉNÉRÉ n'en a
-# aucun usage — et la self-CI (.github/workflows/ci.yml) teste render.py / EXAMPLES /
-# l'inventaire des skills, que l'init vient justement de supprimer → CI ROUGE dans le
-# projet généré. Retirés APRÈS la copie des skills stack (qui lit EXAMPLES/). init-from-template/
-# est retiré EN DERNIER : il contient CE script (suppression OK sous POSIX — le process
-# tourne déjà en mémoire). Réversible : le snapshot git « chore: snapshot pre-init » garde tout.
+# N'existent que pour développer/distribuer le template lui-même. Un projet GÉNÉRÉ n'en a
+# aucun usage — et la self-CI (.github/workflows/ci.yml) teste render.py / l'inventaire, que
+# l'init vient justement de supprimer → CI ROUGE héritée. Les plugins stack (plugins/ +
+# .claude-plugin/) sont la SOURCE du marketplace : le projet les INSTALLE (/plugin), il ne les
+# embarque pas. init-from-template/ est retiré EN DERNIER : il contient CE script (suppression
+# OK sous POSIX — le process tourne en mémoire). Réversible : le snapshot git pre-init garde tout.
 TEMPLATE_MAINTENANCE = [
     ".github/",                            # self-CI + README/CHANGELOG DU template
     "test/",                               # tests + rapports d'audit DU template
-    "EXAMPLES/",                           # exemples + sources skills stack (déjà copiés au besoin)
+    "EXAMPLES/",                           # exemple rempli (acme) — référence, pas du projet
+    "plugins/",                            # SOURCE des plugins stack → le projet les installe (marketplace)
+    ".claude-plugin/",                     # manifeste marketplace → vit dans le repo template
     ".claude/skills/adopt-template/",      # bootstrap brownfield one-shot (exclusif avec init)
     ".claude/skills/init-from-template/",  # bootstrap one-shot — EN DERNIER (contient ce script)
 ]
@@ -186,17 +177,7 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     print(f"\n🎉 {prefix}Cleanup : {deleted_files} fichiers + {deleted_dirs} dossiers supprimés "
           f"({skipped} déjà absents)")
 
-    # Copy EXAMPLES si demandé par le profil (bdd-migration : mapping explicite)
-    copy_examples = profile.get("copy_examples", {})
-    if copy_examples:
-        copy_from_examples(root, copy_examples, dry_run)
-
-    # Copy EXAMPLES par glob (automation-n8n : tous les n8n-* d'un coup)
-    copy_examples_glob = profile.get("copy_examples_glob", {})
-    if copy_examples_glob:
-        copy_glob_from_examples(root, copy_examples_glob, dry_run)
-
-    # Retrait des artefacts de maintenance DU template (tous types) — APRÈS la copie stack
+    # Retrait des artefacts de maintenance DU template (tous types)
     strip_template_maintenance(root, dry_run)
 
     # Post-cleanup : réparer CLAUDE.md + purger settings.json (hooks fantômes + allow-rules mortes)
@@ -206,58 +187,6 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
         prune_dead_permissions(root)
 
     return 0
-
-
-def copy_from_examples(root: Path, mapping: dict, dry_run: bool) -> None:
-    """Copie des dossiers depuis EXAMPLES/ vers le projet selon le profil."""
-    for src_rel, dst_rel in mapping.items():
-        src = root / src_rel
-        dst = root / dst_rel
-
-        if not src.exists():
-            print(f"  ⚠️  EXAMPLES source absente : {src_rel} (skip)")
-            continue
-
-        if dst.exists():
-            print(f"  ⚠️  Destination déjà existante : {dst_rel} (skip pour éviter écrasement)")
-            continue
-
-        if dry_run:
-            print(f"  [DRY] Would copy : {src_rel} → {dst_rel}")
-        else:
-            try:
-                if src.is_dir():
-                    shutil.copytree(src, dst)
-                else:
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dst)
-                print(f"  📦 Copied EXAMPLE : {src_rel} → {dst_rel}")
-            except Exception as e:
-                print(f"  ⚠️  Échec copie {src_rel} : {e}", file=sys.stderr)
-
-
-def copy_glob_from_examples(root: Path, mapping: dict, dry_run: bool) -> None:
-    """Copie tous les dossiers matchant un glob depuis EXAMPLES/ vers un dossier destination.
-    Chaque match `EXAMPLES/.../foo` → `<dst_dir>/foo`. Skip si la destination existe déjà
-    (évite l'écrasement). Glob (pas de liste en dur) → robuste à l'ajout/retrait de skills."""
-    for src_glob, dst_dir_rel in mapping.items():
-        matches = sorted(p for p in root.glob(src_glob) if p.is_dir())
-        if not matches:
-            print(f"  ⚠️  Aucun dossier ne matche : {src_glob} (skip)")
-            continue
-        for src in matches:
-            dst = root / dst_dir_rel / src.name
-            if dst.exists():
-                print(f"  ⚠️  Destination déjà existante : {dst.relative_to(root)} (skip)")
-                continue
-            if dry_run:
-                print(f"  [DRY] Would copy : {src.relative_to(root)} → {dst.relative_to(root)}")
-            else:
-                try:
-                    shutil.copytree(src, dst)
-                    print(f"  📦 Copied EXAMPLE : {src.relative_to(root)} → {dst.relative_to(root)}")
-                except Exception as e:
-                    print(f"  ⚠️  Échec copie {src.relative_to(root)} : {e}", file=sys.stderr)
 
 
 def strip_template_maintenance(root: Path, dry_run: bool) -> int:

@@ -75,15 +75,15 @@ Les plugins ont leur propre namespace automatiquement (`plugin-name:skill-name`)
 | `/codemap`            | Régénère .claude/docs/code-map.md               |
 | `/init-from-template` | Init projet depuis ce template (UNE FOIS)       |
 
-## Skills stack-spécifiques (hors cœur → `EXAMPLES/`, copiés à l'init)
+## Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
 
-Pas livrés dans `.claude/skills/` par défaut — copiés par `/init-from-template` selon le type
-de projet, ou à la main. Recensés ici pour visibilité.
+Pas livrés dans `.claude/skills/` — packagés en **plugins** installés par projet via `/plugin`
+(auto-découverts, aucun inventaire à maintenir). Recensés ici pour visibilité.
 
-| Skill           | Source                 | Copié pour type  |
-| --------------- | ---------------------- | ---------------- |
-| `/db-migration` | `EXAMPLES/skills-db/`  | `bdd-migration`  |
-| `/n8n-*`        | `EXAMPLES/skills-n8n/` | `automation-n8n` |
+| Plugin          | Skills                 | Install (selon type projet)                                     |
+| --------------- | ---------------------- | --------------------------------------------------------------- |
+| `n8n-expertise` | 7 skills n8n (`n8n-*`) | `automation-n8n` → `/plugin install n8n-expertise@claude-setup` |
+| `db-migration`  | `db-migration`         | `bdd-migration` → `/plugin install db-migration@claude-setup`   |
 
 ## Skills built-in Claude Code (hors `.claude/skills/`)
 

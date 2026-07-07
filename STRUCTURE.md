@@ -57,8 +57,8 @@ mon-projet/
     │   ├── team/SKILL.md           # /team — orchestration agent-teams (worktrees, task list, débrief)
     │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (brownfield, merges non-destructifs)
     │   └── init-from-template/SKILL.md
-    │   # db-migration + skills n8n = hors-cœur → EXAMPLES/skills-{db,n8n}/ (copiés par /init-from-template selon le type)
-    │   # Pour grouper par source : préfixe le nom (n8n-deploy, n8n-test) ou package en plugin
+    │   # db-migration + skills n8n = PLUGINS (marketplace claude-setup, dossier plugins/) → /plugin install, pas copiés
+    │   # Pour grouper des skills : préfixe le nom, ou package en plugin (cf. plugins/ + .claude-plugin/marketplace.json)
     │
     ├── agents/                     # custom agents — à plat aussi (subagents ET rôles teammate)
     │   ├── README.md
@@ -679,7 +679,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 ## Skills (`.claude/skills/`)
 
 - /handoff /spec /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap · /init-from-template (10 cœur)
-- Skills hors-cœur stack (`/n8n-*`, `/db-migration`) copiés depuis `EXAMPLES/skills-*` ; installer dans `.claude/skills/` ET recenser dans `.claude/CLAUDE.md`.
+- Skills stack (`n8n-expertise`, `db-migration`) = **plugins** (marketplace `claude-setup`, dossier `plugins/`) → `/plugin install`, auto-découverts (rien à recenser).
 
 ## Workflow features
 

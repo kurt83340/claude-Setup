@@ -59,6 +59,17 @@ jobs:
           if [ "$rc" -ne 0 ]; then exit 1; fi
           echo "✅ Tous les rôles teammate ont SendMessage dans tools:"
 
+      - name: Manifestes marketplace + plugins valides
+        run: |
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          rc=0
+          for d in plugins/*/; do
+            [ -f "${d}.claude-plugin/plugin.json" ] || { echo "❌ ${d} : .claude-plugin/plugin.json manquant"; rc=1; continue; }
+            python3 -m json.tool "${d}.claude-plugin/plugin.json" > /dev/null 2>&1 || { echo "❌ ${d}.claude-plugin/plugin.json : JSON invalide"; rc=1; }
+          done
+          if [ "$rc" -ne 0 ]; then exit 1; fi
+          echo "✅ marketplace.json + plugin.json valides"
+
       - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 3 @-imports
         run: |
           n=$(grep -oE '@\.claude/[^ ]+' EXAMPLES/acme-sync-erp-notion-docs/_CLAUDE.md | wc -l)

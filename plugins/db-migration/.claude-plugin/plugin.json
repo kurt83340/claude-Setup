@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "db-migration",
+  "description": "Skill de migration BDD (Alembic) — génération, revue et application de migrations de schéma.",
+  "version": "1.0.0",
+  "author": { "name": "Julien Leroy" },
+  "repository": "https://github.com/kurt83340/claude-Setup",
+  "keywords": ["database", "migration", "alembic"],
+  "skills": "./skills/"
+}

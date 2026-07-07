@@ -3,6 +3,21 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.9.0] — 2026-07-06
+
+Composants stack → **plugins** (archi C incrémentale) : les capacités optionnelles sortent du scaffold standalone pour devenir des plugins installables par projet, **auto-découverts** par le harness → plus aucun inventaire `.md` à maintenir pour eux.
+
+### Added
+
+- **Marketplace** dans le repo (`.claude-plugin/marketplace.json`) + 2 plugins sous `plugins/` : **`n8n-expertise`** (les 7 skills n8n) et **`db-migration`** (Alembic), chacun avec `.claude-plugin/plugin.json` (`skills: "./skills/"`) + README. Install par projet : `/plugin marketplace add kurt83340/claude-Setup` puis `claude plugin install <plugin>@claude-setup --scope project` (skills namespacés `/<plugin>:<skill>`).
+- **Check CI** « manifestes marketplace + plugins valides ».
+
+### Changed
+
+- **`cleanup-for-type.py`** : `automation-n8n`/`bdd-migration` ne copient plus de skills (retrait `copy_examples`/`copy_examples_glob` + les 2 fonctions de copie devenues mortes) ; `plugins/` + `.claude-plugin/` ajoutés au strip des artefacts de maintenance (le projet **installe** depuis le marketplace, il n'embarque pas la source).
+- **`EXAMPLES/skills-n8n/` + `EXAMPLES/skills-db/` supprimés** (déplacés dans `plugins/`) → `EXAMPLES/` ne garde que l'exemple ACME. Le rsync d'init exclut désormais `plugins/` + `.claude-plugin/`.
+- Doc basculée « skills stack copiés depuis EXAMPLES » → « plugins » : init SKILL, `.claude/CLAUDE.md`, `.claude/skills/README.md`, `template-maintenance.md`, `STRUCTURE.md`, `USAGE.md`, README repo.
+
 ## [0.8.2] — 2026-07-06
 
 ### Added

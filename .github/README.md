@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + skills **stack** (hors-cœur, dans `EXAMPLES/skills-*`) : n8n (×7 skills d'expertise), `db-migration`. Inventaire canonique → `.claude/CLAUDE.md`.
+- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/team`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`. Inventaire cœur → `.claude/CLAUDE.md`.
 - **Agents** : `doc-maintainer` (subagent, maintenance doc en batch) + rôles teammate agent-teams — `worker`, `front-end`, `back-end`, `tester`, `reviewer` — + 3 explorateurs lecture seule `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/team`, débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
@@ -17,18 +17,20 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 ## Démarrer un projet
 
 ```bash
-rsync -av --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
+  --exclude='plugins/' --exclude='.claude-plugin/' \
   ./ /chemin/vers/mon-projet/
 cd /chemin/vers/mon-projet
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 claude   # puis, dans la session : /init-from-template
+# Stack ? installe le plugin : /plugin marketplace add kurt83340/claude-Setup ; /plugin install n8n-expertise@claude-setup
 ```
 
 **Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md`
 et `.env.example`), puis `/adopt-template` — merges non-destructifs + rétro-remplissage de la
 doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
 
-> `EXAMPLES/skills-*` (n8n, db-migration) est **conservé** : `/init-from-template` y copie les skills stack selon le type de projet. Seul l'exemple ACME est exclu. Tu peux retirer `EXAMPLES/` à la fin si tu n'en as plus besoin.
+> Les **plugins stack** (`n8n-expertise`, `db-migration`) vivent dans `plugins/` (marketplace `claude-setup`) — un projet les **installe** via `/plugin install …@claude-setup`, il ne les embarque pas (le rsync exclut `plugins/` + `.claude-plugin/`). L'exemple ACME (`EXAMPLES/`) est aussi exclu du projet généré.
 
 → Guide complet : **[USAGE.md](../USAGE.md)** · Convention : **[STRUCTURE.md](../STRUCTURE.md)** · Exemple rempli : **[EXAMPLES/](../EXAMPLES/)**
 
