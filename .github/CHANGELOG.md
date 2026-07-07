@@ -3,6 +3,17 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.12.1] — 2026-07-07
+
+### Fixed
+
+- **Grep de vérification post-init trop large** (découvert par test E2E sur projet jetable) : il matchait les `{{SPEC_*}}` des templates bundlés de `/spec` (qui DOIVENT garder leurs placeholders — c'est le scaffold) → faux « ❌ CORE restants ». Périmètre restreint aux fichiers réellement substitués (`CLAUDE.md`, `README.md`, `.env.example`, `.claude/CLAUDE.md`, `.claude/docs/`, `.claude/rules/`).
+
+### Notes — E2E validé sur 2 projets jetables
+
+- **python-app** : rsync → chmod → git init → render (20 substitutions, 0 CORE) → cleanup (strip complet, 2 allow-rules + 10 lignes d'inventaire purgées) → hooks smoke-testés → **pipeline `tdd` déroulé en entier** (spec scaffoldée depuis les templates, auto-sélection TDD via plan.md § Décisions, tests ROUGES → code VERT, review adverse, DoD, ROADMAP/CHANGELOG/HANDOFF).
+- **script-jetable** : -80% → il reste exactement `handoff`+`lecon`, hooks fantômes et @-imports cassés auto-réparés, settings valide.
+
 ## [0.12.0] — 2026-07-07
 
 ### Added

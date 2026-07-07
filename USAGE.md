@@ -66,8 +66,9 @@ Claude va :
 > ensuite retiré avec le scaffolding du template. Re-check possible sans script :
 
 ```bash
-# 1. Aucun placeholder CORE restant ? (rien trouvé = ✅)
-grep -rEn '\{\{[A-Z]{2,}_[A-Z][A-Z0-9_]+\}\}' --include='*.md' . && echo "❌ CORE restants" || echo "✅ aucun CORE restant"
+# 1. Aucun placeholder CORE restant ? (rien trouvé = ✅). Périmètre SUBSTITUÉ uniquement :
+#    les templates bundlés de /spec ({{SPEC_*}}) et STRUCTURE/USAGE gardent leurs {{...}} d'exemple — normal.
+grep -rEn '\{\{[A-Z]{2,}_[A-Z][A-Z0-9_]+\}\}' CLAUDE.md README.md .env.example .claude/CLAUDE.md .claude/docs/ .claude/rules/ 2>/dev/null && echo "❌ CORE restants" || echo "✅ aucun CORE restant"
 
 # 2. Premier commit du projet rempli
 git add -A
