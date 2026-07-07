@@ -93,7 +93,8 @@ existant n'en contiennent pas.)
 
 ## Étape 4 — Rétro-remplissage depuis l'existant (la vraie valeur)
 
-1. **`stack.md`** ← manifests scannés (langage + version, frameworks, services tiers, LLM).
+1. **`stack.md`** ← manifests scannés (langage + version, frameworks, services tiers, LLM)
+   + ligne d'en-tête `> Template claude-Setup vX.Y.Z (adopté le YYYY-MM-DD)` (version : `.claude/template-version`).
 2. **`code-map.md`** ← **délègue `/codemap`** (foyer unique : vue macro + couplages depuis le code).
 3. **`cadrage/README.md`** ← synthèse des **matériaux déposés** (Étape 1 — extraire des
    documents/tickets/transcriptions : verbatim de la demande, interlocuteurs, contraintes,

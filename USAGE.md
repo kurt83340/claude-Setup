@@ -54,11 +54,11 @@ Claude va :
 
 | Type             | Impact   | Skills installés                              | Use case                         |
 | ---------------- | -------- | --------------------------------------------- | -------------------------------- |
-| `script-jetable` | **-80%** | 2 (handoff, lecon)                      | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | 13 (cœur)                                     | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | 13 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 13 cœur + plugin officiel `n8n-mcp-skills` (×14) | Workflow n8n + helpers Python |
-| `bdd-migration`  | léger    | 13 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
+| `script-jetable` | **-80%** | minimum vital (handoff, lecon)                | 1-shot Python, < 1 jour          |
+| `python-app`     | léger    | cœur (post-init)                              | App Python (FastAPI, scripts...) |
+| `web-app`        | léger    | cœur (post-init)                              | Next.js, React, etc.             |
+| `automation-n8n` | léger    | cœur + plugin officiel `n8n-mcp-skills`       | Workflow n8n + helpers Python    |
+| `bdd-migration`  | léger    | cœur + plugin `db-migration`                  | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 

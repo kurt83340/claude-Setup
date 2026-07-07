@@ -680,7 +680,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Skills (`.claude/skills/`)
 
-- /handoff /spec /conception /debug /feature-done /pivot · /lecon /adr /idee · /doc-health /codemap · /init-from-template /adopt-template (13 cœur)
+- Skills cœur : /handoff /spec /conception /feature /feature-done /debug /scaffold · /lecon /adr /idee · /doc-health /codemap /pivot (cette liste = source de vérité, compte CI-vérifié)
 - Skills stack = **plugins** auto-découverts (rien à recenser) : `db-migration` + `agent-teams` (marketplace `claude-setup`) ; n8n → plugin **officiel** `n8n-mcp-skills` (czlonkowski/n8n-skills, 14 skills + hooks).
 
 ## Workflow features

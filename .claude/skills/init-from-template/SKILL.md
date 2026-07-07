@@ -157,6 +157,10 @@ doute, montrer d'abord le `--dry-run` des deux types et faire trancher.
 > `rm -rf`** (que le template interdit de toute façon). Ces artefacts restent dans le **repo template
 > source** ; l'init ne touche qu'à la copie du projet.
 
+**Traçabilité** : ajoute en tête de `.claude/docs/stack.md` la ligne
+`> Généré depuis le template claude-Setup vX.Y.Z le YYYY-MM-DD` (version : lire
+`.claude/template-version`, qui RESTE dans le projet — c'est lui qui permettra un futur upgrade).
+
 Committer le résultat — `git add -A` embarque les suppressions faites par le script :
 
 ```bash

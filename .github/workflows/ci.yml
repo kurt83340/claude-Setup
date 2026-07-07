@@ -47,8 +47,43 @@ jobs:
             name=$(basename "$d")
             grep -q "/$name" .claude/CLAUDE.md || { echo "❌ Skill '$name' absent de l'inventaire .claude/CLAUDE.md"; rc=1; }
           done
+          declared=$(grep -oE '\*\*[0-9]+ skills cœur\*\*' .claude/CLAUDE.md | grep -oE '[0-9]+' | head -1)
+          actual=$(ls -d .claude/skills/*/ | wc -l)
+          if [ "$declared" != "$actual" ]; then echo "❌ Compte déclaré ($declared) ≠ dossiers skills ($actual)"; rc=1; fi
           if [ "$rc" -ne 0 ]; then exit 1; fi
-          echo "✅ Tous les skills cœur sont recensés dans .claude/CLAUDE.md"
+          echo "✅ Skills recensés + compte déclaré ($declared) = réel ($actual)"
+
+      - name: Pipelines feature — maillons existants
+        run: |
+          python3 - <<'PY'
+          import re, sys
+          from pathlib import Path
+          core = {p.name for p in Path(".claude/skills").iterdir() if p.is_dir()}
+          house = {f"{pl.parent.parent.name}:{pl.name}" for pl in Path("plugins").glob("*/skills/*") if pl.is_dir()}
+          agents = {p.stem for p in Path(".claude/agents").glob("*.md")} | {p.stem for p in Path("plugins").glob("*/agents/*.md")}
+          EXTERNES = {"n8n-mcp-skills"}
+          BUILTINS = {"plugin", "resume", "compact", "clear", "doctor"}
+          rc = 0
+          for f in sorted(Path(".claude/skills/feature/pipelines").glob("*.md")):
+              text = f.read_text(encoding="utf-8")
+              for r in set(re.findall(r"`/([a-z0-9_:-]+)", text)):
+                  base = r.split('"')[0]
+                  ns = base.split(":")[0] if ":" in base else None
+                  if not (base in core or base in house or ns in EXTERNES or base in BUILTINS):
+                      print(f"❌ {f.name}: maillon inconnu /{base}"); rc = 1
+              for a in re.findall(r"subagent `([a-z-]+)`", text):
+                  if a not in agents:
+                      print(f"❌ {f.name}: agent inconnu {a}"); rc = 1
+          if rc: sys.exit(1)
+          print("✅ pipelines : tous les maillons référencés existent")
+          PY
+
+      - name: Version template = tete du CHANGELOG
+        run: |
+          v_file=$(tr -d ' \n' < .claude/template-version)
+          v_log=$(grep -m1 -oE '^## \[[0-9.]+\]' .github/CHANGELOG.md | tr -d '#[] ')
+          echo "fichier=$v_file changelog=$v_log"
+          test "$v_file" = "$v_log"
 
       - name: Defs teammate ont SendMessage dans tools
         run: |

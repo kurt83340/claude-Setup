@@ -1,4 +1,14 @@
+---
+paths:
+  - ".claude/docs/**"
+---
+
 # Template maintenance — Comment vivre avec cette structure
+
+> 🪶 **Rule scopée** (`paths: .claude/docs/**`) : chargée quand on écrit dans la doc — son
+> déclencheur naturel (« lis ce fichier avant d'écrire dans `.claude/docs/` ») — au lieu de
+> peser ~9k tokens sur CHAQUE session. L'inventaire des skills reste dans `.claude/CLAUDE.md`
+> (auto-chargé) ; les skills portent leurs propres instructions.
 
 > Méta-documentation : comment ce projet est organisé, comment le maintenir vivant,
 > quel skill/agent invoquer pour quelle tâche. Lis ce fichier avant d'écrire dans
@@ -260,27 +270,9 @@ diagrams/
 
 ## ✅ Skills + hooks + agents EN PLACE
 
-### Skills perso disponibles
+### Skills disponibles
 
-| Skill                    | Quoi                                                                                                                                                                                   | Path                                 |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `/init-from-template` ⭐ | Pose 10 questions, substitue les CORE placeholders + lance cleanup-for-type.py adapté au type projet (à exécuter UNE FOIS)                                                             | `.claude/skills/init-from-template/` |
-| `/adopt-template`        | Brownfield : état des lieux détecté, merges diff-par-diff (CLAUDE.md/settings/.gitignore existants), mêmes scripts render/cleanup, rétro-remplissage doc (stack/code-map/HANDOFF/ADRs) | `.claude/skills/adopt-template/`     |
-| `/handoff` ⭐            | Snapshot .claude/docs/HANDOFF.md fin de session (status + échecs + blockers + next). Détecte HANDOFF fresh (post-init)                                                                 | `.claude/skills/handoff/`            |
-| `/spec` ⭐               | Scaffold nouvelle feature : 4 fichiers research/spec/plan/tasks depuis templates + update ROADMAP                                                                                      | `.claude/skills/spec/`               |
-| `/conception` ⭐         | Méthode de planification : explorations parallèles (subagents), tableau d'options, décision user, plan avec points de vérification, revue adverse                                      | `.claude/skills/conception/`         |
-| `/feature-done` ⭐       | Coche ROADMAP + CHANGELOG + HANDOFF + suggère ADRs + archive idées + marque leçons promues                                                                                             | `.claude/skills/feature-done/`       |
-| `/doc-health`            | Audit hebdo : docs stale, ADRs manquants, growth opportunities, code-map drift, specs stalled, leçons en attente                                                                       | `.claude/skills/doc-health/`         |
-| `/lecon`                 | Ajoute entry rapide dans .claude/docs/lecons.md (statut 🆕 new) + workflow promotion documenté                                                                                         | `.claude/skills/lecon/`              |
-| `/idee`                  | Capture/gère les idées perso (`idees/`) — capture / promote (→ spec) / discard / archive                                                                                               | `.claude/skills/idee/`               |
-| `/codemap`               | MAJ .claude/docs/code-map.md : vue macro + règles de couplage + gotchas, et détecte les violations de couplage (scan imports). PAS de file-by-file.                                    | `.claude/skills/codemap/`            |
-| `/adr`                   | Crée un nouveau ADR (frontmatter + structure + index README) + gère pattern supersede                                                                                                  | `.claude/skills/adr/`                |
-| `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                                                          | `.claude/skills/pivot/`              |
-| `/agent-teams:team` ⭐   | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | plugin `agent-teams` (marketplace)   |
-| `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                                                           | `.claude/skills/debug/`              |
-| `/scaffold`              | Générateur de composants conformes (skill/agent/pipeline) — conventions + référencement automatiques ; pipeline en mode dirigé OU proposé                                              | `.claude/skills/scaffold/`           |
-
-> 🧩 Skills **stack** = plugins installés par projet, auto-découverts (pas de listing manuel) : `db-migration` (Alembic) → marketplace `claude-setup` ; n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)). Inventaire cœur → [`.claude/CLAUDE.md`](../CLAUDE.md).
+→ **Inventaire canonique unique** (liste + 1-ligne, skills cœur ET plugins) : [`.claude/CLAUDE.md`](../CLAUDE.md) — auto-chargé, CI-vérifié. **Ne pas redupliquer ici** (c'était fait, ça a drifté). Le « quand invoquer » → tables ci-dessus.
 
 ### Hooks configurés (cf `.claude/settings.json`)
 
@@ -293,17 +285,13 @@ diagrams/
 | `PreToolUse(Edit\|Write)` ⭐                     | Réinjecte les règles de couplage + intention + gotchas (non-déductibles) avant édition de code (cap 4k chars) | `hooks/pretooluse-inject-codemap.py`    |
 | `PostToolUse(Edit\|Write)`                       | Détecte triggers (API_KEY, deploy, RGPD) → flag dans `.growth-suggestions.md`                                 | `hooks/posttooluse-growth-detection.py` |
 | `Stop`                                           | Rappel `/handoff` si .claude/docs/HANDOFF.md > 24h + changements git pending                                  | `hooks/stop-handoff-reminder.sh`        |
-| `TaskCreated` / `TaskCompleted` / `TeammateIdle` | Trace JSON de progression d'équipe dans `.claude/.cache/team-progress.log`                                    | `hooks/teamtask-log.py`                 |
+| `TaskCreated` / `TaskCompleted` / `TeammateIdle` | Trace JSON de progression d'équipe dans `.claude/.cache/team-progress.log`                                    | plugin `agent-teams` (hooks.json)       |
 
 ⚠️ **Prérequis** : `chmod +x .claude/hooks/*.py .claude/hooks/*.sh` (sinon les hooks bloquent). Géré automatiquement par `/init-from-template` étape 0.
 
-### Agent perso
+### Agents disponibles
 
-| Agent                                                       | Quoi                                                                                                                                                                 |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `doc-maintainer`                                            | Cerveau invocable (Task tool) — couvre HANDOFF, ROADMAP, CHANGELOG, ADRs, pivot 9-étapes, promotion lecon → ADR, archivage idées. Diff par diff, jamais d'overwrite. |
-| `reviewer` (cœur) · rôles d'exécution (plugin `agent-teams`) | Rôles teammate (spawn via `/agent-teams:team` ou à la demande) — protocole commun : [agent-teams.md](agent-teams.md).                                            |
-| `explore-code` / `explore-docs` / `explore-memoire`         | Explorateurs lecture seule réutilisables (subagents ou teammates) — étape Explore de `/conception` + toute investigation.                                            |
+→ **Table canonique** : [`.claude/agents/README.md`](../agents/README.md) (rôles cœur + note plugin `agent-teams`). Le « quand invoquer » → table Agent perso ci-dessus.
 
 ## Distinction `cadrage/` vs `idees/`
 

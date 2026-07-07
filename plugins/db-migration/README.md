@@ -18,4 +18,8 @@ claude plugin install db-migration@claude-setup --scope project
 
 Désinstaller : `/plugin uninstall db-migration@claude-setup --scope project`.
 
+> 🔖 **Mainteneur : à CHAQUE modification de ce plugin, bump `version` dans
+> `.claude-plugin/plugin.json`** — sinon les projets ne voient pas la mise à jour via
+> `/plugin marketplace update claude-setup`.
+
 > 🧩 Migrations = décisions structurantes → pense à un ADR (`/adr`) pour les choix de schéma non triviaux.

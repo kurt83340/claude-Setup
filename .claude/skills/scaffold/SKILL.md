@@ -74,9 +74,10 @@ Dans les deux cas, à la fin :
 
 ## Fin de run — rappels selon le contexte
 
-- **Repo template** : bump le compte « N skills cœur » (`.claude/CLAUDE.md`, `.github/README`,
-  USAGE) + entrée CHANGELOG + si le composant est overkill pour un 1-shot → l'ajouter à
-  `SCRIPT_JETABLE` dans `cleanup-for-type.py`.
+- **Repo template** : bump le compte « N skills cœur » dans `.claude/CLAUDE.md` (SEUL endroit
+  chiffré — la CI vérifie compte = dossiers) + entrée CHANGELOG + bump `.claude/template-version` ;
+  composant dans un plugin maison → **bump la `version` de son `plugin.json`** (sinon les projets
+  ne voient pas la MAJ) ; overkill pour un 1-shot → l'ajouter à `SCRIPT_JETABLE` (cleanup-for-type.py).
 - **Projet généré** : rien de plus — le référencement est fait, il n'y a pas de CI d'inventaire.
 
 ## Anti-patterns

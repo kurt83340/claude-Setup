@@ -25,4 +25,8 @@ claude plugin install agent-teams@claude-setup --scope project
 Prérequis : `tmux` dans le PATH (sinon `teammateMode` retombe en in-process).
 Désinstaller : `/plugin uninstall agent-teams@claude-setup --scope project`.
 
+> 🔖 **Mainteneur : à CHAQUE modification de ce plugin, bump `version` dans
+> `.claude-plugin/plugin.json`** — sinon les projets ne voient pas la mise à jour via
+> `/plugin marketplace update claude-setup`.
+
 > 🧑‍🤝‍🧑 Un projet **solo/n8n** n'a pas besoin de ce plugin — c'est précisément pourquoi il est sorti du cœur.

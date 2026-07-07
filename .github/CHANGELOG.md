@@ -3,6 +3,22 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.16.0] — 2026-07-07
+
+Durcissement final post-revue de système : gardes permanentes, fin des comptes dupliqués, traçabilité de version, régime de contexte.
+
+### Added
+
+- **CI « pipelines → maillons existants »** : chaque `/x` référencé dans `feature/pipelines/*.md` doit résoudre (skill cœur, plugin maison, namespace officiel connu, built-in) — le check fait 2× à la main pendant la revue est maintenant permanent.
+- **CI « compte auto-vérifié »** : le nombre déclaré dans « **N skills cœur** » (`.claude/CLAUDE.md`) doit égaler le nombre réel de dossiers — le compte ne peut plus mentir.
+- **Traçabilité de version** : nouveau fichier **`.claude/template-version`** (copié dans chaque projet généré et conservé) + check CI « version = tête du CHANGELOG » ; `/init-from-template` et `/adopt-template` notent `Template claude-Setup vX.Y.Z` dans `stack.md` → base d'un futur `/template-update`.
+
+### Changed
+
+- **Fin des comptes dupliqués** (2 erreurs de synchro aujourd'hui) : le nombre de skills ne vit QUE dans `.claude/CLAUDE.md` (CI-vérifié) ; README, USAGE (table des types), STRUCTURE dé-numérotés (pointeurs vers l'inventaire canonique).
+- **Régime de contexte des rules** (mesuré : **~12,2k tokens** auto-chargés/session — 8× la philosophie « ~1,5k » du CLAUDE.md) : `template-maintenance.md` **scopée `paths: .claude/docs/**`** (chargée quand on écrit de la doc — son déclencheur déclaré) **+ dégraissée** (tables « Skills/Agents EN PLACE » supprimées : dupliquaient l'inventaire `.claude/CLAUDE.md` et `agents/README` — et avaient déjà drifté). `code-style`/`testing` étaient déjà scopées `**/*.py`. Reste auto-chargé en permanence : agent-teams + doc-lookup + git-workflow ≈ **2,9k tokens** (−76 %).
+- **Hygiène de version des plugins maison** : rappel mainteneur dans les README de `db-migration`/`agent-teams` + dans `/scaffold` (bump `plugin.json` à chaque modif, sinon `/plugin marketplace update` ne propage rien de visible).
+
 ## [0.15.0] — 2026-07-07
 
 ### Added
