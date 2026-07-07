@@ -206,6 +206,7 @@ diagrams/
 | `/handoff` ⭐              | Fin de session — snapshot .claude/docs/HANDOFF.md (status + échecs + blockers + next)                               |
 | `/spec "<titre>"` ⭐       | Démarrer une feature — scaffold 4 fichiers (research/spec/plan/tasks) + ROADMAP                                     |
 | `/conception <spec-id>` ⭐ | Arrêter le plan — explore par subagents (code/docs/mémoire), 2-3 options, décision, plan vérifiable + revue adverse |
+| `/feature "<titre>" [pipeline]` ⭐ | Dérouler une feature de bout en bout (pipeline standard/tdd/custom — fichiers déposables dans `feature/pipelines/`), gate entre chaque maillon |
 | `/feature-done <id>` ⭐    | Après livraison feature — coche ROADMAP + CHANGELOG + ADRs + archive idées                                          |
 | `/pivot "<raison>"`        | Workflow pivot client 9 étapes orchestrées                                                                          |
 | `/agent-teams:team <spec-id>` ⭐ (plugin) | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, mode TDD opt-in, débrief              |

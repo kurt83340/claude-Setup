@@ -3,6 +3,17 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.12.0] — 2026-07-07
+
+### Added
+
+- **Skill `/feature "<titre>" [pipeline]`** (14e skill cœur) — **orchestrateur de pipeline** : déroule une feature de bout en bout en enchaînant les maillons EXISTANTS (`/spec` → `/conception` → solo|`/agent-teams:team` → tests → `reviewer` adverse → vérif DoD → `/feature-done`), avec **gate utilisateur entre chaque étape** et reprise propre après un stop. **1 pipeline = 1 fichier déposable** dans `feature/pipelines/` — extensible au fil de l'eau sans toucher l'orchestrateur. Livrés : `standard` (Planifier → Coder → Tester → Review → Vérifier → Persister) et `tdd` (Planifier → **Écrire les tests rouges** → Coder vert → Review → Vérifier → Persister). Auto-sélection : `/conception` note le mode par spec dans `plan.md § Décisions` → `/feature` le respecte.
+- **Section « 🔁 Pipelines récurrents » dans `.claude/CLAUDE.md`** (auto-chargé) : les 3 séquences canoniques (standard, tdd, bug) visibles d'un coup d'œil — fini le « je ne me les rappelle plus ».
+
+### Changed
+
+- Comptes et inventaires synchronisés (**14 skills cœur**) ; `script-jetable` retire aussi `/feature` (overkill pour un 1-shot).
+
 ## [0.11.0] — 2026-07-07
 
 Étape 2 du plan plugins : l'**exécution d'équipe** sort du cœur — un projet solo/n8n n'embarque plus les rôles web.

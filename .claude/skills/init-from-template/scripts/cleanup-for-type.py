@@ -55,6 +55,7 @@ SCRIPT_JETABLE = {
         ".claude/skills/codemap/",
         ".claude/skills/doc-health/",
         ".claude/skills/feature-done/",
+        ".claude/skills/feature/",
         ".claude/skills/spec/",
         ".claude/skills/pivot/",
         ".claude/skills/idee/",

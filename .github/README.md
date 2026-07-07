@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **13 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature-done`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook). Inventaire cœur → `.claude/CLAUDE.md`.
+- **14 skills cœur** (`.claude/skills/`) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `n8n-expertise` (×7), `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook). Inventaire cœur → `.claude/CLAUDE.md`.
 - **Agents cœur** : `doc-maintainer` (subagent, maintenance doc en batch) + `reviewer` (revue adverse lecture seule) + 3 explorateurs `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` — les rôles d'exécution (`worker`, `front-end`, `back-end`, `tester`) viennent du plugin `agent-teams` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/agent-teams:team` (plugin), débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe

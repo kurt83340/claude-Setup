@@ -48,6 +48,7 @@ mon-projet/
     │   ├── spec/SKILL.md           # /spec (scaffold feature)
     │   ├── conception/SKILL.md     # /conception — explore → options → plan arrêté + revue adverse
     │   ├── debug/SKILL.md          # /debug — reproduire (test rouge) → cause → fix minimal → leçon
+    │   ├── feature/SKILL.md        # /feature — orchestrateur de pipeline (+ pipelines/ : standard, tdd, customs déposables)
     │   ├── feature-done/SKILL.md
     │   ├── adr/SKILL.md            # 4 modes : capture/supersede/deprecate/list
     │   ├── lecon/SKILL.md          # 4 modes : capture/promote/discard/archive

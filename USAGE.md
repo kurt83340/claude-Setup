@@ -55,10 +55,10 @@ Claude va :
 | Type             | Impact   | Skills installés                              | Use case                         |
 | ---------------- | -------- | --------------------------------------------- | -------------------------------- |
 | `script-jetable` | **-80%** | 2 (handoff, lecon)                      | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | 11 (cœur)                                     | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | 11 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 11 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
-| `bdd-migration`  | léger    | 11 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
+| `python-app`     | léger    | 12 (cœur)                                     | App Python (FastAPI, scripts...) |
+| `web-app`        | léger    | 12 (cœur)                                     | Next.js, React, etc.             |
+| `automation-n8n` | léger    | 12 cœur + plugin `n8n-expertise` (×7)         | Workflow n8n + helpers Python    |
+| `bdd-migration`  | léger    | 12 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 
@@ -236,6 +236,7 @@ Rapport généré → tu suis les actions par priorité.
 | Nouveau projet                             | `/init-from-template`                                                         |
 | Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)   |
 | Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                             |
+| Dérouler le pipeline complet (avec gates)  | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done                             |
 | Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse) |
 | Fin de session                             | `/handoff`                                                                    |
 | Feature livrée                             | `/feature-done <spec-id>`                                                     |

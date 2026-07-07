@@ -21,6 +21,7 @@
 - `/handoff` ⭐ — snapshot HANDOFF.md fin de session
 - `/spec "<titre>"` ⭐ — scaffold nouvelle feature (4 fichiers + ROADMAP)
 - `/conception <spec-id|macro>` ⭐ — arrêter le plan : explore (subagents code+docs+mémoire) → 2-3 options → décision → plan/tasks + revue adverse
+- `/feature "<titre>" [pipeline]` ⭐ — dérouler le **pipeline complet** (standard/tdd/custom) en enchaînant les maillons, gate utilisateur entre chaque étape
 - `/feature-done <spec-id>` ⭐ — livraison feature
 - `/pivot "<raison>"` — orchestrer un pivot client (9 étapes)
 - `/debug "<symptôme>"` — pipeline de debugging : reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → test pérennisé + leçon
@@ -41,7 +42,7 @@
 - `/init-from-template` — initialise un projet depuis ce template (from scratch, UNE FOIS)
 - `/adopt-template` — greffe le template sur un projet EXISTANT (brownfield, UNE FOIS) : merges non-destructifs + rétro-remplissage doc depuis l'existant
 
-> 🗂️ **Inventaire canonique** : cette liste (**13 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**14 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
 
@@ -54,6 +55,14 @@ Hors du cœur. Packagés en **plugins** installés par projet via `/plugin` — 
 > Marketplace = le repo template : `/plugin marketplace add kurt83340/claude-Setup` (une fois), puis `/plugin install <plugin>@claude-setup`. La source (`plugins/` + `.claude-plugin/marketplace.json`) vit dans le repo template — pas dans les projets générés.
 
 Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.claude/skills/` **et les recenser ici** : ce fichier reste l'inventaire unique de **tous** les skills — cœur ou stack.
+
+## 🔁 Pipelines récurrents (orchestrés par `/feature`)
+
+- **standard** : Planifier (`/spec`+`/conception`) → Coder (solo | `/agent-teams:team`) → Tester → Review adverse → Vérifier → Persister (`/feature-done`)
+- **tdd** : Planifier → **Écrire les tests (rouges)** → Coder (vert, sans toucher aux tests) → Review adverse → Vérifier → Persister
+- **bug** : `/debug` — Reproduire (test rouge) → Explorer → Hypothèses discriminées → Fix minimal → Pérenniser (leçon)
+
+> **1 pipeline = 1 fichier déposable** dans `.claude/skills/feature/pipelines/` — ajoutes-en au fil de l'eau (format documenté dans le SKILL `/feature`). `/conception` note le mode (TDD/standard) par spec dans `plan.md § Décisions` → `/feature` le lit pour auto-choisir.
 
 ## Slash commands projet
 
