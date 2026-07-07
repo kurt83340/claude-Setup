@@ -55,10 +55,10 @@ Claude va :
 | Type             | Impact   | Skills installés                              | Use case                         |
 | ---------------- | -------- | --------------------------------------------- | -------------------------------- |
 | `script-jetable` | **-80%** | 2 (handoff, lecon)                      | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | 12 (cœur)                                     | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | 12 (cœur)                                     | Next.js, React, etc.             |
-| `automation-n8n` | léger    | 12 cœur + plugin officiel `n8n-mcp-skills` (×14) | Workflow n8n + helpers Python |
-| `bdd-migration`  | léger    | 12 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
+| `python-app`     | léger    | 13 (cœur)                                     | App Python (FastAPI, scripts...) |
+| `web-app`        | léger    | 13 (cœur)                                     | Next.js, React, etc.             |
+| `automation-n8n` | léger    | 13 cœur + plugin officiel `n8n-mcp-skills` (×14) | Workflow n8n + helpers Python |
+| `bdd-migration`  | léger    | 13 cœur + plugin `db-migration`               | Migration BDD avec Alembic       |
 
 ### Vérification post-init
 
@@ -247,6 +247,7 @@ Rapport généré → tu suis les actions par priorité.
 | Débugger un bug non trivial                | `/debug "<symptôme>"` (repro → cause → fix minimal → leçon)                   |
 | Idée perso à capturer                      | `/idee "<titre>"`                                                             |
 | Refacto majeur sur le code                 | `/codemap`                                                                    |
+| Créer un skill / agent / pipeline conforme | `/scaffold skill·agent·pipeline "<nom>"` — conventions + référencement auto  |
 | Audit hebdo                                | `/doc-health`                                                                 |
 | BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
 | Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                                 |
@@ -665,6 +666,10 @@ Docs : voir `.claude/skills/README.md` et `.claude/agents/README.md`.
 Édite directement le `.claude/skills/<nom>/SKILL.md` (ex: `.claude/skills/handoff/SKILL.md`). Le frontmatter `allowed-tools` contrôle ce que Claude peut faire.
 
 ### Ajouter un nouveau skill (custom)
+
+> 🏗️ **Le plus simple : `/scaffold skill "<nom>"`** — il pose les bonnes questions (sensible ?
+> outils ?), crée le fichier conforme ET fait le référencement dans l'inventaire. La procédure
+> manuelle ci-dessous reste valable.
 
 ```bash
 mkdir -p .claude/skills/mon-skill

@@ -226,6 +226,7 @@ diagrams/
 | ------------- | -------------------------------------------------------------------------------------- |
 | `/doc-health` | Audit hebdo — docs stale + ADRs manquants + growth + leçons en attente + specs stalled |
 | `/codemap`    | Après gros refacto — régénère .claude/docs/code-map.md depuis le code                  |
+| `/scaffold skill·agent·pipeline "<nom>"` | Créer un composant conforme — conventions encodées (SendMessage, grammaire pipeline dirigé/proposé, maillons vérifiés) + référencement exigé fait |
 
 ### Slash commands projet
 
@@ -277,6 +278,7 @@ diagrams/
 | `/pivot`                 | Workflow pivot client 9 étapes (réunion → cadrage → research → PRD bump → tasks refonte → ROADMAP v2 → ADR → leçon → HANDOFF)                                                          | `.claude/skills/pivot/`              |
 | `/agent-teams:team` ⭐   | Orchestre une équipe de teammates (tmux) sur une feature : plan validé, worktrees, task list native, mode TDD opt-in, suivi, merge, débrief mémoire                                    | plugin `agent-teams` (marketplace)   |
 | `/debug`                 | Pipeline debugging : symptôme verbatim → repro (test rouge) → hypothèses discriminées → fix minimal → test pérennisé + leçon                                                           | `.claude/skills/debug/`              |
+| `/scaffold`              | Générateur de composants conformes (skill/agent/pipeline) — conventions + référencement automatiques ; pipeline en mode dirigé OU proposé                                              | `.claude/skills/scaffold/`           |
 
 > 🧩 Skills **stack** = plugins installés par projet, auto-découverts (pas de listing manuel) : `db-migration` (Alembic) → marketplace `claude-setup` ; n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)). Inventaire cœur → [`.claude/CLAUDE.md`](../CLAUDE.md).
 

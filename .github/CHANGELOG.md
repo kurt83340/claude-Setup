@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.15.0] — 2026-07-07
+
+### Added
+
+- **Skill `/scaffold skill|agent|pipeline "<nom>"`** (15e skill cœur) — **générateur de composants conformes** : les conventions gardées par la CI sont encodées à la création au lieu d'être rattrapées après. Mode **skill** (name = dossier, description auto-invocante, `disable-model-invocation` pour le sensible, + ligne d'inventaire `.claude/CLAUDE.md`). Mode **agent** (teammate → `SendMessage` obligatoire, libs externes → `mcp__context7`, + ligne `agents/README`). Mode **pipeline** en 2 façons : **dirigé** (l'utilisateur dicte l'ordre des étapes + maillons/MCP de chacune — le skill vérifie l'existence de chaque maillon et complète les critères de sortie) ou **proposé** (l'utilisateur décrit la tâche récurrente — le skill inventorie les maillons disponibles, instancie la grammaire Planifier→…→Persister et propose le pipeline optimal, l'utilisateur tranche). Étape 0 anti-doublon systématique + rappels contextuels (repo template : comptes/CHANGELOG ; projet généré : rien de plus). `script-jetable` le retire.
+
 ## [0.14.0] — 2026-07-07
 
 ### Changed

@@ -61,6 +61,7 @@ SCRIPT_JETABLE = {
         ".claude/skills/idee/",
         ".claude/skills/conception/",
         ".claude/skills/debug/",
+        ".claude/skills/scaffold/",
         # (adopt-template : déjà retiré pour tous les types via TEMPLATE_MAINTENANCE)
         # Agents (pas besoin doc-maintainer pour 1-shot)
         ".claude/agents/",

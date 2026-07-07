@@ -56,6 +56,7 @@ mon-projet/
     │   ├── doc-health/SKILL.md
     │   ├── codemap/SKILL.md
     │   ├── pivot/SKILL.md          # workflow 9 étapes
+    │   ├── scaffold/SKILL.md       # /scaffold — générateur de composants conformes (skill/agent/pipeline)
     │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (brownfield, merges non-destructifs)
     │   └── init-from-template/SKILL.md
     │   # db-migration + agent-teams = PLUGINS maison (marketplace claude-setup) ; stack n8n = plugin OFFICIEL czlonkowski/n8n-skills → /plugin install, rien de copié

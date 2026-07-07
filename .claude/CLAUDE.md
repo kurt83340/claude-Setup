@@ -36,13 +36,14 @@
 
 - `/doc-health` — audit hebdo de la doc
 - `/codemap` — régénère `code-map.md` depuis `src/`
+- `/scaffold skill|agent|pipeline "<nom>"` — générateur de composants **conformes** : conventions encodées (SendMessage teammate, grammaire pipeline dirigé/proposé, maillons vérifiés) + référencement exigé fait automatiquement
 
 ### Bootstrap
 
 - `/init-from-template` — initialise un projet depuis ce template (from scratch, UNE FOIS)
 - `/adopt-template` — greffe le template sur un projet EXISTANT (brownfield, UNE FOIS) : merges non-destructifs + rétro-remplissage doc depuis l'existant
 
-> 🗂️ **Inventaire canonique** : cette liste (**14 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**15 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
 
