@@ -3,6 +3,12 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.13.0] — 2026-07-07
+
+### Added
+
+- **Pipeline `n8n`** (3e fichier de `feature/pipelines/`) — implémentation d'un workflow d'automatisation : Planifier (pattern choisi via `n8n-workflow-patterns`) → Construire (outils n8n-mcp + skills du plugin `n8n-expertise` : node-configuration, expression-syntax, code-js/py) → **Valider** (validation n8n-mcp + `n8n-validation-expert`, faux positifs écartés) → **Tester en réel** (cas nominal ET cas d'erreur, sortie de chaque nœud inspectée) → Review adverse sur l'**export JSON** (secrets absents, idempotence, rate limits) → Persister (**JSON versionné dans `workflows/`** + RUNBOOK si prod). Illustre la doctrine : le squelette (Planifier→…→Persister) est universel, chaque contexte instancie ses étapes — nouveau fichier pipeline seulement quand une étape change de **nature**, pas d'outil.
+
 ## [0.12.1] — 2026-07-07
 
 ### Fixed
