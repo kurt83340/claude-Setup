@@ -57,13 +57,15 @@ Claude va :
 
 ### Vérification post-init
 
+> ℹ️ L'init a déjà vérifié les CORE (`render.py --check`) **avant** le cleanup — le script est
+> ensuite retiré avec le scaffolding du template. Re-check possible sans script :
+
 ```bash
-# 1. Tous les CORE placeholders sont substitués ?
-python3 .claude/skills/init-from-template/scripts/render.py --check
-# → ✅ "Tous les placeholders CORE sont substitués"
+# 1. Aucun placeholder CORE restant ? (rien trouvé = ✅)
+grep -rEn '\{\{[A-Z]{2,}_[A-Z][A-Z0-9_]+\}\}' --include='*.md' . && echo "❌ CORE restants" || echo "✅ aucun CORE restant"
 
 # 2. Premier commit du projet rempli
-git add .
+git add -A
 git commit -m "feat: init projet <nom> depuis template"
 ```
 
@@ -82,7 +84,8 @@ Ton projet a déjà du code et une histoire ? **Ne pas** utiliser `/init-from-te
 ```bash
 cd /chemin/vers/projet-existant     # working tree PROPRE (commit/stash avant)
 rsync -av --ignore-existing \
-  --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' \
+  --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' \
+  --exclude='plugins/' --exclude='.claude-plugin/' \
   --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
   /chemin/vers/template/ .
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
@@ -580,8 +583,8 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 **Defaults du template** :
 
 - `allow` : pytest, ruff, mypy, alembic, git status/log/diff/add/commit/tag, uv, npm, find, grep, Read/Edit/Write dans `.claude/docs/` et `src/`
-- `ask` : `git push`, `git reset`, `alembic downgrade`, `./scripts/deploy`
-- `deny` : `rm -rf`, `Read(./.env)`, `Read(./.env.local)`
+- `ask` : `git push`, `git reset`, `alembic downgrade`, `./scripts/deploy`, `Read(./.env.*)` — **filet fail-closed** : tout `.env.*` non listé en deny (`.env.prod`, `.env.dev`…) déclenche un prompt au lieu d'être lisible en silence ; `.env.example` reste lisible après 1 confirmation
+- `deny` : `rm -rf`, `.env` / `.env.local` / `.env.*.local` / `.env.{development,staging,production,test}`, `secrets.*`, `ACCESS.md`
 
 **Customiser par projet** : édite `.claude/settings.json` pour ajouter tes commandes spécifiques (ex: `n8n:*`, `docker compose:*`).
 

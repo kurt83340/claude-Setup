@@ -102,7 +102,7 @@ Possibles options à considérer plus tard :
 | ----------- | --------------------------------- | ----------------- | --------------------------- |
 | Unit        | `pytest` + `respx`                | >= 80% (objectif) | `pytest tests/unit/`        |
 | Integration | `pytest` + testcontainers (futur) | sur staging       | `pytest tests/integration/` |
-| E2E         | run manuel du workflow n8n        | smoke tests       | manuel ou /n8n-push         |
+| E2E         | run manuel du workflow n8n        | smoke tests       | manuel ou scripts/deploy.py |
 
 Voir [testing.md](../rules/testing.md) pour conventions.
 

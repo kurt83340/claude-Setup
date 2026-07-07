@@ -21,7 +21,8 @@ jamais écrasé.
 ```bash
 # Depuis le projet existant — copie SANS ÉCRASEMENT (les fichiers existants gagnent toujours)
 rsync -av --ignore-existing \
-  --exclude='EXAMPLES/acme-sync-erp-notion-docs/' --exclude='test/' --exclude='.github/' \
+  --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' \
+  --exclude='plugins/' --exclude='.claude-plugin/' \
   --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
   /chemin/vers/template/ .
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
@@ -75,9 +76,17 @@ saisir. Puis, mêmes scripts (source unique — ne pas ré-implémenter) :
 
 ```bash
 python3 .claude/skills/init-from-template/scripts/render.py --vars <vars.json>
-python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py --type <type>
-python3 .claude/skills/init-from-template/scripts/render.py --check
+python3 .claude/skills/init-from-template/scripts/render.py --check   # AVANT le cleanup
+python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py --type <type> --brownfield
 ```
+
+> ⚠️ **`--brownfield` OBLIGATOIRE ici.** Sans lui, le cleanup retirerait les « artefacts de
+> maintenance du template »… or sur un projet EXISTANT, `.github/`, `test/`, `plugins/` sont
+> à l'**UTILISATEUR** (le rsync d'adopt exclut ceux du template) → destruction de sa CI et de
+> ses tests. Avec le flag : aucun strip, suppressions de profil confinées à `.claude/`,
+> permissions et inventaires **non** purgés. (Des sentinelles côté script protègent aussi par
+> défaut — ceinture ET bretelles.) Les skills bootstrap restent donc en place : leur retrait
+> manuel est proposé à l'Étape 5.
 
 (La substitution ne touche que les `{{CORE}}` du squelette copié — les .md du projet
 existant n'en contiennent pas.)

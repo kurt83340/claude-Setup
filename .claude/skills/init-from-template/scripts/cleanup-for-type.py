@@ -61,7 +61,7 @@ SCRIPT_JETABLE = {
         ".claude/skills/team/",
         ".claude/skills/conception/",
         ".claude/skills/debug/",
-        ".claude/skills/adopt-template/",
+        # (adopt-template : déjà retiré pour tous les types via TEMPLATE_MAINTENANCE)
         # Agents (pas besoin doc-maintainer pour 1-shot)
         ".claude/agents/",
         # Hooks code (pas de code structuré)
@@ -116,13 +116,18 @@ PROFILES = {
     "bdd-migration": BDD_MIGRATION,
 }
 
-# ── Artefacts de maintenance DU TEMPLATE (retirés pour TOUS les types) ─────────
+# ── Artefacts de maintenance DU TEMPLATE (retirés en GREENFIELD uniquement) ────
 # N'existent que pour développer/distribuer le template lui-même. Un projet GÉNÉRÉ n'en a
 # aucun usage — et la self-CI (.github/workflows/ci.yml) teste render.py / l'inventaire, que
 # l'init vient justement de supprimer → CI ROUGE héritée. Les plugins stack (plugins/ +
 # .claude-plugin/) sont la SOURCE du marketplace : le projet les INSTALLE (/plugin), il ne les
 # embarque pas. init-from-template/ est retiré EN DERNIER : il contient CE script (suppression
 # OK sous POSIX — le process tourne en mémoire). Réversible : le snapshot git pre-init garde tout.
+#
+# ⚠️ SÉCURITÉ (bug brownfield 2026-07-07) : .github/, test/, plugins/ existent dans plein de
+# VRAIS projets. Chaque dossier n'est supprimé que si sa SENTINELLE template (cf.
+# _is_template_owned) prouve qu'il vient bien du template — jamais par homonymie. Et le mode
+# --brownfield (/adopt-template) saute ce strip entièrement.
 TEMPLATE_MAINTENANCE = [
     ".github/",                            # self-CI + README/CHANGELOG DU template
     "test/",                               # tests + rapports d'audit DU template
@@ -134,14 +139,33 @@ TEMPLATE_MAINTENANCE = [
 ]
 
 
-def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
+def _is_template_owned(root: Path, rel: str) -> bool:
+    """Sentinelles : prouve qu'un dossier de TEMPLATE_MAINTENANCE appartient bien au template
+    (et pas au projet de l'utilisateur, qui peut avoir ses propres .github/, test/, plugins/).
+    Sentinelle absente → le strip N'Y TOUCHE PAS."""
+    if rel == ".github/":
+        ci = root / ".github" / "workflows" / "ci.yml"
+        try:
+            return ci.exists() and "test_hooks" in ci.read_text(encoding="utf-8")
+        except Exception:
+            return False
+    if rel == "test/":
+        return (root / "test" / "test_hooks.py").exists()
+    if rel == "EXAMPLES/":
+        return (root / "EXAMPLES" / "acme-sync-erp-notion-docs").exists()
+    if rel in ("plugins/", ".claude-plugin/"):
+        return (root / ".claude-plugin" / "marketplace.json").exists()
+    return True  # .claude/skills/{init,adopt}-* : noms spécifiques au template
+
+
+def cleanup(root: Path, profile_name: str, dry_run: bool, brownfield: bool = False) -> int:
     if profile_name not in PROFILES:
         print(f"❌ Type inconnu : {profile_name}", file=sys.stderr)
         print(f"   Types valides : {', '.join(PROFILES.keys())}", file=sys.stderr)
         return 1
 
     profile = PROFILES[profile_name]
-    print(f"📋 Profil : {profile_name}")
+    print(f"📋 Profil : {profile_name}" + (" (mode brownfield /adopt-template)" if brownfield else ""))
     print(f"   {profile['keep_reason']}\n")
 
     deleted_files = 0
@@ -149,6 +173,12 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     skipped = 0
 
     for rel_path in profile["delete"]:
+        # Brownfield : le projet EXISTE déjà — ne supprimer que dans .claude/ (scaffold
+        # fraîchement rsyncé). Un chemin racine homonyme (workflows/…) peut être à l'user.
+        if brownfield and not rel_path.startswith(".claude/"):
+            print(f"  ⤳ (brownfield) hors .claude/, non supprimé : {rel_path}")
+            skipped += 1
+            continue
         target = root / rel_path
         if not target.exists():
             skipped += 1
@@ -177,27 +207,40 @@ def cleanup(root: Path, profile_name: str, dry_run: bool) -> int:
     print(f"\n🎉 {prefix}Cleanup : {deleted_files} fichiers + {deleted_dirs} dossiers supprimés "
           f"({skipped} déjà absents)")
 
-    # Retrait des artefacts de maintenance DU template (tous types)
-    strip_template_maintenance(root, dry_run)
+    # Retrait des artefacts de maintenance DU template — greenfield UNIQUEMENT.
+    # En brownfield (/adopt-template), .github/, test/, plugins/… sont ceux de l'UTILISATEUR
+    # (le rsync d'adopt exclut ceux du template) → on n'y touche JAMAIS.
+    if brownfield:
+        print("\n🏠 Brownfield : artefacts de maintenance conservés (projet existant) ; "
+              "permissions et inventaires non purgés.")
+    else:
+        strip_template_maintenance(root, dry_run)
 
     # Post-cleanup : réparer CLAUDE.md + purger settings.json (hooks fantômes + allow-rules mortes)
     if not dry_run:
         fix_claude_md_imports(root)
         prune_dead_hooks(root)
-        prune_dead_permissions(root)
+        if not brownfield:
+            prune_dead_permissions(root)
+            prune_bootstrap_inventory(root)
 
     return 0
 
 
 def strip_template_maintenance(root: Path, dry_run: bool) -> int:
     """Retire les artefacts qui ne servent qu'à maintenir LE TEMPLATE (self-CI, tests, exemples,
-    skills bootstrap — voir TEMPLATE_MAINTENANCE). Appelé pour TOUS les types, APRÈS la copie des
-    skills stack. Réversible via le snapshot git pre-init."""
+    plugins source, skills bootstrap — voir TEMPLATE_MAINTENANCE). Greenfield uniquement (jamais
+    appelé en --brownfield). Chaque dossier générique n'est supprimé que si sa SENTINELLE prouve
+    qu'il vient du template (_is_template_owned) — jamais par homonymie avec un dossier user.
+    Réversible via le snapshot git pre-init."""
     print("\n🧹 Artefacts de maintenance du template (inutiles dans un projet généré) :")
     removed = 0
     for rel in TEMPLATE_MAINTENANCE:
         target = root / rel
         if not target.exists():
+            continue
+        if not _is_template_owned(root, rel):
+            print(f"  ⚠️  {rel} : sentinelle template absente → ressemble à un dossier du PROJET, conservé")
             continue
         if dry_run:
             print(f"  [DRY] Would delete : {rel}")
@@ -214,6 +257,24 @@ def strip_template_maintenance(root: Path, dry_run: bool) -> int:
     return removed
 
 
+def prune_bootstrap_inventory(root: Path) -> None:
+    """Le strip vient de supprimer les skills bootstrap (init-from-template / adopt-template) :
+    retire leurs lignes d'inventaire (puces et lignes de tableau) des index SHIPPÉS — sinon
+    chaque projet généré recense 2 skills morts. Greenfield uniquement."""
+    pat = re.compile(r"/(?:init-from-template|adopt-template)\b")
+    for rel in (".claude/CLAUDE.md", ".claude/rules/template-maintenance.md", "USAGE.md"):
+        p = root / rel
+        if not p.exists():
+            continue
+        lines = p.read_text(encoding="utf-8").split("\n")
+        kept = [l for l in lines
+                if not (pat.search(l) and l.lstrip().startswith(("-", "|")))]
+        removed = len(lines) - len(kept)
+        if removed:
+            p.write_text("\n".join(kept), encoding="utf-8")
+            print(f"🔧 {rel} : {removed} ligne(s) d'inventaire bootstrap retirée(s)")
+
+
 def prune_dead_permissions(root: Path) -> None:
     """Retire de settings.json les allow-rules Bash pointant vers un script `.claude/…(.py|.sh)`
     désormais absent — ex. les 2 règles init-from-template (render.py / cleanup-for-type.py),
@@ -228,13 +289,19 @@ def prune_dead_permissions(root: Path) -> None:
     perms = settings.get("permissions")
     if not isinstance(perms, dict) or not isinstance(perms.get("allow"), list):
         return
-    script_re = re.compile(r"\.claude/[^\s:\"']+\.(?:py|sh)")
+    # Précision avant tout : au moindre doute on GARDE la règle (une allow-rule morte est
+    # inoffensive ; une allow-rule vivante supprimée = prompts en boucle / run headless bloqué).
+    # - lookbehind : ne pas matcher `.claude/` au milieu d'un chemin (`~/.claude/…`, autre repo)
+    # - glob (*?[) dans le chemin : invérifiable par exists() → conserver
+    script_re = re.compile(r"(?<![\w~/.\\-])\.claude/[^\s:\"']+\.(?:py|sh)")
     kept, removed = [], 0
     for rule in perms["allow"]:
         m = script_re.search(rule) if isinstance(rule, str) else None
-        if m and not (root / m.group(0)).exists():
-            removed += 1
-            continue
+        if m:
+            path = m.group(0)
+            if not any(c in path for c in "*?[") and not (root / path).exists():
+                removed += 1
+                continue
         kept.append(rule)
     if removed:
         perms["allow"] = kept
@@ -321,9 +388,13 @@ def main():
                         help="Racine du projet (default: cwd)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Ne pas supprimer, juste lister")
+    parser.add_argument("--brownfield", action="store_true",
+                        help="Mode /adopt-template (projet EXISTANT) : conserve les artefacts de "
+                             "maintenance (.github/, test/, plugins/…), ne purge ni permissions ni "
+                             "inventaires, et restreint les suppressions de profil à .claude/")
     args = parser.parse_args()
 
-    return cleanup(args.root.resolve(), args.type, args.dry_run)
+    return cleanup(args.root.resolve(), args.type, args.dry_run, brownfield=args.brownfield)
 
 
 if __name__ == "__main__":

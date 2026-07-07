@@ -23,7 +23,7 @@ git checkout main && git pull
 pytest
 
 # 2. Push workflow n8n
-/n8n-push  # ou : python scripts/deploy.py --target n8n-prod
+python scripts/deploy.py --target n8n-prod  # ou un skill projet /deploy (slash-only)
 
 # 3. Vérifier en n8n UI que le workflow est bien Active
 # 4. Lancer un run manuel pour smoke test

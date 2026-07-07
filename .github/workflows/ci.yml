@@ -21,6 +21,9 @@ jobs:
       - name: Suite de tests render.py (init-from-template)
         run: python3 test/test_render.py
 
+      - name: Suite de tests cleanup-for-type.py (sentinelles + brownfield + prune)
+        run: python3 test/test_cleanup.py
+
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 
@@ -54,21 +57,38 @@ jobs:
           for f in .claude/agents/*.md; do
             name=$(basename "$f" .md)
             case "$name" in README|doc-maintainer) continue;; esac
-            grep -qE '^tools:.*\bSendMessage\b' "$f" || { echo "❌ Agent '$name' : SendMessage absent de tools: (teammate muet garanti)"; rc=1; }
+            # pas de champ tools: → l'agent hérite de TOUT (dont SendMessage) : conforme
+            grep -qE '^tools:' "$f" || continue
+            grep -qE '^tools:.*\bSendMessage\b' "$f" || { echo "❌ Agent '$name' : tools: restreint SANS SendMessage (teammate muet garanti)"; rc=1; }
           done
           if [ "$rc" -ne 0 ]; then exit 1; fi
           echo "✅ Tous les rôles teammate ont SendMessage dans tools:"
 
-      - name: Manifestes marketplace + plugins valides
+      - name: Manifestes marketplace + plugins coherents
         run: |
-          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-          rc=0
-          for d in plugins/*/; do
-            [ -f "${d}.claude-plugin/plugin.json" ] || { echo "❌ ${d} : .claude-plugin/plugin.json manquant"; rc=1; continue; }
-            python3 -m json.tool "${d}.claude-plugin/plugin.json" > /dev/null 2>&1 || { echo "❌ ${d}.claude-plugin/plugin.json : JSON invalide"; rc=1; }
-          done
-          if [ "$rc" -ne 0 ]; then exit 1; fi
-          echo "✅ marketplace.json + plugin.json valides"
+          python3 - <<'PY'
+          import json, sys
+          from pathlib import Path
+          rc = 0
+          mp = json.load(open(".claude-plugin/marketplace.json"))
+          listed = {}
+          for p in mp.get("plugins", []):
+              name, src = p.get("name", "?"), p.get("source")
+              if not isinstance(src, str) or not Path(src).is_dir():
+                  print(f"❌ marketplace: source introuvable pour '{name}' : {src}"); rc = 1; continue
+              pj = Path(src) / ".claude-plugin" / "plugin.json"
+              if not pj.is_file():
+                  print(f"❌ {src}: plugin.json manquant"); rc = 1; continue
+              if json.load(open(pj)).get("name") != name:
+                  print(f"❌ {src}: plugin.json name ≠ marketplace name '{name}'"); rc = 1
+              listed[Path(src).resolve()] = name
+          plugroot = Path("plugins")
+          for d in (sorted(plugroot.iterdir()) if plugroot.is_dir() else []):
+              if d.is_dir() and d.resolve() not in listed:
+                  print(f"❌ {d}/ absent du marketplace.json"); rc = 1
+          if rc: sys.exit(1)
+          print(f"✅ marketplace ({len(listed)} plugins) : JSON valides, sources presentes, plugins/ tous recenses")
+          PY
 
       - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 3 @-imports
         run: |

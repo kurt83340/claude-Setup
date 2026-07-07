@@ -51,7 +51,7 @@ Hors du cœur. Packagés en **plugins** installés par projet via `/plugin` — 
 - **n8n** (type `automation-n8n`) → plugin **`n8n-expertise`** (7 skills : node-configuration, validation-expert, workflow-patterns, code-javascript, code-python, expression-syntax, mcp-tools-expert) → `claude plugin install n8n-expertise@claude-setup --scope project`
 - **BDD / Alembic** (type `bdd-migration`) → plugin **`db-migration`** → `claude plugin install db-migration@claude-setup --scope project`
 
-> Marketplace = ce repo : `/plugin marketplace add kurt83340/claude-Setup`. Source : [`plugins/`](../plugins/) · manifeste : [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json).
+> Marketplace = le repo template : `/plugin marketplace add kurt83340/claude-Setup` (une fois), puis `/plugin install <plugin>@claude-setup`. La source (`plugins/` + `.claude-plugin/marketplace.json`) vit dans le repo template — pas dans les projets générés.
 
 Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.claude/skills/` **et les recenser ici** : ce fichier reste l'inventaire unique de **tous** les skills — cœur ou stack.
 

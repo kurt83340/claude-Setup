@@ -3,6 +3,24 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.9.1] — 2026-07-07
+
+Post-review complète (workflow multi-agents : 15 findings confirmés + vérifs inline + sweep) — durcissement init/adopt et correctifs de cohérence.
+
+### Fixed
+
+- **🔴 `/adopt-template` détruisait les dossiers du PROJET** : `strip_template_maintenance` supprimait sans condition `.github/`, `test/`, `plugins/` — or en brownfield ils appartiennent à l'**utilisateur** (le rsync d'adopt exclut ceux du template) → CI/tests/code client effacés puis commités. Double protection : **mode `--brownfield`** (aucun strip, deletes de profil confinés à `.claude/`, permissions et inventaires non purgés — le SKILL adopt le passe désormais, et `render --check` repasse AVANT le cleanup) **+ sentinelles de propriété** (`_is_template_owned` : un `.github/`/`test/`/`plugins/` homonyme sans marqueur template n'est **jamais** supprimé, même sans flag).
+- **🔴 `prune_dead_permissions` effaçait des allow-rules vivantes** : globs (`.claude/hooks/*.py`) testés en chemin littéral, chemins `~/.claude/…` matchés en substring → supprimés à tort. Lookbehind d'ancrage + skip des chemins à métacaractères ; au doute on **garde** (une règle morte est inoffensive, une vivante supprimée = prompts en boucle).
+- **🔴 Deny `.env` troué** : l'énumération laissait `.env.prod`, `.env.dev`… **silencieusement lisibles** via l'allow `Read(./**)`. Ajout du filet **`ask: Read(./.env.*)`** — fail-closed : tout `.env.*` non listé en deny déclenche un prompt ; `.env.example` lisible après 1 confirmation.
+- **Projet généré propre** : `prune_bootstrap_inventory` purge les lignes `/init-from-template` + `/adopt-template` des index shippés (`.claude/CLAUDE.md`, `template-maintenance.md`, `USAGE.md`) ; sections « Garantie skills vitaux » / « affiner ensuite » réécrites (le cleanup **s'auto-retire**, décision de type AVANT exécution) ; vérif post-init sans `render.py` (grep) ; note marketplace sans liens locaux morts.
+- **Rsync brownfield aligné** (adopt SKILL + USAGE) : exclut `EXAMPLES/`, `plugins/`, `.claude-plugin/` comme le greenfield.
+- **`render.py`** : EXCLUDE += `plugins/` + `.claude-plugin/` (les exemples `{{ }}` n8n des plugins ne sont pas des placeholders).
+- **CI durcie** : garde SendMessage tolère l'absence de `tools:` (héritage complet = conforme) ; check manifests **croisé** (sources présentes, `plugins/*` tous recensés, `name` plugin ↔ marketplace) ; références `/n8n-push` mortes nettoyées (STRUCTURE.md, exemple ACME ×3) ; entrée `adopt-template` redondante retirée de `SCRIPT_JETABLE`.
+
+### Added
+
+- **`test/test_cleanup.py`** (40 asserts, stdlib) + step CI : greenfield strippé/pruné, **homonymes protégés**, **brownfield intouché**, dry-run inerte — les 2 fonctions destructrices ne re-régresseront plus en silence.
+
 ## [0.9.0] — 2026-07-06
 
 Composants stack → **plugins** (archi C incrémentale) : les capacités optionnelles sortent du scaffold standalone pour devenir des plugins installables par projet, **auto-découverts** par le harness → plus aucun inventaire `.md` à maintenir pour eux.

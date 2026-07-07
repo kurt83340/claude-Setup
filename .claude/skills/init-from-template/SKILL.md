@@ -135,17 +135,23 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
 ### Garantie : skills "vitaux" toujours conservés
 
-Pour TOUS les types : `handoff`, `lecon`, `init-from-template` restent disponibles (+ `lecons.md` conservé comme cible de `/lecon`).
+Pour TOUS les types : `handoff` et `lecon` restent disponibles (+ `lecons.md` conservé comme
+cible de `/lecon`). Les skills **bootstrap** (`init-from-template`, `adopt-template`) sont
+retirés en fin de cleanup (usage unique) — leurs lignes d'inventaire sont purgées automatiquement
+des index shippés.
 
 ### Si le user n'est pas sûr du type
 
-Choisir `automation-n8n` ou `python-app` par défaut (impact léger, peut affiner ensuite avec un autre cleanup).
+Choisir `automation-n8n` ou `python-app` (impact léger). ⚠️ À décider AVANT d'exécuter : le
+cleanup **s'auto-retire** (usage unique) — pas de « 2e cleanup » possible ensuite. En cas de
+doute, montrer d'abord le `--dry-run` des deux types et faire trancher.
 
 ## Étape 4 — Commit initial
 
 > L'Étape 3 (`cleanup-for-type.py`) a **déjà** retiré, pour **tous** les types, les artefacts de
 > maintenance **DU template** — inutiles (et cassants pour la CI) dans un projet généré : `.github/`
-> (self-CI + README/CHANGELOG du template), `test/`, `EXAMPLES/` (après copie des skills stack) et les
+> (self-CI + README/CHANGELOG du template), `test/`, `EXAMPLES/`, `plugins/` + `.claude-plugin/` (source du
+> marketplace — le projet **installe** les plugins via `/plugin`, il ne les embarque pas) et les
 > skills bootstrap `adopt-template` + `init-from-template`. Elle a aussi purgé de `settings.json` les
 > allow-rules mortes (scripts init supprimés). **Rien à supprimer à la main ici** — donc **pas de
 > `rm -rf`** (que le template interdit de toute façon). Ces artefacts restent dans le **repo template

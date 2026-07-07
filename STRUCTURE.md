@@ -412,7 +412,7 @@ Marie (toute décision archi ou changement scope passe par elle)
 
 - Workflow n8n : "Sync ERP Commandes" dans tenant ACME
 - Trigger : Schedule toutes les 10min
-- Déployé via : `/n8n-push` (skill projet)
+- Déployé via : import API n8n (cf. `workflows/README.md`) ou un skill projet `/deploy`
 - Versionning : workflow JSON exporté dans `workflows/sync-erp.json`
 
 ## Monitoring

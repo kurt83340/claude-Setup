@@ -44,7 +44,8 @@
       "Bash(git merge:*)",
       "Bash(git worktree remove:*)",
       "Bash(alembic downgrade:*)",
-      "Bash(./scripts/deploy:*)"
+      "Bash(./scripts/deploy:*)",
+      "Read(./.env.*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",

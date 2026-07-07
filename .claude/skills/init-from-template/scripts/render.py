@@ -35,6 +35,10 @@ EXCLUDE = [
     "USAGE.md",
     # test/ contient des rapports qui citent {{UPPER_SNAKE}} en exemple (pas de vraies vars)
     "test/",
+    # Plugins (source du marketplace) : leurs .md regorgent d'expressions n8n {{ }} —
+    # du CONTENU de référence, jamais des placeholders à substituer
+    "plugins/",
+    ".claude-plugin/",
 ]
 
 # Une placeholder est CORE si son nom est COMPOUND_UPPER_SNAKE :
