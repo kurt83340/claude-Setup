@@ -8,6 +8,10 @@ argument-hint: "[capture|promote|discard|archive] <args>"
 
 # /idee — Cycle de vie complet des idées perso
 
+> **Quand ne PAS utiliser** : input reçu du client/collègue/ticket → `cadrage/` (provenance
+> externe — ne JAMAIS mélanger) · observation/pattern technique → `/lecon`.
+> **Réversibilité** : 🟢 crée `idees/YYYY-MM-DD-titre.md` — undo : `discard` ou supprimer le fichier.
+
 Ton rôle : orchestrer le cycle de vie des fichiers dans `.claude/docs/idees/`.
 
 ## Modes disponibles

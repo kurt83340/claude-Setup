@@ -8,6 +8,11 @@ argument-hint: "<raison-courte>"
 
 # /pivot — Workflow pivot client (9 étapes)
 
+> **Quand ne PAS utiliser** : une idée à explorer (pas un changement de cap acté) → `/idee` ·
+> changement local à UNE feature → `/conception <spec-id>` (re-planifier la spec).
+> **Réversibilité** : 🟠 réorganise cadrage/PRD/ROADMAP/specs — chaque étape validée en diff,
+> l'historique est préservé par design (append datés, jamais d'overwrite) ; undo via git.
+
 Ton rôle : orchestrer le changement de direction d'un projet sans casser l'historique. Chaque étape demande validation à l'user.
 
 > 🧭 **Foyer unique du workflow pivot.** L'agent `doc-maintainer` ne redéfinit PAS ces étapes :

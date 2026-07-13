@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /handoff — Snapshot fin de session
 
+> **Quand ne PAS utiliser** : reprendre une session précise → `/resume` (natif, fidélité 100%) ·
+> feature terminée à livrer → `/feature-done` · pattern technique appris → auto-memory ou `/lecon`.
+> **Réversibilité** : 🟢 n'écrit que `.claude/docs/HANDOFF.md`, après confirmation —
+> undo : `git checkout -- .claude/docs/HANDOFF.md`.
+
 Ton rôle : générer une mise à jour propre de `.claude/docs/HANDOFF.md` qui permettra de reprendre le travail demain sans perdre le contexte.
 
 ## Étape 1 — Collecter l'état actuel
@@ -73,10 +78,22 @@ Format strict :
 2. **Task #N+1** : ...
 3. <étape suivante>
 
+## Continuation State (machine-readable — grammaire fixe `Clé: valeur`, 1 ligne chacune)
+
+Spec: <00X-slug | aucune>
+Task: <T2.3 | aucune>
+Fichiers en cours: <chemins séparés par virgule | aucun>
+Bloqué sur: <rien | description courte>
+Commande de reprise: <la 1re commande à lancer en reprenant | aucune>
+
 ## Journal (append-only — 1 ligne par session, NE JAMAIS réécrire)
 
 - YYYY-MM-DD — <ce qui a été fait cette session, en 1 phrase>
 ```
+
+> Le **Continuation State** duplique volontairement l'essentiel de « Next » en grammaire fixe :
+> c'est le point de reprise **parseable** (par un agent frais ou un script) quand la prose ambiguë
+> coûte cher. Toujours les 5 clés, même à `aucune` — une clé absente est indistinguable d'un oubli.
 
 ## Étape 4 — Présenter le diff au user
 

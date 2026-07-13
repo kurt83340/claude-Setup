@@ -8,6 +8,11 @@ argument-hint: "[capture|promote|discard|archive] <args>"
 
 # /lecon — Cycle de vie complet des leçons
 
+> **Quand ne PAS utiliser** : décision structurante d'architecture → `/adr` (une leçon peut y
+> être promue ensuite) · idée produit/feature → `/idee`.
+> **Réversibilité** : 🟢 append une entry dans `lecons.md` (statuts gérés par sous-modes) —
+> undo : sous-mode `discard` (ou retirer l'entry à la main).
+
 Ton rôle : orchestrer le cycle de vie des entries dans `.claude/docs/lecons.md`.
 
 ## Modes disponibles

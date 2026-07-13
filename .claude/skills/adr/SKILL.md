@@ -8,6 +8,11 @@ argument-hint: "[capture|supersede|deprecate|list] <args>"
 
 # /adr — Cycle de vie complet des Architecture Decision Records
 
+> **Quand ne PAS utiliser** : décision locale à UNE feature → § `## Décisions` de son `plan.md` ·
+> simple observation/pattern à mûrir → `/lecon`.
+> **Réversibilité** : 🟢 crée fichier + index — mais un ADR accepté est **immuable** : on ne
+> supprime ni ne modifie, on `supersede <NN>` (le seul undo légitime).
+
 Ton rôle : orchestrer le cycle de vie des ADR dans `.claude/docs/adr/`.
 
 ## Modes disponibles

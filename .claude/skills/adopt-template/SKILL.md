@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /adopt-template — Greffer le template sur un projet existant
 
+> **Quand ne PAS utiliser** : projet vierge (copie fraîche du template) → `/init-from-template` ·
+> projet déjà adopté → jamais deux fois (one-shot).
+> **Réversibilité** : 🟠 merges non-destructifs, deletes confinés à `.claude/` — commit de
+> pré-adoption exigé ; undo : `git reset --hard` sur ce commit.
+
 Pendant brownfield de `/init-from-template`. **Règle d'or : l'existant est sacré** — on
 n'écrase RIEN, on fusionne diff par diff, et la doc se remplit DEPUIS le projet, pas depuis
 des placeholders.

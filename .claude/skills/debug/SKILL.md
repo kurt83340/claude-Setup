@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /debug — Pipeline de debugging (reproduire → comprendre → corriger → pérenniser)
 
+> **Quand ne PAS utiliser** : bug trivial reproduit en une ligne → fix direct + CHANGELOG ·
+> nouvelle capacité à construire → `/feature` · re-planifier une approche → `/conception`.
+> **Réversibilité** : 🟠 écrit un fix minimal + un test de repro pérennisé — undo : git ;
+> le test rouge archivé reste la preuve du bug.
+
 Le « template debugging » du projet — symétrique de `/conception` pour les bugs.
 **Règle d'or : pas de repro = pas de fix.**
 

@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /conception — Explorer, converger, arrêter le plan
 
+> **Quand ne PAS utiliser** : pas encore de dossier spec → `/spec` d'abord · exécuter un plan
+> arrêté → `/feature` (ou `/agent-teams:team`) · diagnostiquer un bug → `/debug`.
+> **Réversibilité** : 🟢 n'écrit que les 4 fichiers de la spec (aucun code) —
+> undo : `git checkout -- .claude/docs/conception/`.
+
 Codifie la boucle power-user **Explore → Options → Décision → Plan → Revue adverse** sur les
 artefacts EXISTANTS du template (`research.md` / `plan.md` / `tasks.md` / `spec.md`) : aucun
 nouveau type de fichier — on les remplit avec méthode au lieu de les remplir à l'humeur.
@@ -65,8 +70,12 @@ Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `
 
 - `plan.md` : étapes numérotées, fichiers touchés par étape, risques + parades, et **un point
   de vérification exécutable par étape** (test/build/curl — jamais « ça devrait marcher »).
-- `tasks.md` : checklist `- [ ]` avec DoD mesurable, **partitionnée par fichiers disjoints**
-  si une exécution `/agent-teams:team` est envisagée (2 teammates sur les mêmes fichiers = interdit).
+  Remplis aussi ses **§ Circuit breakers** : les conditions d'arrêt se décident À FROID, ici —
+  pas au 3ᵉ échec, quand on est déjà en train de s'acharner.
+- `tasks.md` : checklist `- [ ]` avec **DoD typée** (`command_passes:` / `file_exists:` /
+  `manual:` — grammaire du template), **partitionnée par fichiers disjoints** si une exécution
+  `/agent-teams:team` est envisagée (2 teammates sur les mêmes fichiers = interdit), et des
+  phases de **~35 min de travail agent max** (au-delà : découper).
 - **Mode d'exécution — décide-le ICI, par spec** (note-le dans `plan.md` § Décisions) :
   **TDD** si les comportements sont spécifiables a priori (logique métier, parsing, contrats
   d'API — le test rouge devient le point de vérification de l'étape) ; **tests-après + E2E
@@ -85,7 +94,8 @@ Corrige le plan, et note dans `research.md` § « Revue adverse » ce qu'elle a 
 
 ## Étape 6 — Geler et brancher la suite
 
-Validation utilisateur finale → ROADMAP à jour (`[ ]` → `[~]` si démarrage immédiat),
+Validation utilisateur finale → frontmatter de `spec.md` : `status: validated` (plan arrêté —
+et `in-progress` si démarrage immédiat), ROADMAP à jour (`[ ]` → `[~]` si démarrage immédiat),
 HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
 `/agent-teams:team <spec-id>` (plugin `agent-teams` ; les tasks sont déjà partitionnées pour).
 

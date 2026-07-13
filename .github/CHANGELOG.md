@@ -3,6 +3,53 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [0.19.0] — 2026-07-13
+
+Moisson [Citadel](https://github.com/SethGammon/Citadel) (SethGammon, MIT) : après comparaison
+approfondie des deux systèmes, adoption de 4 idées compatibles avec notre philosophie
+(markdown pur, zéro runtime) — testabilité des skills, critères de fin vérifiables,
+état machine-readable, anti-mauvais-routage. Détail de l'analyse : leur `Decision Log` meurt
+avec la campagne archivée là où nos ADR survivent ; en échange, leur culture « une instruction
+se teste comme du code » nous manquait — c'est corrigé ici.
+
+### Added
+
+- **`test/test_skills.py`** (4ᵉ suite CI, stdlib) : un SKILL.md est du code d'instruction —
+  frontmatter (`name` = dossier, description), bloc anti-mauvais-routage présent avec voisins
+  **existants** (même résolution que le check pipelines : cœur + `plugin:skill` + externes +
+  builtins), réversibilité typée, contrats v0.19 des templates bundlés (DoD typée, circuit
+  breakers, `status:`, Continuation State), structure des scénarios benchmarks. 132 checks.
+- **`test/benchmarks/`** (pattern `__benchmarks__/` de Citadel) : scénarios comportementaux
+  par skill (frontmatter `input`/`state`/`assert-contains`) — structure validée en CI,
+  exécution agentique via **PROTOCOL-E2E Phase B** (nouvelle). 3 seeds : `handoff/fresh-regen`,
+  `doc-health/rapport-lecture-seule`, `spec/numerotation-continue`.
+- **Bloc anti-mauvais-routage dans les 15 skills cœur** : « **Quand ne PAS utiliser** » nommant
+  1-2 skills voisins (le bon routage vient des voisins nommés, pas de la description) +
+  « **Réversibilité** » typée 🟢/🟠/🔴 avec undo littéral. Convention encodée dans `/scaffold`
+  (mode skill, étape 3) et exigée par `test_skills.py`.
+- **DoD typée dans `spec/templates/tasks.md`** : `command_passes:` / `file_exists:` / `manual:`
+  — le critère de fin devient exécutable, pas interprétable. + budget **~35 min de travail
+  agent par phase** (au-delà, l'agent « perd le fil » — télémétrie Morph 2026 via Citadel).
+- **§ Circuit breakers dans `spec/templates/plan.md`** : conditions d'arrêt décidées À FROID
+  à la conception (3 échecs consécutifs → replanifier, etc.) — `/conception` Étape 4 les remplit.
+- **Frontmatter `status:` machine-readable sur `spec.md`** (draft/validated/in-progress/done/
+  parked) : posé par `/spec`, `validated` par `/conception` Étape 6, `done` par `/feature-done`
+  Étape 3 ; **cohérence ROADMAP ↔ frontmatter auditée par `/doc-health`** (Étape 8 étendue).
+- **Continuation State dans HANDOFF** (template + `/handoff` + pattern minimal de
+  template-maintenance) : 5 clés `Clé: valeur` fixes (Spec/Task/Fichiers en cours/Bloqué sur/
+  Commande de reprise) — le point de reprise parseable quand la prose ambiguë coûte cher.
+- **`/doc-health` Étape 10bis — no-op audit des instructions** (inspiré du no-op detector
+  Citadel) : références `/skill` mortes, chemins morts (whitelist création-différée),
+  placeholders résiduels dans les skills maison — en CI pour le template (`test_skills.py`),
+  agentique pour les projets générés.
+
+### Notes
+
+- Idées Citadel **écartées** (incompatibles avec la philosophie du template) : runtime JS +
+  router 4-tiers (49 skills → nécessaire ; 15 bien nommés → non), télémétrie/dashboard
+  (absorbés par les vendors — leur propre lab report le documente), trust levels (produit
+  multi-utilisateurs, pas solo-dev).
+
 ## [0.18.0] — 2026-07-08
 
 Phase 0 du protocole E2E rejouée mécaniquement sur les **5 types** de `cleanup-for-type.py`

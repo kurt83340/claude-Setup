@@ -1,10 +1,16 @@
+---
+status: draft # draft | validated | in-progress | done | parked
+progress: 0/0 # X/Y tasks (compté depuis tasks.md) — MAJ par /feature-done ou à la main
+---
+
 # Spec — {{SPEC_TITRE}}
 
 > Vision micro : QUOI on construit et POURQUOI. Pas de "comment" (c'est dans plan.md).
+> Le frontmatter `status:` = source **machine-readable** de l'état. La ROADMAP doit lui rester
+> cohérente (`[ ]`=draft/validated · `[~]`=in-progress · `[x]`=done — audité par `/doc-health`).
 
 **ID :** `{{SPEC_ID}}-{{SPEC_KEBAB}}`
 **Date :** {{SPEC_DATE}}
-**Statut :** [ ] Draft → [ ] Validé → [ ] En cours → [ ] Livré
 
 ## Vision
 

@@ -156,6 +156,10 @@ def main():
             skip("HANDOFF jamais exercé (template intact — Phase 10 non jouée)")
         else:
             ok("HANDOFF sans placeholder {{ }}", "{{" not in ht)
+            ok("HANDOFF : Continuation State (5 clés — contrat v0.19)",
+               "## Continuation State" in ht and all(
+                   k in ht for k in ("Spec:", "Task:", "Fichiers en cours:",
+                                     "Bloqué sur:", "Commande de reprise:")))
     st = docs / "stack.md"
     if st.is_file():
         ok("stack.md trace la version du template",

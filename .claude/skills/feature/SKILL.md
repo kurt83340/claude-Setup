@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /feature — dérouler un pipeline complet
 
+> **Quand ne PAS utiliser** : un bug → `/debug` · planifier sans exécuter → `/spec` + `/conception` ·
+> feature déjà codée à livrer → `/feature-done`.
+> **Réversibilité** : 🟠 orchestre code + docs sur plusieurs maillons — gate utilisateur entre
+> chaque étape ; undo par étape via git (rien n'est poussé sans validation).
+
 Une commande = toute la chaîne. Ce skill n'implémente RIEN lui-même : il **enchaîne les
 maillons existants** (source unique — `/spec`, `/conception`, `/agent-teams:team`,
 `reviewer`, `/feature-done`…) et tient le fil entre eux. Chaque étape se termine par un

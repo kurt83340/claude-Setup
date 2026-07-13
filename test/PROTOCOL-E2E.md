@@ -157,7 +157,23 @@ CORE=0, specs stalled…) et **ne modifie rien**.
 ## Phase 10 — `/handoff`
 
 **PASS si** : HANDOFF réel (0 placeholder `{{ }}`) · sections Échecs tentés / Blocked /
-Next remplies avec du contenu de la session.
+Next remplies avec du contenu de la session · bloc **Continuation State** présent avec ses
+5 clés (`Spec` / `Task` / `Fichiers en cours` / `Bloqué sur` / `Commande de reprise`).
+
+## Phase B — Benchmarks de skills (`test/benchmarks/`)
+
+Pour **chaque scénario** `test/benchmarks/<skill>/<cas>.md` (structure déjà validée en CI
+par `test_skills.py` — ici on joue le COMPORTEMENT) :
+
+1. Préparer le jetable selon `state` (frontmatter du scénario).
+2. Jouer `input` dans la session de test.
+3. Vérifier chaque `assert-contains` / `assert-not-contains` sur la sortie et les fichiers,
+   puis les puces de « Attendu » une à une.
+
+**PASS si** : toutes les assertions du scénario passent. Un scénario ⚠️/❌ = citer
+l'assertion échouée dans le rapport. Les phases 2/8/10 couvrent déjà en partie les seeds
+(`spec`, `doc-health`, `handoff`) — Phase B les rejoue sur l'état FINAL du jetable, ce qui
+attrape les régressions d'état accumulé (numérotation, incohérences ROADMAP↔frontmatter).
 
 ## Phase E — Cas d'erreur (tester les REFUS)
 

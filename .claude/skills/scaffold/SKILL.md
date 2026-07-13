@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /scaffold — créer un composant conforme (skill · agent · pipeline)
 
+> **Quand ne PAS utiliser** : une feature applicative → `/spec` (specs, pas composants template) ·
+> installer le template entier → `/init-from-template` ou `/adopt-template`.
+> **Réversibilité** : 🟢 crée 1 fichier composant + 1 ligne d'inventaire —
+> undo : supprimer le fichier + retirer la ligne.
+
 Les conventions du template sont gardées par la CI (inventaire, SendMessage…) — CE skill les
 rend **impossibles à oublier** : il les encode à la création. Tu ne retiens plus les règles.
 
@@ -28,10 +33,16 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
    (`allowed-tools` **minimal** — pas de Bash(*) par confort).
 2. Crée `.claude/skills/<nom>/SKILL.md` — ⚠️ `name:` = **nom du dossier** (c'est le dossier
    qui fait le `/nom`), dossier À PLAT (1 niveau).
-3. **Référence (exigé par la CI)** : ajoute la ligne `- /<nom> — <1 ligne>` dans l'inventaire
+3. **Bloc anti-mauvais-routage (exigé par `test/test_skills.py` sur le repo template)** — sous
+   le H1, un quote de 2 entrées :
+   - `> **Quand ne PAS utiliser** : <cas> → \`/skill-voisin\` · <cas> → \`/autre\`.` — nomme
+     **1-2 skills voisins existants** (c'est ce qui évite le mauvais routage, pas la description) ;
+   - `> **Réversibilité** : 🟢|🟠|🔴 <ce que ça écrit> — undo : <commande littérale>.`
+4. **Référence (exigé par la CI)** : ajoute la ligne `- /<nom> — <1 ligne>` dans l'inventaire
    de [`.claude/CLAUDE.md`](../../CLAUDE.md), dans la section adaptée.
-4. Rappels : fichiers de support possibles (`templates/`, `scripts/`) ; pris en compte à chaud
-   (ou `/reload-skills`).
+5. Rappels : fichiers de support possibles (`templates/`, `scripts/`) ; pris en compte à chaud
+   (ou `/reload-skills`) ; **sur le repo template**, un scénario benchmark
+   `test/benchmarks/<nom>/<cas>.md` est bienvenu (format : `test/benchmarks/README.md`).
 
 ## Mode `agent` — `/scaffold agent "<nom>"`
 

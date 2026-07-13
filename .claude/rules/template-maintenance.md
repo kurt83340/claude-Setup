@@ -316,6 +316,10 @@ diagrams/
 - `[~]` = en cours (mettre en **gras** pour visibilité)
 - `[x]` = livré
 
+→ Miroir **machine-readable** : le frontmatter `status:` de chaque `specs/00X/spec.md`
+(`draft`/`validated`↔`[ ]` · `in-progress`↔`[~]` · `done`↔`[x]` · `parked`). MAJ par
+`/spec`, `/conception` (validated) et `/feature-done` (done) ; incohérence flaggée par `/doc-health`.
+
 ## Pattern .claude/docs/HANDOFF.md (format minimal)
 
 ```markdown
@@ -329,6 +333,8 @@ diagrams/
 **Échecs tentés** : ce qui n'a pas marché (CRUCIAL)
 **Blocked on** : aucun ou X
 **Next** : 3 prochaines steps concrètes
+**Continuation State** : bloc `Clé: valeur` fixe en fin de fichier (Spec / Task / Fichiers
+en cours / Bloqué sur / Commande de reprise) — le point de reprise parseable, toujours les 5 clés
 ```
 
 ## Pattern ADR (format minimal)

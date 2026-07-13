@@ -7,6 +7,11 @@ disable-model-invocation: true
 
 # /init-from-template — Initialise un nouveau projet
 
+> **Quand ne PAS utiliser** : le projet a DÉJÀ du code ou de la doc → `/adopt-template`
+> (brownfield, non-destructif) · projet déjà initialisé → jamais deux fois (one-shot).
+> **Réversibilité** : 🔴 substitutions + suppressions en masse (cleanup par type de projet) —
+> à lancer UNE FOIS sur une copie vierge ; undo = re-rsync depuis le template.
+
 Ton rôle : transformer ce template (placeholders `{{...}}`) en un projet concret rempli avec les infos du user.
 
 ## Étape 0 — Prérequis techniques (CRITIQUE)

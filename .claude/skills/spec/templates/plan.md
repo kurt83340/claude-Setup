@@ -66,6 +66,16 @@
 - **Integration** : {{scénarios E2E principaux}}
 - **Load** : {{si applicable}}
 
+## Circuit breakers (conditions d'arrêt — à définir AVANT de coder)
+
+> Si une condition se déclenche : STOP — on ne s'acharne pas. Retour `/conception {{SPEC_ID}}-{{SPEC_KEBAB}}`
+> (replanifier) ou parking documenté (ROADMAP + HANDOFF § Blocked on). Au-delà du breaker,
+> l'agent ne produit plus du code faux mais du code hors-sujet.
+
+- {{3 échecs consécutifs sur la même tâche → l'approche est mauvaise, replanifier}}
+- {{Le fix d'un test en casse ≥ 2 autres, deux fois de suite → conflit d'archi, remonter}}
+- {{Accès/dépendance externe manquant (ACCESS.md) → parking + relance client}}
+
 ## Liens
 
 - Spec : [spec.md](spec.md)

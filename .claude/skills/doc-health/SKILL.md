@@ -1,11 +1,15 @@
 ---
 name: doc-health
-description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision, patterns auto-memory à consolider. Génère un rapport priorisé sans modifier.
+description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision, cohérence ROADMAP vs frontmatter status des specs, instructions mortes dans les skills (no-op audit), patterns auto-memory à consolider. Génère un rapport priorisé sans modifier.
 allowed-tools: Read, Glob, Grep, Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(date:*)
 disable-model-invocation: false
 ---
 
 # /doc-health — Audit hebdomadaire du template
+
+> **Quand ne PAS utiliser** : agir/écrire les corrections → agent `doc-maintainer` (scan + diffs) ·
+> seulement resynchroniser la carte du code → `/codemap`.
+> **Réversibilité** : 🟢 lecture seule — ne modifie RIEN (rapport uniquement).
 
 Ton rôle : scanner la santé documentaire du projet et produire un rapport actionnable.
 
@@ -144,6 +148,24 @@ done
 - Si `[~]` depuis > 30j → 🟠 "spec stalled, refresh ou archive"
 - Si spec référencée absente → 🔴 "lien ROADMAP cassé"
 
+**Cohérence ROADMAP ↔ frontmatter `status:`** (la ROADMAP est un dashboard — le frontmatter
+de chaque `spec.md` est la source machine-readable ; s'ils divergent, l'un des deux ment) :
+
+```bash
+for f in .claude/docs/conception/specs/[0-9]*/spec.md; do
+  [ -f "$f" ] || continue
+  st=$(grep -m1 "^status:" "$f" | awk '{print $2}')
+  id=$(basename "$(dirname "$f")")
+  case "$st" in
+    in-progress) grep -qE "\[~\].*$id" .claude/docs/ROADMAP.md || echo "🟠 $id : status: in-progress mais ROADMAP ≠ [~]" ;;
+    done)        grep -qE "\[x\].*$id" .claude/docs/ROADMAP.md || echo "🟠 $id : status: done mais ROADMAP ≠ [x]" ;;
+    parked)      grep -qE "\[~\].*$id" .claude/docs/ROADMAP.md && echo "🟠 $id : status: parked mais ROADMAP encore [~]" ;;
+  esac
+done
+```
+
+- Spec sans frontmatter `status:` (antérieure à v0.19) → 🟢 "ajouter le frontmatter au prochain passage"
+
 ## Étape 9 — Idées âgées sans décision
 
 ```bash
@@ -169,6 +191,32 @@ Si > 5 idées vieilles → 🟢 "review idées : promouvoir / discard / archiver
    - Mémoire contredite par le code actuel → 🟠 « stale : corriger ou supprimer le fichier mémoire »
    - Pas de MEMORY.md → ✅ RAS (rien d'appris ou auto-memory désactivée)
 
+## Étape 10bis — Instructions mortes dans skills & rules (no-op audit)
+
+> Les instructions rotent comme du code : une consigne qui pointe vers un skill supprimé ou un
+> chemin disparu ne fait pas « rien » — elle **dégrade** l'agent (routage faux, confiance érodée).
+> Constat mesuré chez Citadel : la doc d'instruction stale nuit activement, elle n'est pas neutre.
+
+```bash
+# 1. Références `/skill` dans skills + rules du projet → chacune doit exister
+grep -rhoE '`/[a-z][a-z0-9_:-]+' .claude/skills/*/SKILL.md .claude/rules/*.md 2>/dev/null | sort -u
+ls .claude/skills/   # + plugins installés (/plugin list) + builtins (/resume, /plugin, /clear, /init…)
+
+# 2. Chemins .claude/... référencés par les skills → doivent exister
+#    Whitelist création-différée (absents = NORMAL) : ACCESS.md, RUNBOOK.md, GLOSSARY.md,
+#    STAKEHOLDERS.md, idees/archived/, specs/00X (exemples génériques)
+grep -rhoE '\.claude/[a-zA-Z0-9_./-]+' .claude/skills/*/SKILL.md 2>/dev/null | sort -u \
+  | while read -r p; do [ -e "$p" ] || echo "$p"; done \
+  | grep -vE "ACCESS|RUNBOOK|GLOSSARY|STAKEHOLDERS|archived|00X|<" | head -10
+```
+
+- Référence vers un skill **inexistant** (ni local, ni plugin, ni builtin) → 🟠 "instruction morte : `/x` n'existe plus — corriger ou retirer"
+- Chemin référencé absent (hors whitelist) → 🟠 "chemin mort dans <skill>"
+- Skill maison avec placeholders `{{...}}` restants ou section vide → 🟢 "compléter ou dégraisser"
+
+> ℹ️ Sur le **repo template**, la partie mécanique de cet audit tourne en CI (`test/test_skills.py`).
+> Ici sa valeur = les **projets générés**, qui ajoutent leurs propres skills sans CI de template.
+
 ## Étape 11 — Rapport synthétique
 
 Format type :
@@ -185,6 +233,8 @@ Format type :
 
 - .claude/docs/code-map.md pas MAJ depuis le dernier refacto (commit abc123) → /codemap
 - .claude/docs/ROADMAP.md ligne `[~] 002-notion-writer` en cours depuis 14j → status réel ?
+- 003-export-pdf : frontmatter `status: done` mais ROADMAP encore `[~]` → resync
+- skill maison `/deploy-x` référence `/vieux-skill` supprimé → instruction morte
 
 ## 🟢 Suggestions
 

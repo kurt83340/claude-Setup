@@ -8,6 +8,11 @@ argument-hint: "<id-optionnel> <titre>"
 
 # /spec — Scaffold une nouvelle feature
 
+> **Quand ne PAS utiliser** : le plan d'une spec existante → `/conception` · dérouler toute la
+> chaîne d'une traite → `/feature` · petite modif/bugfix → pas de spec (commit + CHANGELOG).
+> **Réversibilité** : 🟢 crée `specs/00X-slug/` (4 fichiers) + 1 ligne ROADMAP —
+> undo : `rm -r` du dossier + retirer la ligne.
+
 Ton rôle : créer le dossier `.claude/docs/conception/specs/00X-titre/` avec ses 4 fichiers prêts à remplir, et update ROADMAP.
 
 ## Usage
@@ -77,7 +82,12 @@ Trouver la section phase indiquée par l'user, ajouter la ligne dans l'état qui
 
 - **`/spec` pose `[ ]`** par défaut (spec scaffoldée mais pas démarrée), **OU `[~]`** si l'user enchaîne tout de suite (cf. Étape 5).
 - **`/feature-done` lit l'état réel** (`[ ]` _ou_ `[~]`) et le passe à `[x]`.
-- **`/doc-health` détecte les `[~]` stalled** (en cours depuis > 30j).
+- **`/doc-health` détecte les `[~]` stalled** (en cours depuis > 30j) **et les incohérences ROADMAP ↔ frontmatter**.
+
+> 🔗 **Frontmatter `status:` de `spec.md` = source machine-readable, à garder synchrone** :
+> `[ ]`↔`draft`/`validated` (validated = posé par `/conception` quand le plan est arrêté) ·
+> `[~]`↔`in-progress` · `[x]`↔`done`. Le template est créé à `draft` — chaque transition
+> ROADMAP s'accompagne de la MAJ du frontmatter (ici et dans `/feature-done`).
 
 > ⚠️ Sans transition vers `[~]`, les greps de `/feature-done` et `/doc-health` (`[~] … **EN COURS**`) ne matchent jamais. C'est `/spec` (Étape 5) ou l'user qui pose `[~]` au démarrage.
 
@@ -96,6 +106,8 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
    ```markdown
    - [~] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — **EN COURS** 0/Y tasks
    ```
+
+   … et passer le frontmatter de `specs/00X-<kebab>/spec.md` à `status: in-progress` (sync).
 
 2. Mettre à jour HANDOFF :
 

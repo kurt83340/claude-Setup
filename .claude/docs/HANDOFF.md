@@ -29,3 +29,11 @@
 1. **{{Task #N}}** : {{description courte}}
 2. **{{Task #N+1}}** : ...
 3. {{Étape suivante}}
+
+## Continuation State (machine-readable — grammaire fixe `Clé: valeur`, 1 ligne chacune)
+
+Spec: {{00X-slug | aucune}}
+Task: {{T2.3 | aucune}}
+Fichiers en cours: {{src/a.py, tests/test_a.py | aucun}}
+Bloqué sur: {{rien | description courte}}
+Commande de reprise: {{/conception 00X | /feature "..." | pytest tests/ -q | aucune}}

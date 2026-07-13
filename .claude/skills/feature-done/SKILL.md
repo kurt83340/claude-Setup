@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /feature-done — Livraison d'une feature
 
+> **Quand ne PAS utiliser** : session finie mais feature en cours → `/handoff` · tasks restants →
+> continuer `/feature` · une décision isolée à documenter → `/adr`.
+> **Réversibilité** : 🟢 édite ROADMAP/CHANGELOG/HANDOFF/spec frontmatter (ADR délégué à `/adr`) —
+> undo : `git checkout --` des fichiers docs touchés.
+
 Ton rôle : finaliser proprement une feature en synchronisant tous les fichiers vivants.
 
 ## Usage
@@ -73,6 +78,8 @@ cours) **ou** `[~] … **EN COURS** X/Y tasks` (démarrée via `/spec` Étape 5)
 
 - Passer l'état à `[x]` : `- [x] [<spec-id>](...) — livré YYYY-MM-DD`
 - Retirer le **gras** `**EN COURS**` s'il était présent (plus en cours)
+- **Sync frontmatter** de `specs/<spec-id>/spec.md` : `status: done` + `progress: Y/Y` (source
+  machine-readable — `/doc-health` flagge toute ROADMAP incohérente avec lui)
 
 ## Étape 4 — Append entry dans .claude/docs/CHANGELOG.md
 

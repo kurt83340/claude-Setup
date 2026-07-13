@@ -24,6 +24,9 @@ jobs:
       - name: Suite de tests cleanup-for-type.py (sentinelles + brownfield + prune)
         run: python3 test/test_cleanup.py
 
+      - name: Suite de tests des skills (structure + conventions + benchmarks)
+        run: python3 test/test_skills.py
+
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 

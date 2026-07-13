@@ -7,6 +7,11 @@ disable-model-invocation: false
 
 # /codemap — Met à jour .claude/docs/code-map.md
 
+> **Quand ne PAS utiliser** : audit doc complet (fraîcheur, ADRs, leçons…) → `/doc-health` ·
+> documenter le rôle fichier-par-fichier → personne (déductible, ça drifte).
+> **Réversibilité** : 🟢 réécrit `code-map.md` (diff présenté avant) —
+> undo : `git checkout -- .claude/docs/code-map.md`.
+
 Ton rôle : tenir à jour la partie **non-déductible** du code (vue macro, règles de
 couplage, intention, gotchas) et **détecter les violations de couplage**.
 
