@@ -97,9 +97,9 @@ mon-projet/
     │   │   └── specs/              # design micro : 1 sous-dossier par feature (numéroté séquentiellement)
     │   │       └── 001-feature/    # nommage : 001-, 002-, … (jamais de reset entre phases)
     │   │           ├── research.md   # brainstorm feature : options techniques explorées, libs envisagées, alternatives
-    │   │           ├── spec.md       # PRD feature (QUOI/POURQUOI) : critères d'acceptation, user stories, scope
-    │   │           ├── plan.md       # plan technique feature (COMMENT) : architecture interne, patterns, libs, estimations
-    │   │           ├── tasks.md      # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD feature
+    │   │           ├── spec.md       # PRD feature (QUOI/POURQUOI) : critères d'acceptation, user stories, scope + frontmatter status: (draft→validated→in-progress→done, miroir machine-readable de la ROADMAP)
+    │   │           ├── plan.md       # plan technique feature (COMMENT) : architecture interne, patterns, libs + circuit breakers (conditions d'arrêt décidées à froid)
+    │   │           ├── tasks.md      # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD TYPÉE (command_passes:/file_exists:/manual:) + phases ~35 min max
     │   │           └── (diagrams/    # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
     │   │
     │   ├── 🔄 HANDOFF.md           # ⭐ état de session — VIVANT (MAJ FIN de chaque session) : status, échecs tentés, next, blockers
@@ -582,6 +582,14 @@ Le fichier qui sauve les sessions multi-jours. À mettre à jour **à chaque fin
 **Échecs tentés** : split en 2 PDFs (UX moche), abandonné
 **Next** : task #5 (génération PDF tables imbriquées), puis task #6 (cache)
 **Blocked on** : aucun (ou : "attente accès staging Paul IT")
+
+## Continuation State (machine-readable — 5 clés fixes, toujours présentes)
+
+Spec: 004-export-pdf
+Task: T2.5
+Fichiers en cours: src/pdf/renderer.py
+Bloqué sur: rien
+Commande de reprise: pytest tests/pdf/ -q
 ```
 
 À placer dans le CLAUDE.md :

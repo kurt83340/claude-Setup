@@ -169,7 +169,8 @@ Claude va :
 
 1. Lire git status + log + diff + tests
 2. Lire HANDOFF.md actuel
-3. Te proposer un nouveau HANDOFF (status / échecs / blockers / next steps)
+3. Te proposer un nouveau HANDOFF (status / échecs / blockers / next steps + **Continuation
+   State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
 4. Te demander confirmation avant d'écrire
 
 **Si tu oublies** : hook `Stop` te le rappelle si HANDOFF > 24h avec changements git pending.
@@ -224,6 +225,8 @@ Audit complet qui scanne sans modifier :
 | Placeholders **CONTENT** non remplis (`{{libre}}`)      | informationnel — pas un signal | 🟢       |
 | ADRs sans status valide                                 | > 0                            | 🔴       |
 | Specs `[~]` EN COURS stalled                            | > 30j                          | 🟠       |
+| Incohérence ROADMAP ↔ frontmatter `status:` des specs   | > 0                            | 🟠       |
+| Instructions mortes dans les skills (refs `/x`, chemins) | > 0                            | 🟠       |
 | Idées sans décision                                     | > 30j                          | 🟢       |
 | Liens cassés dans docs                                  | > 0                            | 🔴       |
 | Patterns auto-memory stables non consolidés             | informationnel                 | 🟢       |
@@ -274,7 +277,8 @@ Rapport généré → tu suis les actions par priorité.
        ↓
 3. /conception 004-export-pdf
    → explore (subagents : code + docs + mémoire projet) → 2-3 options → tu tranches
-   → plan.md (points de vérification) + tasks.md (partitionné) + revue adverse
+   → plan.md (points de vérification + circuit breakers) + tasks.md (DoD typée
+     command_passes/file_exists/manual, phases ~35 min, partitionné) + revue adverse
        ↓
 4. CODE → hooks auto pour contexte code-map + growth detection
        ↓
