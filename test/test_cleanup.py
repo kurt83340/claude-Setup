@@ -338,5 +338,31 @@ with tempfile.TemporaryDirectory() as td:
     ok("rules : lien adr mort purgé, section suivante intacte",
        "adr/README.md" not in tm and "## Fin" in tm)
 
+    print("\n== 6. Blocs anti-mauvais-routage (v0.19) : purge des segments morts chez les survivants ==")
+    j6 = make_greenfield(tmp)
+    write(j6 / ".claude/skills/handoff/SKILL.md",
+          "# /handoff — Snapshot fin de session\n\n"
+          "> **Quand ne PAS utiliser** : reprendre une session précise → `/resume` (natif) ·\n"
+          "> feature terminée à livrer → `/feature-done` · pattern appris → `/lecon`.\n"
+          "> **Réversibilité** : 🟢 n'écrit que HANDOFF — undo : `git checkout`.\n\n"
+          "Ton rôle : snapshot.\n")
+    write(j6 / ".claude/skills/lecon/SKILL.md",
+          "# /lecon — Cycle de vie des leçons\n\n"
+          "> **Quand ne PAS utiliser** : décision structurante → `/adr` · idée produit → `/idee`.\n"
+          "> **Réversibilité** : 🟢 append une entry — undo : sous-mode discard.\n\n"
+          "Ton rôle : leçons.\n")
+    r = run(j6, "--type", "script-jetable")
+    ok("exit 0", r.returncode == 0)
+    ho6 = (j6 / ".claude/skills/handoff/SKILL.md").read_text()
+    ok("handoff : segment `/feature-done` (skill strippé) purgé", "/feature-done" not in ho6)
+    ok("handoff : `/resume` (builtin) + `/lecon` (survivant) conservés",
+       "`/resume`" in ho6 and "`/lecon`" in ho6)
+    ok("handoff : recousu proprement (pas de séparateur orphelin, point final)",
+       "· ·" not in ho6 and "· ." not in ho6 and "`/lecon`." in ho6)
+    lc6 = (j6 / ".claude/skills/lecon/SKILL.md").read_text()
+    ok("lecon : ligne « Quand ne PAS utiliser » 100 % morte retirée entière",
+       "Quand ne PAS utiliser" not in lc6)
+    ok("lecon : ligne « Réversibilité » conservée", "**Réversibilité**" in lc6)
+
 print(f"\n{'🎉 CLEANUP OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

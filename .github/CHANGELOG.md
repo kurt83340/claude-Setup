@@ -43,6 +43,30 @@ se teste comme du code » nous manquait — c'est corrigé ici.
   placeholders résiduels dans les skills maison — en CI pour le template (`test_skills.py`),
   agentique pour les projets générés.
 
+### Fixed
+
+- **F6 — refs mortes livrées par les blocs anti-mauvais-routage sur projets générés**
+  (attrapé par la Phase 0 × 5 rejouée) : `/scaffold` routait vers les bootstrap strippés
+  (tous profils) ; `handoff`/`lecon` vers des voisins strippés (script-jetable). → nouvelle
+  purge **`prune_dead_skill_blocks()`** dans `cleanup-for-type.py` : segments morts retirés
+  et recousus (« · »), ligne « Quand ne PAS utiliser » 100 % morte retirée entière (la
+  « Réversibilité » reste), logique positive (jamais les builtins/plugins namespacés).
+  `test_cleanup.py` bloc 6 (67 → 73 checks).
+- **F7 — auto-faux-positifs du no-op audit** : l'Étape 10bis de `/doc-health` flaggait ses
+  propres exemples (`/deploy-x`, `/vieux-skill`) et ceux de `/scaffold` → exclusions
+  documentées + priorité de scan aux quote blocks et skills ajoutés par le projet.
+- Ajouts `template-maintenance.md` reformatés en **bullets purgeables** (la purge
+  d'inventaire opère par bullet/rangée — une prose flèche `→` y échappait sur script-jetable).
+
+### Vérifié sur projets générés (2026-07-13)
+
+- **Phase 0 × 5 profils** (harnais rsync→render→cleanup→verify-e2e + scans blocs/nav/contrats) :
+  **PASS ×5**, 0 ref morte post-purge, contrats v0.19 présents.
+- **Phase B (agentique, jetable python-app)** : `spec/numerotation-continue` PASS (003 = max+1,
+  `status: draft`, 0 `{{SPEC_*}}`) · `handoff/fresh-regen` PASS (fresh à 19 placeholders,
+  5 clés, journal 1 ligne) · `doc-health/rapport-lecture-seule` PASS (🔴 10j + 🟠 incohérence
+  attrapées, git status inchangé). Détail : `test/PROTOCOL-E2E.md` § Rapport v0.19.0.
+
 ### Notes
 
 - Idées Citadel **écartées** (incompatibles avec la philosophie du template) : runtime JS +

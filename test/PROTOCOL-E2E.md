@@ -242,6 +242,32 @@ Frictions :
 
 ---
 
+## Rapport complémentaire — v0.19.0 : Phase 0 × 5 + Phase B (benchmarks), 2026-07-13
+
+Phase 0 rejouée sur les **5 profils** (harnais scratchpad rsync→render→cleanup→stack-version→
+verify-e2e + scans S1/S2/S3 v0.19) puis **Phase B** jouée en agentique sur le jetable
+`python-app` (3 scénarios seed).
+
+| Vérification | Résultat |
+|---|---|
+| Phase 0 × 5 (verify-e2e) | **PASS ×5** (7-8 pass, 0 fail chacun) |
+| S1 blocs anti-mauvais-routage post-cleanup | 0 ref morte ×5 (après F6) |
+| S2 nav bullets/tables | 0 ref de skill supprimé ×5 |
+| S3 contrats v0.19 post-init (Continuation State, DoD, breakers, status) | présents ×5 (selon profil) |
+| Phase B `spec/numerotation-continue` | **PASS** (003 = max+1, status: draft, 0 `{{SPEC_*}}`) |
+| Phase B `handoff/fresh-regen` | **PASS** (fresh à 19 placeholders, 5 clés Continuation State, journal 1 ligne) |
+| Phase B `doc-health/rapport-lecture-seule` | **PASS** (🔴 HANDOFF 10j, 🟠 incohérence status/ROADMAP attrapée, git status inchangé) |
+
+Frictions trouvées puis corrigées (même version) :
+- **F6** — les blocs anti-mauvais-routage (v0.19) livraient des **refs mortes sur projets
+  générés** : `/scaffold` → bootstrap strippé (tous profils) ; `handoff`/`lecon` → voisins
+  strippés (script-jetable). → nouvelle purge `prune_dead_skill_blocks()` dans
+  `cleanup-for-type.py` (segments recousus « · », ligne 100 % morte retirée, Réversibilité
+  conservée) + bloc 6 de `test_cleanup.py` (67 → 73 checks).
+- **F7** — l'Étape 10bis de `/doc-health` (no-op audit) flaggait à tort ses **propres
+  exemples** (`/deploy-x`, `/vieux-skill`) et ceux de `/scaffold` → exclusions documentées
+  dans le skill (vécu : le grep brut remonte du bruit, scanner en priorité les quote blocks).
+
 ## Rapport complémentaire — Phase 0 × 5 types (mécanique), 2026-07-08
 
 Phase 0 rejouée sur les **5 profils** de `cleanup-for-type.py` via harnais scripté

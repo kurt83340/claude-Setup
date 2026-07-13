@@ -230,6 +230,7 @@ def cleanup(root: Path, profile_name: str, dry_run: bool, brownfield: bool = Fal
             prune_dead_permissions(root)
             prune_dead_inventory(root, profile)
             prune_dead_nav_links(root)
+            prune_dead_skill_blocks(root, profile)
 
     return 0
 
@@ -408,6 +409,47 @@ def prune_dead_nav_links(root: Path) -> None:
         if removed:
             p.write_text("\n".join(out), encoding="utf-8")
             print(f"🔧 {rel} : {removed} lien(s) mort(s) retiré(s) (cible supprimée par le profil)")
+
+
+def prune_dead_skill_blocks(root: Path, profile: dict) -> None:
+    """Purge, dans le bloc anti-mauvais-routage des SKILL.md SURVIVANTS (quote sous le H1,
+    convention v0.19), les segments « <cas> → `/nom` » dont la cible a été supprimée :
+    bootstrap (init/adopt, retirés pour tous les types) + skills retirés par le profil.
+    Même logique POSITIVE que prune_dead_inventory : on ne retire que les morts connus —
+    jamais les builtins (`/resume`…) ni les plugins namespacés (`/agent-teams:team`).
+    Ligne « Quand ne PAS utiliser » sans plus aucun segment vivant → retirée entière
+    (la ligne « Réversibilité » reste). Greenfield uniquement — sinon un skill survivant
+    route vers un skill mort (instruction morte = dégradation silencieuse, cf. /doc-health)."""
+    names = ["init-from-template", "adopt-template"]
+    names += [n for n in _profile_skill_names(profile)
+              if not (root / ".claude" / "skills" / n).exists()]
+    pat = re.compile("`/(?:%s)(?![\\w-])" % "|".join(re.escape(n) for n in names))
+    skills_dir = root / ".claude" / "skills"
+    if not skills_dir.is_dir():
+        return
+    for f in sorted(skills_dir.glob("*/SKILL.md")):
+        text = f.read_text(encoding="utf-8")
+        if "**Quand ne PAS utiliser**" not in text or not pat.search(text):
+            continue
+        lines = text.split("\n")
+        start = next(i for i, l in enumerate(lines) if "**Quand ne PAS utiliser**" in l)
+        end = start
+        while end < len(lines) and lines[end].lstrip().startswith(">") \
+                and "**Réversibilité**" not in lines[end]:
+            end += 1
+        logical = " ".join(l.lstrip().lstrip(">").strip() for l in lines[start:end])
+        head, _, payload = logical.partition(" : ")
+        segs = [s.strip().rstrip(".") for s in payload.split(" · ")]
+        alive = [s for s in segs if s and not pat.search(s)]
+        if len(alive) == len(segs):
+            continue  # les refs mortes du fichier sont hors du bloc → hors périmètre
+        if alive:
+            lines[start:end] = ["> " + head + " : " + " · ".join(alive) + "."]
+        else:
+            lines[start:end] = []
+        f.write_text("\n".join(lines), encoding="utf-8")
+        print(f"🔧 {f.relative_to(root)} : bloc anti-mauvais-routage purgé "
+              f"({len(segs) - len(alive)} segment(s) → skill(s) supprimé(s) par le profil)")
 
 
 def prune_dead_permissions(root: Path) -> None:

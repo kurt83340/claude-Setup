@@ -214,6 +214,12 @@ grep -rhoE '\.claude/[a-zA-Z0-9_./-]+' .claude/skills/*/SKILL.md 2>/dev/null | s
 - Chemin référencé absent (hors whitelist) → 🟠 "chemin mort dans <skill>"
 - Skill maison avec placeholders `{{...}}` restants ou section vide → 🟢 "compléter ou dégraisser"
 
+⚠️ **Exclusions du scan** (faux positifs connus, vécu E2E v0.19) : CE fichier (doc-health) —
+ses exemples `/deploy-x`, `/vieux-skill`, `/mon-skill` sont illustratifs ; les blocs d'exemple
+de `/scaffold` (`/skill-voisin`, `/autre`, `/nom`) ; et tout `/…` dans un bloc de code bash.
+En priorité, scanner les **quote blocks « Quand ne PAS utiliser »** (grammaire fixe) et les
+skills **ajoutés par le projet** — c'est là que vivent les vraies instructions mortes.
+
 > ℹ️ Sur le **repo template**, la partie mécanique de cet audit tourne en CI (`test/test_skills.py`).
 > Ici sa valeur = les **projets générés**, qui ajoutent leurs propres skills sans CI de template.
 

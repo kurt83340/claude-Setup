@@ -316,9 +316,8 @@ diagrams/
 - `[~]` = en cours (mettre en **gras** pour visibilité)
 - `[x]` = livré
 
-→ Miroir **machine-readable** : le frontmatter `status:` de chaque `specs/00X/spec.md`
-(`draft`/`validated`↔`[ ]` · `in-progress`↔`[~]` · `done`↔`[x]` · `parked`). MAJ par
-`/spec`, `/conception` (validated) et `/feature-done` (done) ; incohérence flaggée par `/doc-health`.
+- Miroir **machine-readable** : frontmatter `status:` de chaque `specs/00X/spec.md` (`draft`/`validated`↔`[ ]` · `in-progress`↔`[~]` · `done`↔`[x]` · `parked`)
+- MAJ du frontmatter par `/spec`, `/conception` (validated) et `/feature-done` (done) ; incohérence ROADMAP↔frontmatter flaggée par `/doc-health`
 
 ## Pattern .claude/docs/HANDOFF.md (format minimal)
 
