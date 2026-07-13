@@ -294,9 +294,16 @@ scripts d'audit eux-mêmes : mkdir manquant, idempotence dédup, sys.path de fix
 | E — Refus (E1/E3/E4/E5) + M3 | 5/5 | ADR accepted intact par hash + supersede proposé · maillon `/deploy-magique` détecté AVANT exécution · feature-done refusé à 4 tasks non cochées · règle HANDOFF-teammate auto-chargée · deny Read secrets présents |
 | 0bis — Rétro-remplissage brownfield | 3/3 | `stack.md` ← pyproject réel, HANDOFF ← `git log` réel + Continuation State, CLAUDE.md mergé (contenu user conservé, exactement 3 @-imports) |
 
-Restent **M4/M5** (install réelle de plugins via `/plugin`, compaction réelle) : exécutables
-uniquement dans une session interactive Claude Code — M1 est attesté par la découverte
-automatique des skills du repo dans la session d'audit elle-même, M2 couvert par l'audit hooks.
+**M4 joué en réel (v1.0.0)** : `claude plugin marketplace add <repo>` + `claude plugin
+install agent-teams@claude-setup --scope project` sur jetable → **F8 attrapée** (manifests
+invalides au schéma réel : `skills`/`agents`/`hooks` en strings → retirés, auto-découverte)
+puis PASS : inventaire complet (1 skill, 4 agents, 3 hooks) + `db-migration` idem.
+M1 attesté (découverte auto des skills en session d'audit), M2 couvert (audit hooks payloads réels).
+
+Reste **M5 seul** (interactif pur) — pas-à-pas : sur un jetable initialisé, ouvrir `claude`,
+générer du contexte (2-3 gros fichiers lus), `/compact` → vérifier que le snapshot
+`.claude/.cache/handoff-snapshot-<session>.md` existe puis que la reprise contient le
+marqueur d'injection (hook `SessionStart(compact)`).
 
 ⚠️ **Leçon de protocole (vécu)** : `phase0-harness` fait `rmtree` des jetables — ne JAMAIS
 re-runner le harnais Phase 0 **après** avoir accumulé de l'état agentique qu'on veut garder

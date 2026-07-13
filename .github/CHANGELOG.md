@@ -3,6 +3,36 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.0.0] — 2026-07-13
+
+**Première version production.** Critères de promotion : protocole E2E intégralement joué
+(Phase 0 ×5, 0bis, 1-10, B, E, M1-M4 — M5 reste interactif pur), 262 checks CI mécaniques,
+~90 vérifications sur 7 projets jetables, 0 défaut résiduel — chaque friction trouvée
+(F6-F8) est corrigée ET verrouillée par un test.
+
+### Added
+
+- **`test/phase0-harness.py` versionné + branché en CI** : l'outil qui a attrapé F6 (init
+  réelle rsync→render→cleanup→verify-e2e + scans S1/S2/S3 sur les 5 profils) tourne
+  maintenant à chaque push — plus un script de session perdu comme le harnais v0.18.
+  **Garde-fou anti-`rmtree` encodé** (leçon v0.19) : refuse d'écraser un jetable contenant
+  de l'état agentique sans `--force`.
+
+### Fixed
+
+- **F8 — plugins ininstallables (attrapé par M4 réel, `claude plugin install`)** : les
+  `plugin.json` déclaraient `skills`/`agents`/`hooks` en strings, invalides au schéma réel
+  (`Validation errors: agents: Invalid input`) — la CI vérifiait la cohérence des manifests,
+  jamais leur installabilité. Fix : champs retirés, **auto-découverte du layout standard**.
+  Vérifié : `agent-teams@claude-setup` (1 skill + 4 agents + 3 hooks inventoriés) et
+  `db-migration@claude-setup` s'installent en `--scope project`.
+
+### Verified
+
+- **M4 joué en réel** : `claude plugin marketplace add` + install des 2 plugins maison sur
+  jetable, inventaire de composants complet. **M5** (compaction réelle) : pas-à-pas documenté
+  dans PROTOCOL-E2E — seul résidu interactif pur.
+
 ## [0.19.0] — 2026-07-13
 
 Moisson [Citadel](https://github.com/SethGammon/Citadel) (SethGammon, MIT) : après comparaison

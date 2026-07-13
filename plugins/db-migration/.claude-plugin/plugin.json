@@ -5,6 +5,5 @@
   "version": "1.0.0",
   "author": { "name": "Julien Leroy" },
   "repository": "https://github.com/kurt83340/claude-Setup",
-  "keywords": ["database", "migration", "alembic"],
-  "skills": "./skills/"
+  "keywords": ["database", "migration", "alembic"]
 }

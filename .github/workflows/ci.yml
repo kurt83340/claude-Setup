@@ -27,6 +27,9 @@ jobs:
       - name: Suite de tests des skills (structure + conventions + benchmarks)
         run: python3 test/test_skills.py
 
+      - name: Phase 0 x 5 profils (harnais jetables — init reelle rsync/render/cleanup/verify)
+        run: python3 test/phase0-harness.py
+
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 
