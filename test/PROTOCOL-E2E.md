@@ -268,6 +268,20 @@ Frictions trouvées puis corrigées (même version) :
   exemples** (`/deploy-x`, `/vieux-skill`) et ceux de `/scaffold` → exclusions documentées
   dans le skill (vécu : le grep brut remonte du bruit, scanner en priorité les quote blocks).
 
+### Audit fonction-par-fonction sur jetables (2026-07-13, complément)
+
+59 checks mécaniques/agentiques rejoués sur les jetables `python-app` (état accumulé des
+scénarios Phase B) et `brownfield` (neuf) — **0 défaut template** (3 accrocs = bugs des
+scripts d'audit eux-mêmes : mkdir manquant, idempotence dédup, sys.path de fixture) :
+
+| Périmètre | Checks | Notes |
+|---|---:|---|
+| Hooks × 7 (payloads réels post-init) | 20/20 | chmod, snapshots par-session, filet consommé, injection code-map sur src/ + silence .md, growth+dédup, Stop reminder + silence subagent |
+| Cycle artefacts `/adr`·`/lecon`·`/idee` | 12/12 | supersede avec **immuabilité vérifiée par hash**, promotion leçon→ADR-0003, idée→spec 004 (max+1), index/CHANGELOG synchro |
+| Machine à états spec (003 de bout en bout) | 6/6 | draft→validated→in-progress→done, DoD `command_passes` **réellement exécutée** (unittest vert), ROADMAP↔frontmatter 0 incohérence finale |
+| `/codemap`·`/debug`·`/scaffold`·`/pivot` | 12/12 | violation de couplage grep-détectée, debug rouge→vert→leçon, composant conforme (bloc v0.19 + inventaire), chaîne pivot datée |
+| Brownfield (adoption projet existant) | 9/9 | fichiers user intacts byte-à-byte (`git status` : 0 modif), aucun strip, blocs non purgés (greenfield only), CORE substitués |
+
 ## Rapport complémentaire — Phase 0 × 5 types (mécanique), 2026-07-08
 
 Phase 0 rejouée sur les **5 profils** de `cleanup-for-type.py` via harnais scripté

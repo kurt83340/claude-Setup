@@ -66,6 +66,11 @@ se teste comme du code » nous manquait — c'est corrigé ici.
   `status: draft`, 0 `{{SPEC_*}}`) · `handoff/fresh-regen` PASS (fresh à 19 placeholders,
   5 clés, journal 1 ligne) · `doc-health/rapport-lecture-seule` PASS (🔴 10j + 🟠 incohérence
   attrapées, git status inchangé). Détail : `test/PROTOCOL-E2E.md` § Rapport v0.19.0.
+- **Audit fonction-par-fonction sur jetables (59 checks, 0 défaut)** : hooks × 7 avec payloads
+  réels (20/20), cycle `/adr`·`/lecon`·`/idee` avec immuabilité vérifiée par hash (12/12),
+  machine à états spec de bout en bout avec DoD exécutée pour de vrai (6/6),
+  `/codemap`·`/debug`·`/scaffold`·`/pivot` (12/12), **brownfield** : adoption sur projet
+  existant, 0 fichier user modifié (9/9). Table complète : PROTOCOL-E2E § Audit.
 
 ### Notes
 
