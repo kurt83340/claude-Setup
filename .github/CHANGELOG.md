@@ -3,6 +3,29 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.1.0] — 2026-07-13
+
+Revue d'arbo « yeux frais » sur 3 jetables : la racine d'un projet généré passe de 8 entrées
+(dont **1 631 lignes de doc de MÉTHODE** — les 2 plus gros fichiers que voyait le client)
+à **5 entrées** : seuls `CLAUDE.md` et `README.md` restent visibles.
+
+### Changed
+
+- **P1 — `USAGE.md` + `STRUCTURE.md` déplacés à la racine → `.claude/`** : la règle du
+  template (« info projet → racine ; info template/outillage → `.claude/` ») s'applique
+  enfin à sa propre doc. Liens internes ré-ancrés (`](.claude/…` → `](…`, `EXAMPLES` →
+  `../EXAMPLES`), toutes les réfs alignées (README, `.claude/CLAUDE.md`, rules, CI,
+  cleanup NAV, harnais, test_cleanup). **`script-jetable` les STRIPPE entièrement**
+  (1 600 lignes de méthode pour un 1-shot = overkill assumé du profil -80 %).
+
+### Fixed
+
+- **P3 — `vars.json` d'init (PII : emails, noms)** : le harnais l'écrivait dans le projet
+  et l'y laissait → écrit HORS projet (comme le skill) + **filet dans `cleanup-for-type`**
+  (supprime un `vars.json` racine oublié s'il contient nos clés CORE, greenfield only).
+  `test_cleanup` : 73 → 76 checks (strip USAGE/STRUCTURE jetable, conservation python-app,
+  filet vars).
+
 ## [1.0.0] — 2026-07-13
 
 **Première version production.** Critères de promotion : protocole E2E intégralement joué

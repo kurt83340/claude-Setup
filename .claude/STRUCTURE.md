@@ -12,7 +12,7 @@
    - Petit script Python jetable → tu utiliseras peut-être 30% (cadrage + spec rapide + HANDOFF)
    - Projet client moyen → 70-80% (tout sauf RUNBOOK si pas encore prod)
    - Gros projet enterprise → 100% + tu rajoutes STAKEHOLDERS.md
-4. **Voir [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/)** = exemple complet rempli (dans le **repo template** ; exclu de ton projet par l'init). Référence quand tu doutes « comment je remplis cette section ? ».
+4. **Voir [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/)** = exemple complet rempli (dans le **repo template** ; exclu de ton projet par l'init). Référence quand tu doutes « comment je remplis cette section ? ».
 5. **Automatique** : lance `/init-from-template` (skill bundled) qui pose 10 questions (CORE placeholders : nom projet, client, décideur, commandes stack…), substitue auto + lance `cleanup-for-type.py` adapté au type de projet. Cf [USAGE.md](USAGE.md) section "Setup nouveau projet" pour la procédure complète.
 
 ## Arborescence complète
@@ -127,7 +127,7 @@ mon-projet/
 
 ## Convention diagrammes
 
-→ **Convention canonique** (3 formats : ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export », + piège `![](path)` non auto-suivi) : [.claude/rules/template-maintenance.md § Convention diagrammes](.claude/rules/template-maintenance.md).
+→ **Convention canonique** (3 formats : ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export », + piège `![](path)` non auto-suivi) : [.claude/rules/template-maintenance.md § Convention diagrammes](rules/template-maintenance.md).
 
 **Où placer les diagrammes ?**
 
@@ -167,7 +167,7 @@ mon-projet/
 
 **Règle d'or :** un fichier qu'on ne met pas à jour ment. Crée à la demande, pas préventivement.
 
-→ **Matrice canonique (trigger → fichier)** : [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](.claude/rules/template-maintenance.md). Vue actionnable jour-1 / plus-tard → checklist « Démarrer un nouveau projet » en fin de ce doc.
+→ **Matrice canonique (trigger → fichier)** : [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](rules/template-maintenance.md). Vue actionnable jour-1 / plus-tard → checklist « Démarrer un nouveau projet » en fin de ce doc.
 
 **❌ À NE PAS créer** : bug log séparé (→ CHANGELOG), backups HANDOFF / archives (git suffit), « notes générales » (→ `idees/` daté).
 
@@ -186,7 +186,7 @@ mon-projet/
 
 `cadrage/` = ce qu'**on te file** (client, Jira, mail — input externe). `idees/` = ce que **toi** brainstormes (input interne). Ne JAMAIS mélanger : tickets/docs reçus ≠ tes notes perso.
 
-→ Détail : [.claude/rules/template-maintenance.md § Distinction cadrage/ vs idees/](.claude/rules/template-maintenance.md).
+→ Détail : [.claude/rules/template-maintenance.md § Distinction cadrage/ vs idees/](rules/template-maintenance.md).
 
 ---
 
@@ -511,7 +511,7 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 
 Fichier court (≤ 1 page) qui capture **une décision technique structurante** + contexte + conséquences. Immuable (on supersede), créé via `/adr <scope> "<titre>"`.
 
-→ **Convention canonique** (5 scopes, frontmatter, statuts, quand-créer OUI/NON, ADR vs `plan.md`) : [.claude/rules/template-maintenance.md § Convention ADR](.claude/rules/template-maintenance.md). Exemple de fichier rempli ci-dessous.
+→ **Convention canonique** (5 scopes, frontmatter, statuts, quand-créer OUI/NON, ADR vs `plan.md`) : [.claude/rules/template-maintenance.md § Convention ADR](rules/template-maintenance.md). Exemple de fichier rempli ci-dessous.
 
 ### Template d'un ADR
 
@@ -649,7 +649,7 @@ Deux fichiers, **tous deux chargés** à chaque session. **Racine = le projet** 
 
 Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
-> 🧭 Fonctionnement du template (skills, structure) → [.claude/CLAUDE.md](.claude/CLAUDE.md)
+> 🧭 Fonctionnement du template (skills, structure) → [.claude/CLAUDE.md](CLAUDE.md)
 
 ## Documentation
 

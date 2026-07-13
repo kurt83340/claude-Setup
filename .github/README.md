@@ -28,11 +28,11 @@ claude   # puis, dans la session : /init-from-template
 
 **Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md`
 et `.env.example`), puis `/adopt-template` — merges non-destructifs + rétro-remplissage de la
-doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../USAGE.md).
+doc depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../.claude/USAGE.md).
 
 > Les **plugins maison** (`db-migration`, `agent-teams`) vivent dans `plugins/` (marketplace `claude-setup`) ; la stack **n8n** = plugin **officiel** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) (14 skills + hooks, czlonkowski). Un projet **installe** via `/plugin`, il n'embarque rien (le rsync exclut `plugins/` + `.claude-plugin/` ; ACME aussi).
 
-→ Guide complet : **[USAGE.md](../USAGE.md)** · Convention : **[STRUCTURE.md](../STRUCTURE.md)** · Exemple rempli : **[EXAMPLES/](../EXAMPLES/)**
+→ Guide complet : **[USAGE.md](../.claude/USAGE.md)** · Convention : **[STRUCTURE.md](../.claude/STRUCTURE.md)** · Exemple rempli : **[EXAMPLES/](../EXAMPLES/)**
 
 ## Maintenance du template
 

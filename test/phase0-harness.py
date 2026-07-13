@@ -32,7 +32,7 @@ VARS = {
 }
 BUILTINS = {"plugin", "resume", "compact", "clear", "doctor", "init",
             "security-review", "code-review", "loop", "reload-skills"}
-NAV = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude/rules/template-maintenance.md", "USAGE.md"]
+NAV = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude/rules/template-maintenance.md", ".claude/USAGE.md"]
 EXCLUDES = ("EXAMPLES/", "test/", ".github/", ".git/", "plugins/", ".claude-plugin/")
 
 
@@ -72,8 +72,9 @@ def run_type(t, workdir, template_skills, version):
     sh("chmod +x .claude/hooks/*.py .claude/hooks/*.sh", cwd=root)
     sh("git init -q && git add -A && git -c user.email=e2e@test -c user.name=e2e "
        "commit -qm 'snapshot pre-init'", cwd=root)
-    (root / "vars.json").write_text(json.dumps(VARS), encoding="utf-8")
-    sh(f"python3 .claude/skills/init-from-template/scripts/render.py --vars vars.json --root {root}", cwd=root)
+    vars_path = workdir / f"vars-{t}.json"  # HORS du projet (comme le skill : /tmp)
+    vars_path.write_text(json.dumps(VARS), encoding="utf-8")
+    sh(f"python3 .claude/skills/init-from-template/scripts/render.py --vars {vars_path} --root {root}", cwd=root)
     sh(f"python3 .claude/skills/init-from-template/scripts/render.py --check --root {root}", cwd=root)
     sh(f"python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py --type {t}", cwd=root)
     st = root / ".claude/docs/stack.md"

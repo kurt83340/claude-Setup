@@ -173,9 +173,10 @@ def scaffold_template_bits(root: Path):
     write(root / ".claude" / "docs" / "cadrage" / "diagrams" / "README.md")
     write(root / "CLAUDE.md", NAV_CLAUDE_MD)
     write(root / ".claude" / "CLAUDE.md", INDEX_CLAUDE_MD)
-    write(root / "USAGE.md",
+    write(root / ".claude" / "USAGE.md",
           "| Nouveau projet | `/init-from-template` |\n| Fin de session | `/handoff` |\n"
           "| Feature | `/spec` |\n")
+    write(root / ".claude" / "STRUCTURE.md", "# Convention\nnpx-free.\n")
     write(root / ".claude" / "rules" / "template-maintenance.md", MAINTENANCE_MD)
     write(root / ".claude" / "tools" / "mytool.py")
     write(root / ".claude" / "settings.json",
@@ -239,7 +240,9 @@ with tempfile.TemporaryDirectory() as td:
     ok("inventaire : compte « skills cœur » recalé (6→4)", "**4 skills cœur**" in inv)
     ok("inventaire : sections Pipelines + Agent perso conservées",
        "Pipelines récurrents" in inv and "Agent perso" in inv)
-    ok("inventaire USAGE : ligne bootstrap purgée", "/init-from-template" not in (g / "USAGE.md").read_text())
+    ok("inventaire USAGE : ligne bootstrap purgée", "/init-from-template" not in (g / ".claude/USAGE.md").read_text())
+    ok("python-app : USAGE/STRUCTURE (doc méthode) CONSERVÉS dans .claude/",
+       (g / ".claude/USAGE.md").exists() and (g / ".claude/STRUCTURE.md").exists())
     tm = (g / ".claude/rules/template-maintenance.md").read_text()
     ok("inventaire rules : ligne bootstrap purgée", "/init-from-template" not in tm)
     ok("rules : sections agents/teams + lien adr conservés",
@@ -351,8 +354,12 @@ with tempfile.TemporaryDirectory() as td:
           "> **Quand ne PAS utiliser** : décision structurante → `/adr` · idée produit → `/idee`.\n"
           "> **Réversibilité** : 🟢 append une entry — undo : sous-mode discard.\n\n"
           "Ton rôle : leçons.\n")
+    write(j6 / "vars.json", '{"PROJECT_NAME": "x", "TON_EMAIL": "a@b.c"}')
     r = run(j6, "--type", "script-jetable")
     ok("exit 0", r.returncode == 0)
+    ok("filet vars.json : matériau d'init (PII) supprimé", not (j6 / "vars.json").exists())
+    ok("script-jetable : USAGE/STRUCTURE (1 600 lignes de méthode) STRIPPÉS",
+       not (j6 / ".claude/USAGE.md").exists() and not (j6 / ".claude/STRUCTURE.md").exists())
     ho6 = (j6 / ".claude/skills/handoff/SKILL.md").read_text()
     ok("handoff : segment `/feature-done` (skill strippé) purgé", "/feature-done" not in ho6)
     ok("handoff : `/resume` (builtin) + `/lecon` (survivant) conservés",

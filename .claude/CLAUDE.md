@@ -9,8 +9,8 @@
 **Lis EN PREMIER** : @rules/template-maintenance.md
 → explique la structure, le workflow fin/début de session, quel skill/agent invoquer.
 
-**Guide d'usage pratique** : [USAGE.md](../USAGE.md) (workflows quotidiens, skills, hooks, pivot, ADR, leçons).
-**Convention complète** : [STRUCTURE.md](../STRUCTURE.md) (arborescence, naming, patterns 2026).
+**Guide d'usage pratique** : [USAGE.md](USAGE.md) (workflows quotidiens, skills, hooks, pivot, ADR, leçons).
+**Convention complète** : [STRUCTURE.md](STRUCTURE.md) (arborescence, naming, patterns 2026).
 
 ## Skills (`.claude/skills/`)
 

@@ -65,7 +65,8 @@ vérifier que l'adoption **ne détruit rien**.
 ## Phase 0 — Greenfield : init complet (× 5 types)
 
 **Actions** : rsync documenté (USAGE §Setup) → `chmod +x hooks` → `git init` + snapshot →
-`vars.json` (10 CORE) → `render.py --vars` → `--check` → `cleanup-for-type.py --type <t>` →
+`vars.json` (10 CORE, **HORS du projet** — ex. `/tmp` ; filet : cleanup supprime un vars.json
+racine oublié, il contient des PII) → `render.py --vars` → `--check` → `cleanup-for-type.py --type <t>` →
 traçabilité version dans `stack.md` (si conservé par le profil) → commit init.
 ⚠️ **Rejouer pour CHAQUE `--type`** (`script-jetable`, `automation-n8n`, `python-app`,
 `web-app`, `bdd-migration`) — cette étape est purement mécanique, un harnais scripté suffit

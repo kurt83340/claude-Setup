@@ -28,7 +28,7 @@ claude
 ```
 
 > 🔌 **Prérequis recommandé : MCP `context7` connecté en user-level** (installé une fois,
-> dispo dans toutes les sessions). La rule [`doc-lookup`](.claude/rules/doc-lookup.md) du
+> dispo dans toutes les sessions). La rule [`doc-lookup`](rules/doc-lookup.md) du
 > template s'appuie dessus (doc officielle versionnée) pour `/conception`, `/debug`, les
 > explorateurs et les teammates ; fallback automatique WebFetch/WebSearch s'il est absent.
 
@@ -120,7 +120,7 @@ claude   # puis : /adopt-template
 
 Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md` + `.claude/rules/*`), **Patterns** (auto-memory, machine-local) et **État** (`HANDOFF.md`). Ne les confonds pas.
 
-→ **Détail canonique** (qui écrit quoi / survit à quoi / versionné) : [.claude/rules/template-maintenance.md § Les 3 layers de mémoire](.claude/rules/template-maintenance.md). Source unique — évite le drift.
+→ **Détail canonique** (qui écrit quoi / survit à quoi / versionné) : [.claude/rules/template-maintenance.md § Les 3 layers de mémoire](rules/template-maintenance.md). Source unique — évite le drift.
 
 **`/resume` vs HANDOFF.md** : `/resume` (built-in) garde 100 % du contexte de la session précédente (reprise même journée) ; `HANDOFF.md` sert quand tu changes de machine, clones ailleurs, partages, ou démarres à froid après plusieurs jours. **Complémentaires.**
 
@@ -355,7 +355,7 @@ Demande client reçue
 
 **Règle courte** : décision **cross-feature** OU qui **survit à la feature** → ADR global (`/adr <scope> "<titre>"`). Décision **locale à une feature** → section `## Décisions` dans `specs/00X/plan.md` (pas d'ADR).
 
-→ **Critères détaillés (OUI/NON), 5 scopes, naming** = source unique dans [.claude/rules/template-maintenance.md § Convention ADR](.claude/rules/template-maintenance.md). Le « comment » (capture / supersede / deprecate / list) → section `/adr` ci-dessous.
+→ **Critères détaillés (OUI/NON), 5 scopes, naming** = source unique dans [.claude/rules/template-maintenance.md § Convention ADR](rules/template-maintenance.md). Le « comment » (capture / supersede / deprecate / list) → section `/adr` ci-dessous.
 
 ## 📝 Workflow leçons (`/lecon`)
 
@@ -540,7 +540,7 @@ dans `.claude/settings.local.json` (non versionné) :
 `.env`…) restent appliquées. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
 mode normal (les `allow`/`ask` du template existent pour ça).
 
-→ Protocole complet (source unique) : [.claude/rules/agent-teams.md](.claude/rules/agent-teams.md).
+→ Protocole complet (source unique) : [.claude/rules/agent-teams.md](rules/agent-teams.md).
 
 ## 🤖 Comprendre les hooks automatiques
 
@@ -563,22 +563,22 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 
 **Règle d'or** : crée à la demande, JAMAIS préventivement.
 
-→ **Matrice complète (trigger → fichier)** = source unique dans [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](.claude/rules/template-maintenance.md). Couvre ACCESS, RUNBOOK, ADR vs `plan.md`, GLOSSARY, specs, idées, leçons, code-map, stack, cadrage (documents / réunions / tickets) et diagrammes.
+→ **Matrice complète (trigger → fichier)** = source unique dans [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](rules/template-maintenance.md). Couvre ACCESS, RUNBOOK, ADR vs `plan.md`, GLOSSARY, specs, idées, leçons, code-map, stack, cadrage (documents / réunions / tickets) et diagrammes.
 
 ## 🎨 Convention diagrammes (3 formats)
 
-→ **Source unique** (ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export ») : [.claude/rules/template-maintenance.md § Convention diagrammes](.claude/rules/template-maintenance.md).
+→ **Source unique** (ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export ») : [.claude/rules/template-maintenance.md § Convention diagrammes](rules/template-maintenance.md).
 
 **Où placer** : simple → inline dans le .md (PRD, ARCHITECTURE, spec.md, plan.md) ; gros / éditable → dossier `diagrams/` local (`cadrage/diagrams/`, `conception/diagrams/`, `specs/00X/diagrams/`).
 
 ## 📛 Conventions de naming
 
-→ **Source unique** (specs `00X`, ADR `00XX-<scope>-<titre>`, réunions/sources/idées datées ISO, leçons, tags git) : [.claude/rules/template-maintenance.md § Conventions de naming](.claude/rules/template-maintenance.md).
+→ **Source unique** (specs `00X`, ADR `00XX-<scope>-<titre>`, réunions/sources/idées datées ISO, leçons, tags git) : [.claude/rules/template-maintenance.md § Conventions de naming](rules/template-maintenance.md).
 
 ## 🚦 Conventions de statut
 
-- **ROADMAP** (`[ ]` / `[~]` / `[x]`) → [.claude/rules/template-maintenance.md § Conventions de statut](.claude/rules/template-maintenance.md).
-- **ADR** (`proposed` / `accepted` / `deprecated` / `superseded`) → [§ Convention ADR](.claude/rules/template-maintenance.md) (frontmatter YAML).
+- **ROADMAP** (`[ ]` / `[~]` / `[x]`) → [.claude/rules/template-maintenance.md § Conventions de statut](rules/template-maintenance.md).
+- **ADR** (`proposed` / `accepted` / `deprecated` / `superseded`) → [§ Convention ADR](rules/template-maintenance.md) (frontmatter YAML).
 - **Leçons** / **Idées** : statuts définis dans leurs workflows ci-dessus (§ Workflow leçons `/lecon`, § Workflow idées `/idee`) — source unique.
 
 ## 🔐 Permissions (`settings.json`)
@@ -795,12 +795,12 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
 | [STRUCTURE.md](STRUCTURE.md)                                                   | Convention 2026 complète (arborescence, naming, patterns)       |
 | [CLAUDE.md](CLAUDE.md)                                                         | Index **projet** : résumé + nav doc + conventions               |
-| [.claude/CLAUDE.md](.claude/CLAUDE.md)                                         | Index **template** : skills, workflow, agent                    |
-| [.claude/rules/template-maintenance.md](.claude/rules/template-maintenance.md) | Méta-doc : 3 layers mémoire, fichiers vivants, conventions      |
-| [.claude/docs/adr/README.md](.claude/docs/adr/README.md)                       | Convention ADRs détaillée                                       |
-| [.claude/docs/conception/README.md](.claude/docs/conception/README.md)         | Pattern mirror macro/micro                                      |
-| [.claude/docs/cadrage/README.md](.claude/docs/cadrage/README.md)               | Template cadrage initial                                        |
-| [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/)     | Exemple rempli (repo template ; exclu de ton projet par l'init) |
+| [.claude/CLAUDE.md](CLAUDE.md)                                         | Index **template** : skills, workflow, agent                    |
+| [.claude/rules/template-maintenance.md](rules/template-maintenance.md) | Méta-doc : 3 layers mémoire, fichiers vivants, conventions      |
+| [.claude/docs/adr/README.md](docs/adr/README.md)                       | Convention ADRs détaillée                                       |
+| [.claude/docs/conception/README.md](docs/conception/README.md)         | Pattern mirror macro/micro                                      |
+| [.claude/docs/cadrage/README.md](docs/cadrage/README.md)               | Template cadrage initial                                        |
+| [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/)     | Exemple rempli (repo template ; exclu de ton projet par l'init) |
 
 ## 🎯 Philosophie
 

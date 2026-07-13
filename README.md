@@ -2,8 +2,8 @@
 
 {{1-2 phrases description}}
 
-> 🚀 **Tu débutes avec ce template ?** Lis [USAGE.md](USAGE.md) section "Setup d'un nouveau projet" (étapes 1 à 6 + `/init-from-template`).
-> 📐 **Convention complète** : [STRUCTURE.md](STRUCTURE.md) (arborescence, naming, patterns).
+> 🚀 **Tu débutes avec ce template ?** Lis [USAGE.md](.claude/USAGE.md) section "Setup d'un nouveau projet" (étapes 1 à 6 + `/init-from-template`).
+> 📐 **Convention complète** : [STRUCTURE.md](.claude/STRUCTURE.md) (arborescence, naming, patterns).
 
 ## Stack
 
@@ -51,4 +51,4 @@ Toute la doc dans [.claude/docs/](.claude/docs/) :
 
 ---
 
-> 💡 Ce projet utilise le **[template Claude Code](STRUCTURE.md)** (convention 2026). Usage quotidien : [USAGE.md](USAGE.md). Exemple rempli : [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/).
+> 💡 Ce projet utilise le **[template Claude Code](.claude/STRUCTURE.md)** (convention 2026). Usage quotidien : [USAGE.md](.claude/USAGE.md). Exemple rempli : [EXAMPLES/acme-sync-erp-notion-docs/](EXAMPLES/acme-sync-erp-notion-docs/).

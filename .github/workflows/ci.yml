@@ -39,9 +39,9 @@ jobs:
           echo "@-imports: $n"
           test "$n" -eq 3
 
-      - name: Pas de 'npx specify' dans STRUCTURE.md
+      - name: Pas de 'npx specify' dans .claude/STRUCTURE.md
         run: |
-          ! grep -q 'npx specify' STRUCTURE.md
+          ! grep -q 'npx specify' .claude/STRUCTURE.md
 
       - name: Tous les hooks Python compilent
         run: python3 -m py_compile .claude/hooks/*.py

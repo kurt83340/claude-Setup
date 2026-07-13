@@ -42,6 +42,9 @@ SCRIPT_JETABLE = {
         ".claude/docs/stack.md",
         ".claude/docs/ACCESS.md",
         ".claude/docs/GLOSSARY.md",
+        # Doc de la MÉTHODE (1 600+ lignes) — overkill pour un 1-shot ; le CLAUDE.md suffit
+        ".claude/USAGE.md",
+        ".claude/STRUCTURE.md",
         # NB: lecons.md est CONSERVÉ — /lecon fait partie du trio vital (handoff, lecon,
         # init) ; supprimer son fichier cible rendrait /lecon capture orphelin. Sur un
         # jetable, /lecon promote→ADR n'est pas dispo (pas de /adr), mais capture/discard si.
@@ -231,6 +234,13 @@ def cleanup(root: Path, profile_name: str, dry_run: bool, brownfield: bool = Fal
             prune_dead_inventory(root, profile)
             prune_dead_nav_links(root)
             prune_dead_skill_blocks(root, profile)
+            # Filet : un vars.json d'init oublié à la racine contient des PII (emails,
+            # noms) — le skill écrit en /tmp, mais un humain suivant le protocole à la
+            # main peut le poser ici. On ne supprime QUE s'il ressemble au nôtre.
+            vj = root / "vars.json"
+            if vj.is_file() and "PROJECT_NAME" in vj.read_text(encoding="utf-8"):
+                vj.unlink()
+                print("🔧 vars.json d'init supprimé (matériau temporaire, contient des PII)")
 
     return 0
 
@@ -335,7 +345,7 @@ def prune_dead_inventory(root: Path, profile: dict) -> None:
     # (`.claude/docs/adr/` contient « /adr » mais n'est pas une réf de skill).
     pat = re.compile("`/(?:%s)(?![\\w-])" % "|".join(re.escape(n) for n in names))
     for rel in ("CLAUDE.md", ".claude/CLAUDE.md",
-                ".claude/rules/template-maintenance.md", "USAGE.md"):
+                ".claude/rules/template-maintenance.md", ".claude/USAGE.md"):
         p = root / rel
         if not p.exists():
             continue
