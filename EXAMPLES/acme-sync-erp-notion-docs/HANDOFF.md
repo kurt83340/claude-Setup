@@ -4,7 +4,7 @@
 > **Reprise précise** → utilise `/resume`. Ce fichier = "où j'en suis" pour démarrage à froid.
 
 **Branche** : `feature/001-erp-connector`
-**Spec en cours** : [001-erp-connector/](conception/specs/001-erp-connector/spec.md) (5/8 tasks)
+**Spec en cours** : [001-erp-connector/](specs/001-erp-connector/spec.md) (5/8 tasks)
 **Goal session** : finir le client SAP B1 (auth + fetch orders)
 
 ## Status

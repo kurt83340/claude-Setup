@@ -6,7 +6,7 @@ Format : [Keep a Changelog](https://keepachangelog.com/). Versionning : `vYYYY.M
 
 ### Added
 
-- Client SAP B1 (auth + fetch orders + pagination) — spec [001-erp-connector](conception/specs/001-erp-connector/spec.md)
+- Client SAP B1 (auth + fetch orders + pagination) — spec [001-erp-connector](specs/001-erp-connector/spec.md)
 - Tests unitaires SAP connector (12 tests, coverage 87%)
 
 ### Changed

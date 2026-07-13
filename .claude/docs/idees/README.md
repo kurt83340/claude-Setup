@@ -43,7 +43,7 @@ Exemples :
 1. Idée vague → 1 fichier daté ici
        ↓
 2. Idée mûrit → décider :
-   ├─► Promouvoir en feature → créer `../conception/specs/00X-feature/`
+   ├─► Promouvoir en feature → créer `../specs/00X-feature/`
    ├─► Modifier la roadmap → update `../ROADMAP.md` backlog
    └─► Abandonner → supprimer ou marquer "❌ abandonné"
 ```

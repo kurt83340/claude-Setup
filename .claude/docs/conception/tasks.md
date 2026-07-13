@@ -16,6 +16,10 @@
 
 ### 1.1 — Composants (specs détaillées)
 
+> Règles de découpe : **la spec 001 = tranche verticale minimale de bout en bout** (même
+> moche — dé-risque l'archi, démo-able immédiat) · 1 spec = 1 livrable testable seul = 1 PR ·
+> le transverse (erreurs, retry, monitoring) = sa propre spec.
+
 | Spec                                                 | Estimation  | Status (voir ROADMAP) |
 | ---------------------------------------------------- | ----------- | --------------------- |
 | [001-{{feature-1}}](specs/001-{{feature-1}}/spec.md) | {{X jours}} | {{Pas commencé}}      |

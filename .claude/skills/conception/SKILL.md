@@ -82,7 +82,14 @@ Décision cross-feature ou qui survit à la feature → `/adr` ; locale → § `
   ciblés** si exploratoire (UI mouvante, intégration à découvrir). `/agent-teams:team` lira ce choix.
 - `spec.md` : scope / non-scope ajustés à la décision.
 
-(Mode `macro` : mêmes étapes, sur `conception/research.md` + `ARCHITECTURE.md` + `tasks.md`.)
+(Mode `macro` : mêmes étapes, sur `conception/research.md` + `ARCHITECTURE.md` + `tasks.md` —
+avec deux règles v1.2 :
+- **Express par défaut si le MVP tient en ≤ 3 specs** : PRD 1 page (≤ 5 features, § Scope OUT
+  obligatoire), ARCHITECTURE ~10 lignes + schéma ASCII, tasks = la table de découpage seule.
+  Le design profond part dans le micro de la feature 1 — on ne conçoit pas deux fois.
+- **Découpage : la spec 001 = tranche verticale minimale** qui traverse le système de bout en
+  bout (entrée → sortie, même moche) — dé-risque l'archi tôt et donne un démo-able en jours ;
+  le transverse (erreurs, retry…) devient sa propre spec, jamais saupoudré.)
 
 ## Étape 5 — Revue adverse à contexte frais
 

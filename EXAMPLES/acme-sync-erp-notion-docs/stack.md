@@ -26,7 +26,7 @@
 | Source/Destination       | Usage                     | Voir                                                              |
 | ------------------------ | ------------------------- | ----------------------------------------------------------------- |
 | **SAP B1 Service Layer** | Lecture seule (commandes) | [ADR-0002](adr/0002-mvp-auth-session-token-sap.md)                |
-| **Notion API**           | Écriture DB "Commandes"   | [data-model.md](conception/specs/002-notion-writer/data-model.md) |
+| **Notion API**           | Écriture DB "Commandes"   | [data-model.md](specs/002-notion-writer/data-model.md) |
 | **n8n Data Tables**      | State delta + token cache | [ADR-0003](adr/0003-mvp-storage-n8n-data-tables.md)               |
 
 → **Pas de BDD séparée** pour v1 (KISS — n8n Data Tables suffit).

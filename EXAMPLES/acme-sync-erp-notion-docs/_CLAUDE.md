@@ -19,7 +19,7 @@ Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB
 ### 📂 Lus à la demande (liens — pas auto-chargés)
 
 - 📥 **Cadrage** : [cadrage/README.md](.claude/docs/cadrage/README.md)
-- 🎨 **Conception** : [research](.claude/docs/conception/research.md) · [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md) · [tasks](.claude/docs/conception/tasks.md) · specs → `.claude/docs/conception/specs/`
+- 🎨 **Conception** : [research](.claude/docs/conception/research.md) · [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md) · [tasks](.claude/docs/conception/tasks.md) · specs → `.claude/docs/specs/`
 - 🔄 **Suivi** : [ACCESS](.claude/docs/ACCESS.md) · [CHANGELOG](.claude/docs/CHANGELOG.md) · [leçons](.claude/docs/lecons.md) · [stack](.claude/docs/stack.md)
 - 📚 **Transversaux** : [ADR](.claude/docs/adr/) · [GLOSSARY](.claude/docs/GLOSSARY.md) · [RUNBOOK](.claude/docs/RUNBOOK.md)
 

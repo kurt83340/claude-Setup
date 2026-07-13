@@ -79,7 +79,7 @@ Quand toutes les entries sont actées/discardées : truncate le fichier (garder 
 
 ```bash
 # Mentions de choix dans les plan.md, HORS d'une section "## Décisions" (déjà documentées localement)
-grep -rnE "choisi|retenu|plutôt que| vs " .claude/docs/conception/specs/*/plan.md 2>/dev/null \
+grep -rnE "choisi|retenu|plutôt que| vs " .claude/docs/specs/*/plan.md 2>/dev/null \
   | grep -vi "décisions" | head -10
 ```
 
@@ -137,10 +137,10 @@ grep -l "^status: superseded" .claude/docs/adr/[0-9]*.md 2>/dev/null
 # Specs marquées [~] EN COURS dans ROADMAP mais pas de commit récent
 grep -E "\[~\].*EN COURS" .claude/docs/ROADMAP.md
 # Pour chaque spec en cours, vérifier la dernière modif des fichiers
-find .claude/docs/conception/specs/*/tasks.md -mtime +30 2>/dev/null
+find .claude/docs/specs/*/tasks.md -mtime +30 2>/dev/null
 
 # Liens spec cassés : chaque spec référencée dans ROADMAP doit exister sur disque
-grep -oE "conception/specs/[0-9a-z-]+/spec\.md" .claude/docs/ROADMAP.md | while read -r p; do
+grep -oE "specs/[0-9a-z-]+/spec\.md" .claude/docs/ROADMAP.md | while read -r p; do
   [ -f ".claude/docs/$p" ] || echo "🔴 ROADMAP référence une spec absente : $p"
 done
 ```
@@ -152,7 +152,7 @@ done
 de chaque `spec.md` est la source machine-readable ; s'ils divergent, l'un des deux ment) :
 
 ```bash
-for f in .claude/docs/conception/specs/[0-9]*/spec.md; do
+for f in .claude/docs/specs/[0-9]*/spec.md; do
   [ -f "$f" ] || continue
   st=$(grep -m1 "^status:" "$f" | awk '{print $2}')
   id=$(basename "$(dirname "$f")")

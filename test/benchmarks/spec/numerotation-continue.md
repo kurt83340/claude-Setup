@@ -2,7 +2,7 @@
 name: numerotation-continue
 skill: spec
 input: /spec "Export CSV" alors que specs/001-… et specs/002-… existent déjà (002 livrée [x])
-state: deux specs existantes 001 et 002 dans conception/specs/ + lignes ROADMAP correspondantes ([x] pour 002)
+state: deux specs existantes 001 et 002 dans specs/ + lignes ROADMAP correspondantes ([x] pour 002)
 assert-contains:
   - "003-export-csv"
   - "status: draft"

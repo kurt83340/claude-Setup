@@ -5,7 +5,7 @@
 > 🧑‍🤝‍🧑 **Multi-agent / agent teams** : fichier partagé = point de collision (overwrite last-write-wins). En équipe → 1 HANDOFF par worker/worktree. Voir [template-maintenance.md § Agent teams](../rules/template-maintenance.md#agent-teams-multi-agent--anti-collision).
 
 **Branche** : `{{feature/00X-name | main}}`
-**Spec en cours** : [{{00X-feature}}/](conception/specs/{{00X-feature}}/spec.md) ({{X/Y tasks}})
+**Spec en cours** : [{{00X-feature}}/](specs/{{00X-feature}}/spec.md) ({{X/Y tasks}})
 **Goal session** : {{ce que je voulais faire cette session}}
 
 ## Status

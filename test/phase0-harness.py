@@ -58,7 +58,7 @@ def block_lines(text):
 
 
 def etat_agentique(root):
-    specs = root / ".claude/docs/conception/specs"
+    specs = root / ".claude/docs/specs"
     return specs.is_dir() and any(re.match(r"^\d{3}-", p.name) for p in specs.iterdir())
 
 

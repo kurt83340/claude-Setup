@@ -28,7 +28,7 @@ Ton rôle : orchestrer le cycle de vie des fichiers dans `.claude/docs/idees/`.
 - **`idees/`** = ce que **MOI** je brainstorme (input INTERNE, pas mûr)
 - **`cadrage/`** = ce que le **CLIENT** me file (input EXTERNE, ticket, mail, doc)
 - **`conception/research.md`** = brainstorm structuré projet (post-cadrage)
-- **`conception/specs/00X/research.md`** = brainstorm structuré feature
+- **`specs/00X/research.md`** = brainstorm structuré feature
 
 → JAMAIS mélanger `idees/` et `cadrage/`.
 
@@ -210,5 +210,5 @@ Garder le fichier (pas supprimer) pour trace historique.
 - ❌ Mettre une demande client dans `idees/` (= confondre interne/externe → `cadrage/`)
 - ❌ Idée sans date dans le filename (perd la traçabilité chronologique)
 - ❌ Supprimer une idée discarded (perdre l'historique des "non, pas ça parce que...")
-- ❌ Promouvoir une idée sans `/spec` (= drift entre idees/ et conception/specs/)
+- ❌ Promouvoir une idée sans `/spec` (= drift entre idees/ et specs/)
 - ❌ Archiver une idée encore en `💡 Backlog` (= perdre une piste potentielle)

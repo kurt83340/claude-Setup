@@ -72,7 +72,7 @@ Options : ajouter une BDD ? Utiliser un fichier ? Utiliser n8n Data Tables ?
 
 ## Liens
 
-- ../conception/specs/001-erp-connector/spec.md
-- ../conception/specs/003-error-handler/spec.md
+- ../specs/001-erp-connector/spec.md
+- ../specs/003-error-handler/spec.md
 - docs/conception/ARCHITECTURE.md (section Stack)
 - https://docs.n8n.io/data/data-tables/

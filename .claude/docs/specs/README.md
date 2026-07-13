@@ -33,12 +33,12 @@ specs/
 
 Chaque fichier d'une spec a son équivalent macro dans `conception/` : `research`↔`research`, `spec`↔`PRD`, `plan`↔`ARCHITECTURE`, `tasks`↔`tasks`.
 
-> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[template-maintenance.md § La structure en 30 secondes](../../../rules/template-maintenance.md#la-structure-en-30-secondes)** _(source unique — ne pas recopier ici pour éviter le drift)_.
+> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[template-maintenance.md § La structure en 30 secondes](../../rules/template-maintenance.md#la-structure-en-30-secondes)** _(source unique — ne pas recopier ici pour éviter le drift)_.
 
 ## Cross-références
 
-- **ROADMAP global** : [`../../ROADMAP.md`](../../ROADMAP.md) agrège le status des features
-- **Plan MVP figé** : [`../tasks.md`](../tasks.md) montre où s'inscrivent les features dans le plan
+- **ROADMAP global** : [`../ROADMAP.md`](../ROADMAP.md) agrège le status des features
+- **Plan MVP figé** : [`../tasks.md`](../conception/tasks.md) montre où s'inscrivent les features dans le plan
 - **Promotion ADR** : si une décision dans `plan.md` survit à la feature OU impacte plusieurs specs → créer ADR dans [`../../adr/`](../../adr/)
 
 ## Démarrer une nouvelle spec
@@ -47,11 +47,11 @@ Chaque fichier d'une spec a son équivalent macro dans `conception/` : `research
 
 ```bash
 # 1. Créer le dossier
-mkdir -p .claude/docs/conception/specs/00X-feature-slug
+mkdir -p .claude/docs/specs/00X-feature-slug
 
 # 2. Copier les 4 templates bundlés du skill /spec
 cp .claude/skills/spec/templates/{research,spec,plan,tasks}.md \
-   .claude/docs/conception/specs/00X-feature-slug/
+   .claude/docs/specs/00X-feature-slug/
 # 3. Remplir research.md d'abord (exploration), puis spec.md, plan.md, tasks.md
 # 4. Cocher la feature dans .claude/docs/ROADMAP.md
 ```
@@ -59,4 +59,4 @@ cp .claude/skills/spec/templates/{research,spec,plan,tasks}.md \
 ## Template d'une spec (à copier dans 00X-feature/)
 
 Source de vérité = les templates bundlés `.claude/skills/spec/templates/`.
-Exemple rempli (référence optionnelle) : `EXAMPLES/acme-sync-erp-notion-docs/conception/specs/001-erp-connector/` — dans le **repo template claude-Setup** (exclu des projets générés).
+Exemple rempli (référence optionnelle) : `EXAMPLES/acme-sync-erp-notion-docs/specs/001-erp-connector/` — dans le **repo template claude-Setup** (exclu des projets générés).

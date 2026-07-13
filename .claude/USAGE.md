@@ -272,7 +272,7 @@ Rapport généré → tu suis les actions par priorité.
 1. Lire ROADMAP.md → choisir la prochaine feature
        ↓
 2. /spec "Export PDF"
-   → scaffold auto : conception/specs/004-export-pdf/{research,spec,plan,tasks}.md
+   → scaffold auto : specs/004-export-pdf/{research,spec,plan,tasks}.md
    → update ROADMAP.md auto
        ↓
 3. /conception 004-export-pdf
@@ -322,7 +322,7 @@ Demande client reçue
        ↓
 7. ROADMAP.md créée à partir de tasks.md
        ↓
-8. Specs par feature dans conception/specs/00X-feature/
+8. Specs par feature dans specs/00X-feature/
 ```
 
 ## 🔄 Workflow pivot (client change d'avis)

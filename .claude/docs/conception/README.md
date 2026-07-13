@@ -3,7 +3,7 @@
 > Cette phase prend les inputs du `cadrage/` (brief + intake) et produit **tout le design** du projet :
 >
 > - **Design macro** (research, PRD, ARCHITECTURE, tasks) à la racine de ce dossier
-> - **Design micro par feature** dans `specs/` (sous-dossier)
+> - **Design micro par feature** dans `../specs/` (dossier FRÈRE — remonté en v1.2)
 >
 > ⚠️ Le **ROADMAP n'est PAS ici** — il vit à la racine `../ROADMAP.md` car c'est un **dashboard vivant** lu/MAJ tous les jours.
 
@@ -22,7 +22,7 @@
 
 | Dossier                        | Quoi                                                       |
 | ------------------------------ | ---------------------------------------------------------- |
-| [`specs/00X-feature/`](specs/) | 1 dossier par feature avec `{research,spec,plan,tasks}.md` |
+| [`specs/00X-feature/`](../specs/) | 1 dossier par feature avec `{research,spec,plan,tasks}.md` |
 
 ### Diagrammes
 

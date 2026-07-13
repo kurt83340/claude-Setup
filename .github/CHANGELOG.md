@@ -3,6 +3,33 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.2.0] — 2026-07-13
+
+### Changed
+
+- **P2 — `specs/` promu au rang de bucket frère** : `.claude/docs/conception/specs/` →
+  `.claude/docs/specs/` (specs à 4 niveaux au lieu de 5). **`conception/` reste intact**
+  (les 5 md du « PRD from scratch » + diagrams/) — seul le bac à features remonte. Le
+  pattern mirror macro↔micro est inchangé (il est conceptuel). 27 fichiers ré-alignés
+  (skills, templates ROADMAP/HANDOFF, rules, STRUCTURE arbre redessiné, EXAMPLES/acme
+  déplacé, verify-e2e, harnais, benchmarks) ; `script-jetable` strippe le nouveau chemin.
+
+### Added
+
+- **P5 — mode macro express** (`/conception macro`) : par défaut si le MVP tient en ≤ 3 specs —
+  PRD 1 page (≤ 5 features, Scope OUT obligatoire), ARCHITECTURE ~10 lignes + ASCII, tasks =
+  table de découpage seule. Le design profond part dans le micro de la feature 1 : on ne
+  conçoit plus deux fois avant la première ligne de code.
+- **P6 — règle « spec 001 = tranche verticale »** (encodée dans `/conception` macro + le
+  template `conception/tasks.md` § 1.1) : la première spec traverse le système de bout en
+  bout, même moche — dé-risque l'archi tôt ; le transverse devient sa propre spec.
+
+### Rejected
+
+- **P4 — index `README.md` à la racine de `docs/`** : testé avec/sans sur jetable — 8 READMEs
+  de bucket existent déjà + CLAUDE.md (nav, auto-chargé) + rule template-maintenance (matrice,
+  auto-chargée en écrivant dans docs/). 0 % d'info nouvelle = 3ᵉ copie à drift garanti.
+
 ## [1.1.0] — 2026-07-13
 
 Revue d'arbo « yeux frais » sur 3 jetables : la racine d'un projet généré passe de 8 entrées

@@ -24,7 +24,7 @@ tmux -V || echo "⚠️ tmux absent → teammateMode retombera en in-process (ag
 git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un repo git (worktrees impossibles)"
 ```
 
-- Spec fournie ? Vérifie que `.claude/docs/conception/specs/<id>/tasks.md` existe (sinon propose `/spec` d'abord).
+- Spec fournie ? Vérifie que `.claude/docs/specs/<id>/tasks.md` existe (sinon propose `/spec` d'abord).
 - ⚠️ **Hors tmux** : `teammateMode: "tmux"` fonctionne quand même (Claude crée la session tmux
   automatiquement — doc officielle, pas besoin d'être dedans), mais l'utilisateur **ne verra
   rien** sans `tmux attach`. Si l'observabilité est le but (défaut de ce template), propose-lui

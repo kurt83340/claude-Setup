@@ -86,21 +86,22 @@ mon-projet/
     │   │       ├── README.md       # convention diagrammes (3 formats : ASCII / Excalidraw+SVG / PNG)
     │   │       └── flow-X.md       # diagramme ASCII inline OU paire .excalidraw + .svg
     │   │
-    │   ├── 🎨 conception/          # design output MACRO + MICRO (SEMI-STABLE — bumpé sur événement majeur)
+    │   ├── 🎨 conception/          # design MACRO — le « PRD from scratch » (SEMI-STABLE — bumpé sur événement majeur)
     │   │   ├── README.md           # synthèse phase + pattern mirror macro/micro + statut + protocole pivot
     │   │   ├── research.md         # brainstorm macro projet : options explorées, alternatives, hypothèses + pivots datés
     │   │   ├── PRD.md              # spec produit (vision, scope, personas, métriques, user stories) — versionné v1.0, v2.0…
     │   │   ├── ARCHITECTURE.md     # plan technique macro (stack, modules, sécurité, flux, mapping champs)
     │   │   ├── tasks.md            # plan exécution MVP : sous-phases 1.1/1.2/1.3 + estimations + DoD figés (stable)
-    │   │   ├── diagrams/           # placeholder pour diagrammes techniques gros (> 50 lignes ASCII)
-    │   │   │   └── README.md       # convention diagrammes (utiliser ici si trop gros pour ARCHITECTURE.md inline)
-    │   │   └── specs/              # design micro : 1 sous-dossier par feature (numéroté séquentiellement)
-    │   │       └── 001-feature/    # nommage : 001-, 002-, … (jamais de reset entre phases)
-    │   │           ├── research.md   # brainstorm feature : options techniques explorées, libs envisagées, alternatives
-    │   │           ├── spec.md       # PRD feature (QUOI/POURQUOI) : critères d'acceptation, user stories, scope + frontmatter status: (draft→validated→in-progress→done, miroir machine-readable de la ROADMAP)
-    │   │           ├── plan.md       # plan technique feature (COMMENT) : architecture interne, patterns, libs + circuit breakers (conditions d'arrêt décidées à froid)
-    │   │           ├── tasks.md      # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD TYPÉE (command_passes:/file_exists:/manual:) + phases ~35 min max
-    │   │           └── (diagrams/    # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
+    │   │   └── diagrams/           # placeholder pour diagrammes techniques gros (> 50 lignes ASCII)
+    │   │       └── README.md       # convention diagrammes (utiliser ici si trop gros pour ARCHITECTURE.md inline)
+    │   │
+    │   ├── 🧩 specs/               # design MICRO : 1 dossier par feature (frère de conception/ depuis v1.2 — la spec 001 = tranche verticale qui traverse tout)
+    │   │   └── 001-feature/        # nommage : 001-, 002-, … (jamais de reset entre phases)
+    │   │       ├── research.md     # brainstorm feature : options techniques explorées, libs envisagées, alternatives
+    │   │       ├── spec.md         # PRD feature (QUOI/POURQUOI) : critères d'acceptation, user stories, scope + frontmatter status: (draft→validated→in-progress→done, miroir machine-readable de la ROADMAP)
+    │   │       ├── plan.md         # plan technique feature (COMMENT) : architecture interne, patterns, libs + circuit breakers (conditions d'arrêt décidées à froid)
+    │   │       ├── tasks.md        # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD TYPÉE (command_passes:/file_exists:/manual:) + phases ~35 min max
+    │   │       └── (diagrams/      # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
     │   │
     │   ├── 🔄 HANDOFF.md           # ⭐ état de session — VIVANT (MAJ FIN de chaque session) : status, échecs tentés, next, blockers
     │   ├── 🔄 ROADMAP.md           # DASHBOARD vivant : status courant des features (synthèse de conception/tasks.md + specs/*/tasks.md)
@@ -152,7 +153,7 @@ mon-projet/
 
 **Pattern mirror macro ↔ micro (les deux niveaux vivent dans `conception/`) :**
 
-| Macro (`conception/`) | Micro (`conception/specs/00X-feature/`) | Question                                |
+| Macro (`conception/`) | Micro (`specs/00X-feature/`) | Question                                |
 | --------------------- | --------------------------------------- | --------------------------------------- |
 | `research.md`         | `research.md`                           | Quelles options on a explorées ?        |
 | `PRD.md`              | `spec.md`                               | Qu'est-ce qu'on construit et pourquoi ? |
@@ -178,7 +179,7 @@ mon-projet/
 | Niveau                  | Quoi                                 | Où                                            |
 | ----------------------- | ------------------------------------ | --------------------------------------------- |
 | **Macro (app entière)** | Vision, archi, plan d'exécution MVP  | `.claude/docs/conception/` (+ ROADMAP racine) |
-| **Micro (une feature)** | Recherche, spec, plan, tasks feature | `.claude/docs/conception/specs/00X-feature/`  |
+| **Micro (une feature)** | Recherche, spec, plan, tasks feature | `.claude/docs/specs/00X-feature/`  |
 
 ---
 
@@ -205,10 +206,10 @@ mon-projet/
 | 8. Accès à obtenir             | API keys, comptes, OAuth scopes       | `.claude/docs/ACCESS.md`                                                                                          |
 | 9. Interlocuteurs              | Qui demande, qui valide               | Section dans `.claude/docs/cadrage/README.md` (sauf gros projet → `STAKEHOLDERS.md`)                              |
 | 10. Principes immuables        | Conventions, règles métier            | `.specify/memory/constitution.md` (Spec Kit)                                                                      |
-| 11. Brainstorm d'UNE feature   | Recherche, options                    | `.claude/docs/conception/specs/00X/research.md`                                                                   |
-| 12. PRD d'UNE feature          | Spec détaillée                        | `.claude/docs/conception/specs/00X/spec.md`                                                                       |
-| 13. Plan technique feature     | Comment implémenter                   | `.claude/docs/conception/specs/00X/plan.md`                                                                       |
-| 14. Checklist feature          | Tasks atomiques à cocher              | `.claude/docs/conception/specs/00X/tasks.md`                                                                      |
+| 11. Brainstorm d'UNE feature   | Recherche, options                    | `.claude/docs/specs/00X/research.md`                                                                   |
+| 12. PRD d'UNE feature          | Spec détaillée                        | `.claude/docs/specs/00X/spec.md`                                                                       |
+| 13. Plan technique feature     | Comment implémenter                   | `.claude/docs/specs/00X/plan.md`                                                                       |
+| 14. Checklist feature          | Tasks atomiques à cocher              | `.claude/docs/specs/00X/tasks.md`                                                                      |
 | 15. Décisions structurantes    | Choix tech irréversibles              | `.claude/docs/adr/00XX-*.md`                                                                                      |
 | 16. Réunion / décision verbale | Compte-rendu                          | `.claude/docs/cadrage/reunions/2026-MM-DD-titre.md`                                                               |
 | 17. Pivot demandé              | Nouvelle direction (hiérarchie)       | Réunion dans cadrage/reunions/ + section dans `conception/research.md` + bump PRD + refonte `conception/tasks.md` |
@@ -250,10 +251,10 @@ mon-projet/
 8. Glossary         → .claude/docs/GLOSSARY.md (si jargon métier)
                         ↓
 ─── boucle par feature (specs/) ───
-9. Pick feature     → .claude/docs/conception/specs/001-xxx/research.md   (= mirror conception/research)
-                   → .claude/docs/conception/specs/001-xxx/spec.md       (= mirror conception/PRD)
-                   → .claude/docs/conception/specs/001-xxx/plan.md       (= mirror conception/ARCHITECTURE)
-                   → .claude/docs/conception/specs/001-xxx/tasks.md      (= mirror docs/ROADMAP)
+9. Pick feature     → .claude/docs/specs/001-xxx/research.md   (= mirror conception/research)
+                   → .claude/docs/specs/001-xxx/spec.md       (= mirror conception/PRD)
+                   → .claude/docs/specs/001-xxx/plan.md       (= mirror conception/ARCHITECTURE)
+                   → .claude/docs/specs/001-xxx/tasks.md      (= mirror docs/ROADMAP)
                    → CODE
                    → CHANGELOG.md MAJ (racine)
                    → HANDOFF.md MAJ (racine, fin session)
@@ -502,7 +503,7 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 - `[ ]` = planifié, pas commencé
 - `[~]` = en cours (mettre en **gras**)
 - `[x]` = livré
-- Lien vers `.claude/docs/conception/specs/00X/spec.md` dès que la spec existe
+- Lien vers `.claude/docs/specs/00X/spec.md` dès que la spec existe
 - Lien vers `.claude/docs/idees/...` tant que c'est juste une idée
 
 ---
@@ -696,7 +697,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 1. Demande client → `.claude/docs/cadrage/` (tickets, documents, reunions)
 2. Synthèse cadrage → `.claude/docs/cadrage/README.md`
 3. PRD → ARCHITECTURE → ROADMAP
-4. Feature démarrée → `/spec "<titre>"` (scaffold `.claude/docs/conception/specs/00X-feature/`)
+4. Feature démarrée → `/spec "<titre>"` (scaffold `.claude/docs/specs/00X-feature/`)
 5. Livrée → `/feature-done` (roadmap [x] + CHANGELOG)
 
 ## Agent & skills projet
@@ -766,7 +767,7 @@ Pour un gros pivot (v2, refonte), 2 options :
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Python**           | `pyproject.toml`, `tests/`. Plan.md documente modules et dépendances                                                                                  |
 | **Scripts**          | `spec.md` souvent inutile → juste `README.md` + commentaires en tête                                                                                  |
-| **n8n**              | `.claude/docs/conception/specs/00X/spec.md` = logique métier, `tasks.md` = checklist de nœuds. JSON exporté dans `workflows/`. RUNBOOK indispensable. |
+| **n8n**              | `.claude/docs/specs/00X/spec.md` = logique métier, `tasks.md` = checklist de nœuds. JSON exporté dans `workflows/`. RUNBOOK indispensable. |
 | **BDD**              | ADRs **obligatoires** pour migrations de schéma. Dossier `db/migrations/` avec scripts numérotés                                                      |
 | **Client/freelance** | BRIEF, INTAKE, ACCESS, STAKEHOLDERS, RUNBOOK = **obligatoires**. Pour projet perso, optionnels.                                                       |
 
@@ -787,11 +788,11 @@ Pour un gros pivot (v2, refonte), 2 options :
 ## Règles mentales
 
 - **Crée à la demande, pas préventivement** — un fichier non maintenu ment
-- **`.claude/docs/` = stratégie** (l'app entière), **`.claude/docs/conception/specs/` = tactique** (une feature à la fois)
+- **`.claude/docs/` = stratégie** (l'app entière), **`.claude/docs/specs/` = tactique** (une feature à la fois)
 - **`cadrage/` = ce qu'on me file**, **`idees/` = ce que je brainstorme** — ne JAMAIS mélanger
 - **Roadmap** = ta vue d'avion, **specs** = tes vues détaillées
 - **Un ADR** si la décision impacte plusieurs features OU est dure à défaire
-- **Rien ne se perd** : tout circule de `idees/` → `.claude/docs/conception/specs/00X/research → spec → plan → tasks`
+- **Rien ne se perd** : tout circule de `idees/` → `.claude/docs/specs/00X/research → spec → plan → tasks`
 - **HANDOFF.md ⭐** mis à jour à chaque fin de session — c'est ce qui sauve la continuité (fichier le plus utile)
 - **CLAUDE.md** est un INDEX, pas la doc elle-même (20-30 lignes max)
 - **CHANGELOG.md** est UN SEUL fichier — features ET bug fixes (pas de fichier bugs séparé)
@@ -824,7 +825,7 @@ Pour un gros pivot (v2, refonte), 2 options :
 11. [ ] `.claude/docs/conception/ARCHITECTURE.md` — quand stack décidée
 12. [ ] `.claude/docs/ROADMAP.md` — quand tu peux découper en > 2 features
 13. [ ] `.claude/docs/adr/00XX-<scope>-<titre>.md` — à la 1ère vraie décision tech (via `/adr`)
-14. [ ] `.claude/docs/conception/specs/001-*/` — quand tu démarres la 1ère feature
+14. [ ] `.claude/docs/specs/001-*/` — quand tu démarres la 1ère feature
 15. [ ] `.claude/docs/HANDOFF.md` ⭐ — fin de la 1ère session de code (via `/handoff`)
 16. [ ] `.claude/docs/CHANGELOG.md` — à la 1ère feature livrée (via `/feature-done`)
 17. [ ] `.claude/docs/GLOSSARY.md` — si jargon métier (sinon skip)

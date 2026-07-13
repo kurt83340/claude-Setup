@@ -16,9 +16,9 @@ Cadrage + conception + setup local : tout OK.
 
 ### Composants
 
-- [~] [001-erp-connector](conception/specs/001-erp-connector/spec.md) — **EN COURS** 5/8 tasks ([détail](conception/specs/001-erp-connector/tasks.md))
-- [ ] [002-notion-writer](conception/specs/002-notion-writer/spec.md) — spec écrite, 0/7 tasks
-- [ ] [003-error-handler](conception/specs/003-error-handler/spec.md) — spec écrite, 0/8 tasks
+- [~] [001-erp-connector](specs/001-erp-connector/spec.md) — **EN COURS** 5/8 tasks ([détail](specs/001-erp-connector/tasks.md))
+- [ ] [002-notion-writer](specs/002-notion-writer/spec.md) — spec écrite, 0/7 tasks
+- [ ] [003-error-handler](specs/003-error-handler/spec.md) — spec écrite, 0/8 tasks
 
 ### Intégration
 
@@ -53,4 +53,4 @@ Voir [conception/tasks.md](conception/tasks.md) section Phase 2.
 - `[~]` = en cours (mettre en **gras**)
 - `[x]` = livré
 - Numéro de spec continue (001 → 002 → 003 → …) — pas de reset entre phases
-- Format `X/Y tasks` = compté depuis `conception/specs/00X/tasks.md`
+- Format `X/Y tasks` = compté depuis `specs/00X/tasks.md`

@@ -63,6 +63,6 @@ Implémentation :
 
 ## Liens
 
-- ../conception/specs/001-erp-connector/spec.md
+- ../specs/001-erp-connector/spec.md
 - docs/conception/ARCHITECTURE.md (section Sécurité)
 - Doc SAP B1 Service Layer : cadrage/documents/2026-05-21-doc-sap-service-layer.pdf

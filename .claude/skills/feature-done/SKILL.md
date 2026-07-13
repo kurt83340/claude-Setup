@@ -23,14 +23,14 @@ Ton rôle : finaliser proprement une feature en synchronisant tous les fichiers 
 
 ## Étape 1 — Vérifier la spec
 
-1. Lire `.claude/docs/conception/specs/<spec-id>/tasks.md`
+1. Lire `.claude/docs/specs/<spec-id>/tasks.md`
 2. Vérifier que TOUS les tasks sont cochés `[x]`
 3. Vérifier que le DoD est rempli
 4. Si non → demander à l'user "Es-tu sûr que la feature est livrée ? Tasks restants : X, Y"
 
 ## Étape 2 — Détecter les décisions tech à promouvoir en ADR
 
-Scan `.claude/docs/conception/specs/<spec-id>/plan.md` pour mots-clés :
+Scan `.claude/docs/specs/<spec-id>/plan.md` pour mots-clés :
 
 - "choisi", "retenu", "vs", "plutôt que", "rejeté"
 - "decision", "pattern", "lib"
@@ -88,7 +88,7 @@ Format Keep a Changelog dans la section `## [Unreleased]` — section `### Added
 ```markdown
 ### Added
 
-- <nom feature> ([spec](conception/specs/<spec-id>/spec.md))
+- <nom feature> ([spec](specs/<spec-id>/spec.md))
 - Tests : X tests verts, coverage Y%
 ```
 
@@ -136,7 +136,7 @@ git commit -m "feat(<spec-id>): <titre court>"
 ```bash
 git push -u origin feature/<spec-id>   # push = permission « ask » → confirmation user
 gh pr create --title "feat(<spec-id>): <titre court>" \
-  --body "Spec : .claude/docs/conception/specs/<spec-id>/spec.md · Tasks X/X ✅ · Tests : <résultat>"
+  --body "Spec : .claude/docs/specs/<spec-id>/spec.md · Tasks X/X ✅ · Tests : <résultat>"
 ```
 
 - CI verte obligatoire avant merge ; squash merge (1 commit par feature dans main).

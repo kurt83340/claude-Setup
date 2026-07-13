@@ -47,7 +47,7 @@ Convention diagrammes détaillée : voir [diagrams/README.md](diagrams/README.md
 
 Tu apprends UN pattern, tu l'appliques à 2 niveaux dans CE dossier :
 
-| Macro (`conception/`) | Micro (`conception/specs/00X-feature/`) | Question                                        |
+| Macro (`conception/`) | Micro (`specs/00X-feature/`) | Question                                        |
 | --------------------- | --------------------------------------- | ----------------------------------------------- |
 | `research.md`         | `research.md`                           | Quelles options on a explorées ?                |
 | `PRD.md`              | `spec.md`                               | Qu'est-ce qu'on construit et pourquoi ?         |

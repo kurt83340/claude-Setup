@@ -12,7 +12,7 @@ paths:
 
 > Méta-documentation : comment ce projet est organisé, comment le maintenir vivant,
 > quel skill/agent invoquer pour quelle tâche. Lis ce fichier avant d'écrire dans
-> `.claude/docs/` ou `.claude/docs/conception/specs/`.
+> `.claude/docs/` ou `.claude/docs/specs/`.
 
 ## Les 3 layers de mémoire (à connaître AVANT tout)
 
@@ -59,7 +59,7 @@ Le « n'oublie rien » durable passe par la **promotion** vers les couches versi
 
 **Pattern mirror macro ↔ micro :**
 
-| Macro (`.claude/docs/conception/`) | Micro (`.claude/docs/conception/specs/00X-feature/`) | Question                                |
+| Macro (`.claude/docs/conception/`) | Micro (`.claude/docs/specs/00X-feature/`) | Question                                |
 | ---------------------------------- | ---------------------------------------------------- | --------------------------------------- |
 | `research.md`                      | `research.md`                                        | Quelles options on a explorées ?        |
 | `PRD.md`                           | `spec.md`                                            | Qu'est-ce qu'on construit et pourquoi ? |
@@ -131,7 +131,7 @@ Le « n'oublie rien » durable passe par la **promotion** vers les couches versi
 | Décision tech **locale à UNE feature** (choix de lib pour cette feature uniquement) | Section `## Décisions` dans `specs/00X/plan.md` (PAS d'ADR séparé)                                                 |
 | > 3 références à un terme métier non documenté                                      | Créer/enrichir `.claude/docs/GLOSSARY.md`                                                                          |
 | > 4-5 interlocuteurs / plusieurs équipes côté client                                | Créer `.claude/docs/STAKEHOLDERS.md` — modèle prêt : **`.claude/STRUCTURE.md` § STAKEHOLDERS** (sinon : section Interlocuteurs de `cadrage/README.md`) |
-| Démarrage d'une feature                                                             | Créer `.claude/docs/conception/specs/00X-feature/{research,spec,plan,tasks}.md`                                    |
+| Démarrage d'une feature                                                             | Créer `.claude/docs/specs/00X-feature/{research,spec,plan,tasks}.md`                                    |
 | Nouvelle idée pas mûre                                                              | Créer `.claude/docs/idees/YYYY-MM-DD-idee.md`                                                                      |
 | Bug / pattern / observation à capturer                                              | Append dans `.claude/docs/lecons.md` (statut 🆕 new, décider promotion plus tard)                                  |
 | **Avant d'éditer un fichier de code**                                               | **Vérifier les règles de couplage dans `.claude/docs/code-map.md`** (le rôle/les imports : se lisent dans le code) |

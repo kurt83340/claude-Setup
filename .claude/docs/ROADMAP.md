@@ -16,8 +16,8 @@
 
 ### Composants
 
-- [ ] [001-{{feature-1}}](conception/specs/001-{{feature-1}}/spec.md) — {{0/Y tasks}}
-- [ ] [002-{{feature-2}}](conception/specs/002-{{feature-2}}/spec.md) — pas commencé
+- [ ] [001-{{feature-1}}](specs/001-{{feature-1}}/spec.md) — {{0/Y tasks}}
+- [ ] [002-{{feature-2}}](specs/002-{{feature-2}}/spec.md) — pas commencé
 - [ ] ...
 
 ### Intégration
@@ -52,4 +52,4 @@ Voir [conception/tasks.md](conception/tasks.md) section Phase 2.
 - `[~]` = en cours (mettre en **gras**)
 - `[x]` = livré
 - Numéro de spec continue (001 → 002 → 003 → …) — pas de reset entre phases
-- Format `X/Y tasks` = compté depuis `conception/specs/00X/tasks.md`
+- Format `X/Y tasks` = compté depuis `specs/00X/tasks.md`

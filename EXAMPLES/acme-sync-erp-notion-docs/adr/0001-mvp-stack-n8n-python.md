@@ -61,6 +61,6 @@ n8n pour l'orchestration (auth, schedule, retry, UI monitoring), Python pour les
 
 ## Liens
 
-- ../conception/specs/001-erp-connector/spec.md
+- ../specs/001-erp-connector/spec.md
 - docs/conception/ARCHITECTURE.md (section Stack)
 - https://docs.n8n.io/

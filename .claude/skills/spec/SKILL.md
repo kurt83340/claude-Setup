@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Crée une nouvelle feature spec — scaffold les 4 fichiers research.md, spec.md, plan.md, tasks.md dans .claude/docs/conception/specs/00X-titre/ depuis des templates bundlés. Update .claude/docs/ROADMAP.md avec la nouvelle entrée. À invoquer chaque fois que tu démarres une nouvelle feature.
+description: Crée une nouvelle feature spec — scaffold les 4 fichiers research.md, spec.md, plan.md, tasks.md dans .claude/docs/specs/00X-titre/ depuis des templates bundlés. Update .claude/docs/ROADMAP.md avec la nouvelle entrée. À invoquer chaque fois que tu démarres une nouvelle feature.
 allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(find:*), Bash(mkdir:*), Bash(cp:*), Bash(date:*), AskUserQuestion
 disable-model-invocation: false
 argument-hint: "<id-optionnel> <titre>"
@@ -13,7 +13,7 @@ argument-hint: "<id-optionnel> <titre>"
 > **Réversibilité** : 🟢 crée `specs/00X-slug/` (4 fichiers) + 1 ligne ROADMAP —
 > undo : `rm -r` du dossier + retirer la ligne.
 
-Ton rôle : créer le dossier `.claude/docs/conception/specs/00X-titre/` avec ses 4 fichiers prêts à remplir, et update ROADMAP.
+Ton rôle : créer le dossier `.claude/docs/specs/00X-titre/` avec ses 4 fichiers prêts à remplir, et update ROADMAP.
 
 ## Usage
 
@@ -29,7 +29,7 @@ Ton rôle : créer le dossier `.claude/docs/conception/specs/00X-titre/` avec se
 
 ```bash
 # Trouver le max existant
-ls .claude/docs/conception/specs/ 2>/dev/null | grep -oE "^[0-9]+" | sort -n | tail -1
+ls .claude/docs/specs/ 2>/dev/null | grep -oE "^[0-9]+" | sort -n | tail -1
 ```
 
 Si aucune spec existante → `001`. Sinon `max + 1`, formaté sur 3 chiffres.
@@ -52,7 +52,7 @@ Via AskUserQuestion :
 ## Étape 3 — Créer le dossier + 4 fichiers
 
 ```bash
-DIR=".claude/docs/conception/specs/00X-<kebab>"
+DIR=".claude/docs/specs/00X-<kebab>"
 mkdir -p "$DIR"
 
 # Copier les 4 templates bundlés
@@ -94,7 +94,7 @@ Trouver la section phase indiquée par l'user, ajouter la ligne dans l'état qui
 Ligne par défaut (scaffold sans démarrer) :
 
 ```markdown
-- [ ] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — pas commencé
+- [ ] [00X-<kebab>](specs/00X-<kebab>/spec.md) — pas commencé
 ```
 
 ## Étape 5 — Démarrage immédiat : poser `[~]` + update HANDOFF (optionnel)
@@ -104,7 +104,7 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
 1. Passer la ligne ROADMAP en **EN COURS** (format canonique attendu par `/feature-done` + `/doc-health`) :
 
    ```markdown
-   - [~] [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) — **EN COURS** 0/Y tasks
+   - [~] [00X-<kebab>](specs/00X-<kebab>/spec.md) — **EN COURS** 0/Y tasks
    ```
 
    … et passer le frontmatter de `specs/00X-<kebab>/spec.md` à `status: in-progress` (sync).
@@ -112,7 +112,7 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
 2. Mettre à jour HANDOFF :
 
    ```markdown
-   **Spec en cours** : [00X-<kebab>](conception/specs/00X-<kebab>/spec.md) (0/Y tasks)
+   **Spec en cours** : [00X-<kebab>](specs/00X-<kebab>/spec.md) (0/Y tasks)
    **Goal session** : démarrer feature 00X-<kebab>
    ```
 
@@ -122,10 +122,10 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
 ✅ Feature 004-pagination-cursor scaffoldée
 
 📂 Fichiers créés :
-  - .claude/docs/conception/specs/004-pagination-cursor/research.md
-  - .claude/docs/conception/specs/004-pagination-cursor/spec.md
-  - .claude/docs/conception/specs/004-pagination-cursor/plan.md
-  - .claude/docs/conception/specs/004-pagination-cursor/tasks.md
+  - .claude/docs/specs/004-pagination-cursor/research.md
+  - .claude/docs/specs/004-pagination-cursor/spec.md
+  - .claude/docs/specs/004-pagination-cursor/plan.md
+  - .claude/docs/specs/004-pagination-cursor/tasks.md
 
 📝 .claude/docs/ROADMAP.md : ligne ajoutée Phase 1 — [ ] [004-pagination-cursor]
 

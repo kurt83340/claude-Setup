@@ -53,7 +53,7 @@ Format strict :
 > Court, narratif, versionné. Patterns techniques → auto-memory. Reprise précise → /resume.
 
 **Branche** : `<branch>`
-**Spec en cours** : [<spec-name>](conception/specs/<spec>/spec.md) (X/Y tasks)
+**Spec en cours** : [<spec-name>](specs/<spec>/spec.md) (X/Y tasks)
 **Goal session** : <ce que je voulais faire>
 
 ## Status

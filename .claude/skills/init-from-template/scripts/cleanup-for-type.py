@@ -31,8 +31,9 @@ from pathlib import Path
 # script-jetable : 1-shot, < 1 jour, pas de feature multiple, pas de prod
 SCRIPT_JETABLE = {
     "delete": [
-        # Doc conception entière (overkill pour 1-shot)
+        # Doc conception + specs entières (overkill pour 1-shot)
         ".claude/docs/conception/",
+        ".claude/docs/specs/",
         # Transversaux pas pertinents
         ".claude/docs/adr/",
         ".claude/docs/idees/",
