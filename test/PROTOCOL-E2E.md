@@ -282,6 +282,26 @@ scripts d'audit eux-mêmes : mkdir manquant, idempotence dédup, sys.path de fix
 | `/codemap`·`/debug`·`/scaffold`·`/pivot` | 12/12 | violation de couplage grep-détectée, debug rouge→vert→leçon, composant conforme (bloc v0.19 + inventaire), chaîne pivot datée |
 | Brownfield (adoption projet existant) | 9/9 | fichiers user intacts byte-à-byte (`git status` : 0 modif), aucun strip, blocs non purgés (greenfield only), CORE substitués |
 
+### Déroulé agentique des phases restantes (2026-07-13, même session)
+
+23 checks — phases jamais jouées jusqu'ici, déroulées sur les jetables (0 défaut template) :
+
+| Phase | Checks | Notes |
+|---|---:|---|
+| 1 — Cadrage + piège bucket (E2) | 3/3 | verbatim client collé tel quel (source datée), ticket → `cadrage/tickets/`, « j'ai eu une idée » → `idees/` (cadrage non pollué) |
+| 3 — `/conception` complète (004) | 4/4 | 3 options dont « ne rien faire », décision argumentée, **revue adverse notée** (🔴 resync non atomique → parade `os.replace`), mode TDD gelé dans plan § Décisions |
+| 4 — `/feature` pipeline **tdd** (004) | 8/8 | tests AVANT le code, **rouges pour la bonne raison** (NotImplementedError ×8 vérifié), verts sans toucher aux tests (hash identique), parade de revue adverse dans le code livré |
+| E — Refus (E1/E3/E4/E5) + M3 | 5/5 | ADR accepted intact par hash + supersede proposé · maillon `/deploy-magique` détecté AVANT exécution · feature-done refusé à 4 tasks non cochées · règle HANDOFF-teammate auto-chargée · deny Read secrets présents |
+| 0bis — Rétro-remplissage brownfield | 3/3 | `stack.md` ← pyproject réel, HANDOFF ← `git log` réel + Continuation State, CLAUDE.md mergé (contenu user conservé, exactement 3 @-imports) |
+
+Restent **M4/M5** (install réelle de plugins via `/plugin`, compaction réelle) : exécutables
+uniquement dans une session interactive Claude Code — M1 est attesté par la découverte
+automatique des skills du repo dans la session d'audit elle-même, M2 couvert par l'audit hooks.
+
+⚠️ **Leçon de protocole (vécu)** : `phase0-harness` fait `rmtree` des jetables — ne JAMAIS
+re-runner le harnais Phase 0 **après** avoir accumulé de l'état agentique qu'on veut garder
+(Phase B et suivantes se jouent APRÈS le dernier run mécanique).
+
 ## Rapport complémentaire — Phase 0 × 5 types (mécanique), 2026-07-08
 
 Phase 0 rejouée sur les **5 profils** de `cleanup-for-type.py` via harnais scripté

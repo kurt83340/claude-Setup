@@ -71,6 +71,11 @@ se teste comme du code » nous manquait — c'est corrigé ici.
   machine à états spec de bout en bout avec DoD exécutée pour de vrai (6/6),
   `/codemap`·`/debug`·`/scaffold`·`/pivot` (12/12), **brownfield** : adoption sur projet
   existant, 0 fichier user modifié (9/9). Table complète : PROTOCOL-E2E § Audit.
+- **Déroulé agentique des phases restantes (23 checks, 0 défaut)** : Phase 1 cadrage + piège
+  bucket, Phase 3 conception complète (options + revue adverse appliquée jusqu'au code),
+  Phase 4 pipeline **TDD** (rouges pour la bonne raison → verts, tests intouchés par hash),
+  Phase E refus E1/E3/E4/E5, Phase 0bis rétro-remplissage. Le protocole E2E est intégralement
+  joué hors M4/M5 (interactifs purs). Table : PROTOCOL-E2E § Déroulé agentique.
 
 ### Notes
 
