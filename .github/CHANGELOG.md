@@ -3,6 +3,18 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.2.1] — 2026-07-13
+
+### Fixed
+
+- **Règles `Write(path)` mortes dans le `settings.json` shippé** : depuis Claude Code ~2.1.x,
+  seules les règles `Edit(path)` sont matchées par les checks de permission fichier (et elles
+  couvrent TOUS les outils d'édition — Write, Edit, NotebookEdit) → chaque session d'un projet
+  généré affichait des warnings de dépréciation. Les 3 règles `Write(./.claude/docs/**)`,
+  `Write(./src/**)`, `Write(./tests/**)` étaient de plus **redondantes** (le `Edit(./**)`
+  global les couvrait déjà) → supprimées. Projets déjà générés : retirer les lignes `Write(`
+  de `.claude/settings.json` (une commande, voir ci-dessous).
+
 ## [1.2.0] — 2026-07-13
 
 ### Changed

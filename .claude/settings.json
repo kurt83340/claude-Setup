@@ -33,10 +33,7 @@
       "Bash(python3 .claude/skills/init-from-template/scripts/render.py:*)",
       "Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)",
       "Read(./**)",
-      "Edit(./**)",
-      "Write(./.claude/docs/**)",
-      "Write(./src/**)",
-      "Write(./tests/**)"
+      "Edit(./**)"
     ],
     "ask": [
       "Bash(git push:*)",
