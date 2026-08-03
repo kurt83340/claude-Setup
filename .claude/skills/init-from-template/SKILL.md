@@ -31,6 +31,14 @@ python3 --version || { echo "❌ Python 3 requis"; exit 1; }
 
 Si l'un échoue → STOP, demander au user de fixer.
 
+> ℹ️ **Approbation des imports CLAUDE.md (machine-locale, non shippable)** : au premier
+> lancement interactif dans le projet, Claude Code peut afficher « Allow external CLAUDE.md
+> file imports? » (les `@-imports` HANDOFF/ROADMAP/code-map) → approuver. Le flag est stocké
+> dans `~/.claude.json`, **keyé par le chemin du projet** — le template ne peut pas le
+> pré-poser. Conséquence agent-teams : un teammate spawné depuis un **sous-dossier** re-tombe
+> sur ce dialogue (chemin différent) et se fige en silence → toujours spawner depuis la
+> racine (rule `agent-teams.md` § Lead / Spawn).
+
 ## Convention placeholders : CORE vs CONTENT
 
 Le template a 2 types de placeholders :

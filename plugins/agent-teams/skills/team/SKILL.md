@@ -76,6 +76,10 @@ principal et les worktrees.
 
 ## Étape 4 — Spawn
 
+⚠️ **D'abord : reviens à la racine du repo** — `cd "$(git rev-parse --show-toplevel)"`. Un `cd`
+Bash antérieur est hérité par le teammate, qui se fige alors EN SILENCE sur le dialogue
+d'imports CLAUDE.md (cf. rule `agent-teams.md` § Lead / Spawn).
+
 Pour chaque teammate (rôle préconfiguré = son nom d'agent ; ad-hoc = nom + prompt), la
 mission contient :
 
@@ -93,6 +97,10 @@ Les teammates bossent (panes tmux visibles). Toi : réagis aux `SendMessage` + i
 notifications ; `TaskList` pour l'avancement ; trace persistée dans
 `.claude/.cache/team-progress.log` (hook TaskCompleted). Débloque, réassigne, envoie le
 reviewer sur les diffs au fil de l'eau. Tu restes disponible pour l'utilisateur.
+
+Teammate **muet** (pas de rapport, pas d'idle ping) ? `tmux capture-pane -p -t <pane>` AVANT
+tout respawn — un dialogue de démarrage bloque sans aucun signal ; déblocage :
+`tmux -L <socket> send-keys -t <pane> Enter` (cf. rule § Suivi).
 
 ## Étape 6 — Débrief mémoire (à CHAQUE rapport — pas seulement à la fin)
 
@@ -118,6 +126,8 @@ d'intégration → **tests après CHAQUE merge** (jamais deux merges sans vert e
 ## Anti-patterns
 
 - ❌ Spawner sans plan validé (Étape 1) — l'utilisateur choisit la topologie et voit le découpage
+- ❌ Spawner depuis un sous-dossier (cd hérité → teammate figé sur le dialogue d'imports) ;
+  respawner un teammate muet sans `capture-pane` d'abord
 - ❌ > 4 teammates codeurs, ou 2 teammates sur les MÊMES fichiers
 - ❌ Fermer un teammate user-owned (seul l'utilisateur décide)
 - ❌ Fermer la session sans débrief/merge (`/resume` ne restaure pas l'équipe)

@@ -3,6 +3,23 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.2.2] — 2026-08-03
+
+### Added
+
+- **Agent teams — garde-fous anti-« teammate figé au spawn »** (vécu sur projet généré) : un
+  `cd` Bash du lead **persiste** et est **hérité** par les teammates → spawnés depuis un
+  sous-dossier, ils démarrent leur session là-bas et se figent EN SILENCE sur le dialogue
+  « Allow external CLAUDE.md file imports? » (approbation keyée par chemin dans
+  `~/.claude.json` : celle de la racine ne couvre pas le sous-dossier) — indistinguables
+  d'agents morts (pas d'erreur, pas d'idle ping, SendMessage non lus → respawns en double).
+  Encodé dans `rules/agent-teams.md` § Lead : sous-section **Spawn** (toujours depuis la
+  racine, `cd "$(git rev-parse --show-toplevel)"`) + § Suivi (**teammate silencieux ≠ mort** :
+  `tmux capture-pane -p -t <pane>` avant respawn ; déblocage `tmux -L <socket> send-keys -t
+  <pane> Enter`, socket via `ls /tmp/tmux-$UID/`). Relayé dans `/agent-teams:team` (Étapes 4-5
+  + anti-patterns) et `/init-from-template` Étape 0 (l'approbation d'imports est
+  machine-locale, non shippable).
+
 ## [1.2.1] — 2026-07-13
 
 ### Fixed

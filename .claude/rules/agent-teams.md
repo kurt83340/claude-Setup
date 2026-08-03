@@ -96,11 +96,29 @@ git worktree add ../<repo>--<teammate> -b feature/<00X>-<slug>--<teammate>
 Les hooks utilisent `${CLAUDE_PROJECT_DIR}` → worktree-safe. Le reviewer (lecture seule)
 n'a pas besoin de worktree.
 
+**Spawn — TOUJOURS depuis la racine du repo :**
+
+- Un `cd` fait en Bash **persiste** entre les appels et est **hérité** par tout teammate
+  spawné ensuite : il démarre sa session Claude Code dans ce sous-dossier. Le `CLAUDE.md`
+  racine est bien trouvé (remontée d'arborescence), mais ses `@-imports` pointent alors
+  **hors du cwd** → dialogue bloquant « Allow external CLAUDE.md file imports? » au
+  démarrage. Et l'approbation étant mémorisée **par chemin** dans `~/.claude.json`, celle
+  donnée pour la racine ne couvre PAS le sous-dossier. Réflexe avant tout spawn :
+  `cd "$(git rev-parse --show-toplevel)"`.
+- ⚠️ Ce blocage est **invisible** depuis le lead : un teammate figé sur un dialogue
+  interactif de démarrage n'émet AUCUN signal — pas d'erreur, pas d'idle ping, tes
+  `SendMessage` s'empilent non lus. Indistinguable d'un agent mort → applique § Suivi
+  (capture-pane) avant de conclure.
+
 **Suivi** : idle notifications (automatiques) + task list native (`TaskCreate`/`TaskList`,
 miroir de `specs/00X/tasks.md`) + trace `.claude/.cache/team-progress.log` (hook TaskCompleted).
 ⚠️ `/resume` ne restaure PAS les teammates → débriefe et merge **avant** de fermer la session.
 Les **prompts de permission** des teammates remontent chez TOI (un teammate ne peut pas
 s'auto-approuver) — c'est toi qui approuves, dans ta session.
+⚠️ **Teammate silencieux ≠ teammate mort.** Avant de respawner : `tmux capture-pane -p -t <pane>`
+— un dialogue interactif de démarrage (imports CLAUDE.md, trust) fige tout sans émettre aucun
+signal, et un respawn re-bloquera pareil (+ travail perdu). Déblocage : `tmux -L <socket>
+send-keys -t <pane> Enter` (« Yes » est présélectionné ; socket trouvable via `ls /tmp/tmux-$UID/`).
 
 **Débrief mémoire (OBLIGATOIRE, à chaque rapport reçu)** — l'unique canal entre le contexte
 d'un teammate et la mémoire projet :
