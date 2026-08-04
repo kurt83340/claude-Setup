@@ -748,7 +748,7 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 
 ### Un hook ne se déclenche pas
 
-- Vérifier le chemin du script dans `settings.json` (utiliser `${CLAUDE_PROJECT_DIR}`)
+- Vérifier le chemin du script dans `settings.json` (utiliser `"${CLAUDE_PROJECT_DIR}"` — **quoté**, sinon ça casse dès que le chemin du projet contient un espace)
 - Vérifier que le script est **exécutable** : `chmod +x .claude/hooks/*.py *.sh`
 - Vérifier le `matcher` (regex `Edit|Write` est correct, pas `Edit\\|Write`)
 - Lancer `claude --debug` et regarder les logs

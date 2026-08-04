@@ -3,6 +3,18 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.2.3] — 2026-08-04
+
+### Fixed
+
+- **Hooks cassés si le chemin du projet contient un espace** (trouvé à l'init d'un projet réel) :
+  les commandes de hooks ne quotaient pas `${CLAUDE_PROJECT_DIR}` (7 occurrences dans le
+  `settings.json` shippé) ni `${CLAUDE_PLUGIN_ROOT}` (3 occurrences dans le `hooks.json` du
+  plugin `agent-teams`) → le shell coupait le chemin au premier espace et aucun hook ne se
+  déclenchait. Variables désormais quotées (`\"${CLAUDE_PROJECT_DIR}\"`) + note quoting dans
+  USAGE.md § troubleshooting hooks. Projets déjà générés : ajouter les quotes dans
+  `.claude/settings.json` à la main.
+
 ## [1.2.2] — 2026-08-03
 
 ### Added

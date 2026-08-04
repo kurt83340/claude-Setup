@@ -64,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/precompact-snapshot-handoff.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/precompact-snapshot-handoff.py",
             "timeout": 30
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionstart-inject-handoff.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/sessionstart-inject-handoff.py",
             "timeout": 10
           }
         ]
@@ -86,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionstart-inject-handoff.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/sessionstart-inject-handoff.py",
             "timeout": 10
           }
         ]
@@ -97,7 +97,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/sessionend-snapshot.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/sessionend-snapshot.py",
             "timeout": 15
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse-inject-codemap.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/pretooluse-inject-codemap.py",
             "timeout": 5
           }
         ]
@@ -121,7 +121,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PROJECT_DIR}/.claude/hooks/posttooluse-growth-detection.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/posttooluse-growth-detection.py",
             "timeout": 5
           }
         ]
@@ -133,7 +133,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-handoff-reminder.sh",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/stop-handoff-reminder.sh",
             "timeout": 5
           }
         ]
