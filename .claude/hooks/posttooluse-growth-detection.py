@@ -60,9 +60,12 @@ def main():
     if not content or not file_path:
         sys.exit(0)
 
-    # Skip si on est en train d'éditer les fichiers doc-template eux-mêmes,
-    # ou le fichier de suggestions lui-même (sinon chaque tri regénère des entrées)
-    if "/.claude/docs/" in file_path or file_path.endswith(".growth-suggestions.md"):
+    # Skip tout ce qui vit sous .claude/ — docs, rules, skills, hooks, plans,
+    # et .growth-suggestions.md lui-même (auto-flag au tri) : ces fichiers parlent
+    # légitimement de credentials/deploy/prod sans être du code projet.
+    # (Guard élargi v1.3.2 — battle-testé sur projet généré après 3 purges de faux positifs.)
+    if "/.claude/" in file_path or file_path.startswith(".claude/") \
+            or file_path.endswith(".growth-suggestions.md"):
         sys.exit(0)
 
     cwd = data.get("cwd", os.getcwd())

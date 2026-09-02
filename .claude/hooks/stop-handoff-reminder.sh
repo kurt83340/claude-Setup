@@ -60,6 +60,11 @@ case "$AGENT" in
   *) exit 0 ;;           # teammate / sous-agent identifié → pas de rappel
 esac
 
+# Projet archivé (/archive-projet) → lecture seule, pas de rappel /handoff
+if [ -f "$CWD/.claude/archived" ]; then
+  exit 0
+fi
+
 HANDOFF="$CWD/.claude/docs/HANDOFF.md"
 
 if [ ! -f "$HANDOFF" ]; then

@@ -176,6 +176,11 @@ l'assertion échouée dans le rapport. Les phases 2/8/10 couvrent déjà en part
 (`spec`, `doc-health`, `handoff`) — Phase B les rejoue sur l'état FINAL du jetable, ce qui
 attrape les régressions d'état accumulé (numérotation, incohérences ROADMAP↔frontmatter).
 
+⚠️ **Ordre** : jouer le scénario `archive-projet/*` en **DERNIER** — s'il va jusqu'au move
+réel, le jetable change de chemin (projet + slug auto-memory) et tout scénario joué après
+travaillerait sur un dossier déplacé. Alternative sûre : s'arrêter au `--dry-run` + gate
+(ce que le scénario asserte), sans exécuter la commande finale.
+
 ## Phase E — Cas d'erreur (tester les REFUS)
 
 | # | Provocation | Attendu |

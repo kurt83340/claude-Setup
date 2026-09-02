@@ -3,6 +3,20 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.3.2] — 2026-09-02
+
+### Changed
+
+- **Hook growth-detection : guard élargi à tout `.claude/`** (au lieu de `.claude/docs/` +
+  `.growth-suggestions.md`) — pattern battle-testé sur un projet généré (fix indépendant
+  2026-06-10, après 3 purges de faux positifs) : les rules/skills/hooks parlent légitimement
+  de « credentials »/« deploy »/« prod » sans être du code projet. Test de régression ajouté.
+- **Hook stop-handoff-reminder : silencieux sur un projet archivé** (marqueur
+  `.claude/archived` de `/archive-projet` présent) — un projet en lecture seule n'a pas à
+  rappeler `/handoff`. Test ajouté.
+- **PROTOCOL-E2E § Phase B : ordre des benchmarks** — jouer `archive-projet/*` en DERNIER
+  (s'il va jusqu'au move réel, le jetable change de chemin), ou s'arrêter au `--dry-run`.
+
 ## [1.3.1] — 2026-09-02
 
 ### Changed

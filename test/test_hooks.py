@@ -145,6 +145,14 @@ r4 = run_hook("posttooluse-growth-detection.py",
                "cwd": str(sb)}, sb)
 ok("s'ignore lui-même (tri de .growth-suggestions.md → aucun flag, fichier inchangé)",
    r4.stdout.strip() == "" and gs.read_text() == snap)
+# guard large v1.3.2 : éditer une rule/skill sous .claude/ (qui parle de credentials/prod)
+# ne doit pas flagger — seul le code projet compte
+r5 = run_hook("posttooluse-growth-detection.py",
+              {"tool_name": "Write", "tool_input": {"file_path": str(sb / ".claude/rules/securite.md"),
+               "content": "Jamais de credentials API_KEY en clair. Deploy production via CI."},
+               "cwd": str(sb)}, sb)
+ok("tout .claude/ ignoré (rule parlant de credentials → aucun flag)",
+   r5.stdout.strip() == "" and gs.read_text() == snap)
 shutil.rmtree(sb, ignore_errors=True)
 
 # 5. stop-handoff-reminder.sh → rappel si HANDOFF vieux + changements git
@@ -176,6 +184,12 @@ if has_git:
                         input=json.dumps({"cwd": str(sb)}), capture_output=True, text=True,
                         cwd=sb, env=dict(os.environ, CLAUDE_HANDOFF_REMINDER="off"))
     ok("CLAUDE_HANDOFF_REMINDER=off → pas de rappel", r4.stdout.strip() == "")
+    # projet archivé (/archive-projet) : marqueur .claude/archived présent → silence,
+    # même avec HANDOFF vieux + git dirty
+    (sb / ".claude/archived").write_text("archived: 2026-09-02\n")
+    r5 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb)}, sb)
+    ok("projet archivé (.claude/archived) → pas de rappel", r5.stdout.strip() == "")
+    (sb / ".claude/archived").unlink()
 else:
     ok("git absent (skip test rappel)", True)
 shutil.rmtree(sb, ignore_errors=True)
