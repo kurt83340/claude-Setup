@@ -601,7 +601,7 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 
 - `allow` : pytest, ruff, mypy, alembic, git status/log/diff/add/commit/tag, uv, npm, find, grep, Read/Edit/Write dans `.claude/docs/` et `src/`
 - `ask` : `git push`, `git reset`, `alembic downgrade`, `./scripts/deploy`, `Read(./.env.*)` — **filet fail-closed** : tout `.env.*` non listé en deny (`.env.prod`, `.env.dev`…) déclenche un prompt au lieu d'être lisible en silence ; `.env.example` reste lisible après 1 confirmation
-- `deny` : `rm -rf`, `.env` / `.env.local` / `.env.*.local` / `.env.{development,staging,production,test}`, `secrets.*`, `ACCESS.md`
+- `deny` : `rm -rf`, `.env` / `.env.local` / `.env.*.local` / `.env.{development,staging,production,test}`, `secrets.*` — `ACCESS.md` n'est **plus** en deny (v1.3.1) : y référencer les accès par NOM (où trouver quoi), jamais les valeurs
 
 **Customiser par projet** : édite `.claude/settings.json` pour ajouter tes commandes spécifiques (ex: `n8n:*`, `docker compose:*`).
 

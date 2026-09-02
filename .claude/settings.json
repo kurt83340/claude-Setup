@@ -54,8 +54,7 @@
       "Read(./.env.staging)",
       "Read(./.env.production)",
       "Read(./.env.test)",
-      "Read(./secrets.*)",
-      "Read(./.claude/docs/ACCESS.md)"
+      "Read(./secrets.*)"
     ]
   },
   "hooks": {

@@ -3,6 +3,16 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.3.1] — 2026-09-02
+
+### Changed
+
+- **`Read(./.claude/docs/ACCESS.md)` retiré du `deny` de `settings.json`** (demande Julien) :
+  ACCESS.md documente **où** vivent les accès (nom de variable, fichier, URL de console), pas
+  les valeurs — le deny empêchait Claude de s'en servir pour ce à quoi il sert (retrouver un
+  accès, enrichir via growth-detection). Les vraies protections restent : `.env*` / `secrets.*`
+  en deny, et la règle « jamais de valeur en clair dans ACCESS.md » (USAGE § permissions).
+
 ## [1.3.0] — 2026-08-31
 
 ### Added
