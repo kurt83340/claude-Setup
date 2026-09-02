@@ -88,8 +88,9 @@ AUTOMATION_N8N = {
         ".claude/docs/RUNBOOK.md",
     ],
     "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod). Skills n8n = plugin OFFICIEL "
-                   "'n8n-mcp-skills' (czlonkowski/n8n-skills) : /plugin marketplace add czlonkowski/n8n-skills "
-                   "puis /plugin install n8n-mcp-skills@n8n-mcp-skills — plus de copie.",
+                   "'n8n-mcp-skills' (czlonkowski/n8n-skills) — check-first `claude plugin list` : "
+                   "déjà en user-scope → rien à faire ; sinon marketplace add + install --scope user. "
+                   "Plus de copie.",
 }
 
 # python-app : retire workflows/

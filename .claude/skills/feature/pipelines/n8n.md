@@ -3,7 +3,8 @@
 > Planifier → Construire → Valider → Tester en réel → Review adverse → Persister (export versionné)
 
 > Prérequis : plugin **officiel** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) installé
-> (`/plugin marketplace add czlonkowski/n8n-skills` puis `/plugin install n8n-mcp-skills@n8n-mcp-skills`)
+> — check-first `claude plugin list` (souvent déjà en **user-scope** → rien à faire) ; sinon
+> `/plugin marketplace add czlonkowski/n8n-skills` puis install `--scope user`
 > — 14 skills + hooks d'enforcement, maintenu par czlonkowski (MIT). MCP **n8n-mcp** connecté
 > si dispo (sinon fallback UI n8n + export manuel).
 

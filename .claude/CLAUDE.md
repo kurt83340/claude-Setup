@@ -25,6 +25,7 @@
 - `/feature-done <spec-id>` ⭐ — livraison feature
 - `/pivot "<raison>"` — orchestrer un pivot client (9 étapes)
 - `/debug "<symptôme>"` — pipeline de debugging : reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → test pérennisé + leçon
+- `/archive-projet ["raison"]` — fin de vie du projet : bilan final, marquage archivé (bannière CLAUDE.md + `.claude/archived`), scan des référents, migration auto-memory, commande de move vers `_archives/` remise à l'utilisateur (post-session) ; sous-modes `restore` (reprendre) et `status`
 
 ### Cycle de vie des artefacts (capture/promote/discard/archive)
 
@@ -43,13 +44,13 @@
 - `/init-from-template` — initialise un projet depuis ce template (from scratch, UNE FOIS)
 - `/adopt-template` — greffe le template sur un projet EXISTANT (brownfield, UNE FOIS) : merges non-destructifs + rétro-remplissage doc depuis l'existant
 
-> 🗂️ **Inventaire canonique** : cette liste (**15 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
+> 🗂️ **Inventaire canonique** : cette liste (**16 skills cœur**) est la **source de vérité** des skills du template. `README.md`, `USAGE.md` et `.claude/rules/template-maintenance.md` y **renvoient** — ne pas redupliquer ailleurs. Un check CI vérifie que chaque dossier `.claude/skills/*` y figure.
 
 ### Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
 
 Hors du cœur. Packagés en **plugins** installés par projet via `/plugin` — **auto-découverts** (aucun listing à maintenir ici) :
 
-- **n8n** (type `automation-n8n`) → plugin **OFFICIEL** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) (czlonkowski — **14 skills + hooks d'enforcement**, MIT, activement maintenu) : `/plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope project`
+- **n8n** (type `automation-n8n`) → plugin **OFFICIEL** [`n8n-mcp-skills`](https://github.com/czlonkowski/n8n-skills) (czlonkowski — **14 skills + hooks d'enforcement**, MIT, activement maintenu). **Check-first** : `claude plugin list` — déjà en scope `user` → confirmer en 1 ligne, rien à installer ; sinon `claude plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope user`
 - **BDD / Alembic** (type `bdd-migration`) → plugin **`db-migration`** → `claude plugin install db-migration@claude-setup --scope project`
 - **Équipe d'exécution** (toute stack, opt-in) → plugin **`agent-teams`** : `/agent-teams:team` + rôles `worker`/`front-end`/`back-end`/`tester` + hook de trace → `claude plugin install agent-teams@claude-setup --scope project`
 

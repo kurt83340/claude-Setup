@@ -135,6 +135,16 @@ run_hook("posttooluse-growth-detection.py",
           "content": "API_KEY = 'secret2'"}, "cwd": str(sb)}, sb)
 after = (sb / ".claude/.growth-suggestions.md").read_text().count("src/conf.py")
 ok("dédup par (source,message) sans timestamp → pas de doublon", before == after == 1)
+# auto-référence : trier .growth-suggestions.md (plein de mots triggers) ne doit RIEN regénérer
+# (vécu 2026-09-02 sur projet généré : le tri du fichier re-flaggait « credentials »/« prod »
+# dans les lignes qu'on barrait → boucle)
+snap = gs.read_text()
+r4 = run_hook("posttooluse-growth-detection.py",
+              {"tool_name": "Edit", "tool_input": {"file_path": str(gs),
+               "new_string": "- ~~credentials API_KEY OAuth~~ traité\n- ~~deploy production~~ traité\n"},
+               "cwd": str(sb)}, sb)
+ok("s'ignore lui-même (tri de .growth-suggestions.md → aucun flag, fichier inchangé)",
+   r4.stdout.strip() == "" and gs.read_text() == snap)
 shutil.rmtree(sb, ignore_errors=True)
 
 # 5. stop-handoff-reminder.sh → rappel si HANDOFF vieux + changements git

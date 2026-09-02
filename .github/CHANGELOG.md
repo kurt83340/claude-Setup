@@ -3,6 +3,53 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.3.0] — 2026-08-31
+
+### Added
+
+- **Skill `/archive-projet`** (16ᵉ skill cœur) — fin de vie d'un projet, sans angle mort :
+  bilan de fermeture (HANDOFF final, ROADMAP gelée à l'état réel, entrée CHANGELOG, leçon
+  post-mortem optionnelle), marquage archivé visible par toute session future (bannière en
+  tête du CLAUDE.md racine entre marqueurs HTML + marqueur machine-lisible `.claude/archived`
+  avec chemins aller/retour), scan des références au chemin absolu (repo + crontab +
+  `~/.claude.json`, rapport seul), migration de l'auto-memory (`~/.claude/projects/<slug>`),
+  et **commande finale remise à l'utilisateur** (`mkdir` + `mv` projet + `mv` mémoire) à
+  lancer après fermeture de la session — le script ne déplace jamais le dossier dans lequel
+  la session tourne. Pré-flights bloquants : déjà archivé, worktrees actifs, destination
+  occupée. Sous-modes `restore` (dé-archivage symétrique) et `status`. Slash-only
+  (`disable-model-invocation: true`). Destination **choisie par l'utilisateur au moment de
+  l'archivage** (AskUserQuestion — défaut proposé `<parent>/_archives/<projet>`, tout autre
+  dossier via `--dest`).
+  Mécanique déterministe dans `scripts/archive-projet.py` (stdlib, `--dry-run` partout),
+  couverte par la nouvelle suite `test/test_archive.py` (34 checks, branchée en CI) + un
+  scénario benchmark Phase B. Survit à tous les profils de cleanup (aucun type ne le retire).
+
+### Fixed
+
+- **Hook growth-detection : boucle auto-référentielle au tri des suggestions** (vécu
+  2026-09-02 sur un projet généré, fixé là-bas en `43ce101` puis backporté ici) : en triant
+  `.claude/.growth-suggestions.md`, le hook PostToolUse scannait le tri lui-même, retrouvait
+  « credentials »/« prod » dans les lignes barrées et **regénérait des suggestions dans le
+  fichier en cours de nettoyage**. Le hook s'ignore désormais lui-même
+  (`file_path.endswith(".growth-suggestions.md")` → skip) + test de régression dans
+  `test_hooks.py`. Projets déjà générés : reporter la ligne à la main (1 ligne).
+
+## [1.2.4] — 2026-08-31
+
+### Changed
+
+- **Plugin n8n : check-first au lieu d'une install proposée systématiquement.** L'étape « plugin
+  stack » de `/init-from-template`, le pipeline `n8n` et la doc proposaient à chaque projet
+  `/plugin marketplace add czlonkowski/n8n-skills` + install `--scope project` — soit un re-clone
+  du repo à chaque init, alors que le plugin est généralement déjà installé en **user-scope**
+  (une install couvre tous les projets). Nouvelle doctrine partout : **vérifier d'abord**
+  (`claude plugin list`) → déjà en scope `user` = confirmation en UNE ligne, rien à cloner ;
+  absent = proposer l'install **`--scope user`** (une fois pour toutes). Touchés : SKILL
+  `/init-from-template`, `cleanup-for-type.py` (message keep_reason), `.claude/CLAUDE.md`,
+  `USAGE.md`, `skills/README.md`, `rules/template-maintenance.md`, pipeline `n8n`,
+  quick-start `.github/README.md`, exemple ACME. `db-migration` reste par projet
+  (marketplace `claude-setup`).
+
 ## [1.2.3] — 2026-08-04
 
 ### Fixed

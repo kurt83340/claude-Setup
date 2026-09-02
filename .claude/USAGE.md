@@ -47,7 +47,7 @@ Claude va :
    - Batch 3 : `COMMANDE_INSTALL`, `COMMANDE_TESTS`, `COMMANDE_RUN`
 3. **Substituer les CORE placeholders** auto (10 substitutions sur ~370 placeholders — le reste est CONTENT à remplir au fil de l'eau)
 4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée**
-5. **Proposer d'installer le plugin stack** si pertinent (type `automation-n8n` → plugin **officiel** `n8n-mcp-skills` via `/plugin marketplace add czlonkowski/n8n-skills` ; `bdd-migration` → `db-migration@claude-setup`)
+5. **Plugin stack** si pertinent — type `automation-n8n` : **check-first** `claude plugin list` (plugin **officiel** `n8n-mcp-skills` souvent déjà en user-scope → confirmation en 1 ligne, rien à cloner) ; sinon proposer l'install user-scope (`claude plugin marketplace add czlonkowski/n8n-skills` + install `--scope user`). Type `bdd-migration` → `db-migration@claude-setup`
 6. **Te proposer le commit initial** : `feat: init projet <nom> depuis template`
 
 ### Les 5 types de projet (impact sur cleanup)
@@ -261,6 +261,8 @@ Rapport généré → tu suis les actions par priorité.
 | Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                                       |
 | Lister tous les ADRs                       | `/adr list [scope]`                                                           |
 | Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                                           |
+| Projet terminé/abandonné → archiver        | `/archive-projet "<raison>"` — bilan + marquage + move vers `_archives/`      |
+| Reprendre un projet archivé                | `/archive-projet restore`                                                     |
 | Reprendre exactement où on en était        | `/resume` (built-in Claude)                                                   |
 | Compaction context (auto)                  | RIEN — hooks gèrent                                                           |
 | Édition fichier code (auto)                | RIEN — hook injecte code-map context                                          |

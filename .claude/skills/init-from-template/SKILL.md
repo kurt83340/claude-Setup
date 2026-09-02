@@ -139,9 +139,16 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 | `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
 | `bdd-migration`  | léger    | `workflows/`                                                                                                                                                                                                                                          |
 
-**Skills stack = PLUGINS (plus de copie)** — proposer à l'user d'installer le plugin adapté au type depuis le marketplace (= ce repo template) :
+**Skills stack = PLUGINS (plus de copie)** — **vérifier AVANT de proposer** (un plugin déjà en user-scope couvre déjà ce projet — refaire `marketplace add` = re-clone inutile du repo) :
 
-- `automation-n8n` → plugin **officiel** ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills), 14 skills + hooks) : `/plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope project`
+- `automation-n8n` → plugin **officiel** ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills), 14 skills + hooks). **Check-first obligatoire** :
+
+  ```bash
+  claude plugin list 2>/dev/null | grep -A3 "n8n-mcp-skills@n8n-mcp-skills"
+  ```
+
+  - **Déjà installé** (scope `user`, enabled) → confirmer en **UNE ligne** (« ✅ plugin `n8n-mcp-skills` déjà installé en global (vX.Y.Z) — rien à faire ») et passer à la suite. Ne PAS refaire `marketplace add`, ne PAS proposer d'install par projet.
+  - **Absent** → proposer l'install **user-scope** (une fois, couvre tous les projets) : `claude plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope user`
 - `bdd-migration` → (marketplace ajouté) `claude plugin install db-migration@claude-setup --scope project`
 
   Les plugins sont **auto-découverts** (aucun ajout à `.claude/CLAUDE.md`). Skills namespacés `/n8n-mcp-skills:<skill>`.

@@ -60,8 +60,9 @@ def main():
     if not content or not file_path:
         sys.exit(0)
 
-    # Skip si on est en train d'éditer les fichiers doc-template eux-mêmes
-    if "/.claude/docs/" in file_path:
+    # Skip si on est en train d'éditer les fichiers doc-template eux-mêmes,
+    # ou le fichier de suggestions lui-même (sinon chaque tri regénère des entrées)
+    if "/.claude/docs/" in file_path or file_path.endswith(".growth-suggestions.md"):
         sys.exit(0)
 
     cwd = data.get("cwd", os.getcwd())

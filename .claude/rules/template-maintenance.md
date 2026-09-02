@@ -205,7 +205,7 @@ diagrams/
 
 ### Skills perso (`.claude/skills/`)
 
-> 🗂️ **Inventaire canonique** (liste + 1-ligne + chemin) → [`.claude/CLAUDE.md`](../CLAUDE.md). Ici = **quand** invoquer. Les skills stack sont des **plugins** installés par projet via `/plugin` : `db-migration` (marketplace `claude-setup`) ; stack n8n → plugin **officiel** `n8n-mcp-skills` (czlonkowski/n8n-skills).
+> 🗂️ **Inventaire canonique** (liste + 1-ligne + chemin) → [`.claude/CLAUDE.md`](../CLAUDE.md). Ici = **quand** invoquer. Les skills stack sont des **plugins** (`/plugin`, auto-découverts) : `db-migration` (marketplace `claude-setup`, par projet) ; stack n8n → plugin **officiel** `n8n-mcp-skills` (czlonkowski/n8n-skills), typiquement en **user-scope** — check-first `claude plugin list` avant toute proposition d'install.
 
 #### Session & feature
 
@@ -221,6 +221,7 @@ diagrams/
 | `/pivot "<raison>"`        | Workflow pivot client 9 étapes orchestrées                                                                          |
 | `/agent-teams:team <spec-id>` ⭐ (plugin) | Déléguer une feature à une équipe de teammates (tmux) — worktrees, task list, mode TDD opt-in, débrief              |
 | `/debug "<symptôme>"`      | Bug non trivial — reproduire (test rouge) → explorer → hypothèses → fix minimal → test pérennisé + leçon            |
+| `/archive-projet ["raison"]` | Projet terminé/abandonné — bilan final + marquage archivé + commande de move vers `_archives/` (`restore` pour reprendre, `status` pour vérifier) |
 
 #### Cycle de vie d'artefacts (capture/promote/discard/archive — sous-modes unifiés)
 
@@ -246,7 +247,7 @@ diagrams/
 > **le template n'utilise plus que `.claude/skills/<nom>/SKILL.md`**.
 > Pour un `/nom` sensible (deploy…) : `disable-model-invocation: true` = slash-only.
 
-**Plugins stack disponibles** : n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills) — 14 skills + hooks) ; BDD → plugin `db-migration` (marketplace `claude-setup`). Installés par projet via `/plugin` (auto-découverts).
+**Plugins stack disponibles** : n8n → plugin **officiel** `n8n-mcp-skills` ([czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills) — 14 skills + hooks), typiquement déjà en **user-scope** (check-first `claude plugin list`) ; BDD → plugin `db-migration` (marketplace `claude-setup`, par projet). Auto-découverts via `/plugin`.
 
 > **Pas de namespacing par dossier en 2026** : Claude Code scanne `.claude/skills/<nom>/SKILL.md` à **1 niveau uniquement** (cf. [issue #18192](https://github.com/anthropics/claude-code/issues/18192), feature request OPEN). Si tu veux grouper des skills par thème → utilise des **préfixes de nom** (ex: `n8n-deploy`, `n8n-test`) ou package-les en **plugin** (`/<plugin>:<skill>`).
 

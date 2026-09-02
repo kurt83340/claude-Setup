@@ -7,7 +7,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, BDD, min
 
 ## Ce qu'il contient
 
-- **Skills cœur** (`.claude/skills/` — inventaire canonique **et compte CI-vérifié** → `.claude/CLAUDE.md`) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/scaffold`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook) — stack n8n = plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills). Inventaire cœur → `.claude/CLAUDE.md`.
+- **Skills cœur** (`.claude/skills/` — inventaire canonique **et compte CI-vérifié** → `.claude/CLAUDE.md`) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/scaffold`, `/adr`, `/lecon`, `/idee`, `/doc-health`, `/codemap`, `/pivot`, `/archive-projet`, `/init-from-template`, `/adopt-template` — + **plugins stack** (marketplace `claude-setup`, dossier `plugins/`) : `db-migration`, `agent-teams` (`/team` + rôles d'exécution + hook) — stack n8n = plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills). Inventaire cœur → `.claude/CLAUDE.md`.
 - **Agents cœur** : `doc-maintainer` (subagent, maintenance doc en batch) + `reviewer` (revue adverse lecture seule) + 3 explorateurs `explore-code`/`explore-docs`/`explore-memoire` pour `/conception` — les rôles d'exécution (`worker`, `front-end`, `back-end`, `tester`) viennent du plugin `agent-teams` (protocole : `.claude/rules/agent-teams.md`)
 - **Agent teams câblés** : flag + `teammateMode: "tmux"` dans `settings.json` (teammates visibles en split panes), orchestration `/agent-teams:team` (plugin), débrief mémoire des rapports
 - **Hooks** lifecycle : snapshots pré-compaction **et** fin de session (filet « n'oublie rien ») → `.claude/.cache/`, ré-injections, code-map, growth-detection, rappel `/handoff`, trace d'équipe
@@ -23,7 +23,8 @@ rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude
 cd /chemin/vers/mon-projet
 chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 claude   # puis, dans la session : /init-from-template
-# Stack n8n ? plugin officiel : /plugin marketplace add czlonkowski/n8n-skills ; /plugin install n8n-mcp-skills@n8n-mcp-skills
+# Stack n8n ? check-first : claude plugin list (souvent déjà en user-scope → rien à faire)
+# sinon : /plugin marketplace add czlonkowski/n8n-skills ; claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope user
 ```
 
 **Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md`
