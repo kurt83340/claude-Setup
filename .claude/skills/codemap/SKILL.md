@@ -9,8 +9,8 @@ disable-model-invocation: false
 
 > **Quand ne PAS utiliser** : audit doc complet (fraîcheur, ADRs, leçons…) → `/doc-health` ·
 > documenter le rôle fichier-par-fichier → personne (déductible, ça drifte).
-> **Réversibilité** : 🟢 réécrit `code-map.md` (diff présenté avant) —
-> undo : `git checkout -- .claude/docs/code-map.md`.
+> **Réversibilité** : 🟢 réécrit `code-map.md` (+ `code-map-gotchas.md`, diff présenté avant) —
+> undo : `git checkout -- .claude/docs/code-map.md .claude/docs/code-map-gotchas.md`.
 
 Ton rôle : tenir à jour la partie **non-déductible** du code (vue macro, règles de
 couplage, intention, gotchas) et **détecter les violations de couplage**.
@@ -47,7 +47,9 @@ Dans `.claude/docs/code-map.md`, mettre à jour / proposer :
 - **Vue d'ensemble macro** : sous-systèmes + sens des flux (1 ligne chacun)
 - **Règles de couplage** : les `❌ A ne doit jamais importer B` et le sens des dépendances
 - **Intention & décisions locales** : le POURQUOI du découpage, les patterns imposés (avec pointers `fichier:ligne`)
-- **Gotchas** : pièges non évidents découverts
+- **Gotchas** : pièges non évidents découverts → dans **`code-map-gotchas.md`** (v1.4, non auto-chargé),
+  chaque entrée **citant en backticks le chemin/fichier/dossier** qu'elle concerne (c'est ce que le hook
+  utilise pour n'injecter que les gotchas du fichier édité) ; transversal → § Globaux (max 5 lignes)
 
 ❌ NE PAS créer de section « Fichier par fichier » ni de listes « Dépend de » / « Tests ».
 
@@ -74,6 +76,9 @@ OK pour écrire ?
 ```
 
 ## Anti-patterns
+
+- ❌ Gonfler `code-map.md` (auto-chargé à chaque session) : budget **< 3k tokens** — gotchas et
+  historique vont dans `code-map-gotchas.md` ; § « Quand mettre à jour » reste à 3 lignes
 
 - ❌ Re-générer une carte fichier-par-fichier (rôle/dépendances/tests) — déductible, drift garanti, c'est ce qu'Anthropic dit d'exclure
 - ❌ Recopier la liste des imports dans le fichier (le graphe sert à détecter les violations, pas à être archivé)

@@ -147,7 +147,7 @@ Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md`
 
 **Automatique (hooks)** :
 
-- 📖 **PreToolUse** : avant chaque édition de fichier dans `src/`, `tests/`, `lib/`, `app/` → Claude reçoit automatiquement les **règles de couplage + intention + gotchas** de code-map.md (le non-déductible) — **tu ne fais RIEN**
+- 📖 **PreToolUse** : avant une édition de fichier dans `src/`, `tests/`, `lib/`, `app/` → Claude reçoit les **règles de couplage + intention** de code-map.md (**une fois par session**, ré-armé après compaction) et les **gotchas de `code-map-gotchas.md` qui citent ce fichier** (une fois par fichier) — **tu ne fais RIEN**. (v1.4 : avant, tout était réinjecté à chaque édition — ~2k tokens × N, cumulés dans la session.)
 - 🔍 **PostToolUse** : si tu écris du code mentionnant `API_KEY`, `deploy`, `RGPD`, `OAuth`, etc. → flag automatique dans `.claude/.growth-suggestions.md`
 - 💾 **Auto-memory** : Claude apprend tes patterns (machine-local, dans `~/.claude/projects/.../memory/`)
 
@@ -760,6 +760,20 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 - Vérifier que `.claude/docs/code-map.md` existe et contient au moins une des sections
   `## Règles de couplage`, `## Intention & décisions locales`, `## Gotchas`
 - Le hook ne fonctionne que pour fichiers dans `/src/`, `/tests/`, `/lib/`, `/app/`
+
+### Le contexte est déjà à 15-20 % au premier prompt
+
+Le projet a grossi et les docs **auto-chargées** avec lui (HANDOFF avec son journal, code-map avec
+tous ses gotchas, ROADMAP…) — mesuré v1.4 : 144k tokens au 1er tour sur un projet d'un mois.
+
+```bash
+python3 .claude/skills/doc-health/scripts/context-budget.py          # qui pèse quoi (tokens ≈ chars/2)
+python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root . --dry-run   # projet < v1.4
+```
+
+Remèdes : journal → `HANDOFF-journal.md`, gotchas → `code-map-gotchas.md`, ROADMAP en lien simple,
+jamais de `@` sur une rule scopée `paths:`. Le socle hors projet (`~/.claude/CLAUDE.md`, hooks de
+plugins, MCP) se voit aussi dans le rapport (`user, hors projet`).
 
 ### `/init-from-template` ne marche pas
 

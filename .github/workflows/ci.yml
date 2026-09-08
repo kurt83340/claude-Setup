@@ -36,11 +36,17 @@ jobs:
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 
-      - name: CLAUDE.md = 3 @-imports (index just-in-time)
+      - name: CLAUDE.md = 2 @-imports (index just-in-time — HANDOFF + code-map)
         run: |
           n=$(grep -oE '@\.claude/[^ ]+' CLAUDE.md | wc -l)
           echo "@-imports: $n"
-          test "$n" -eq 3
+          test "$n" -eq 2
+
+      - name: Budget contexte auto-charge du template vierge (< 12k tokens est.)
+        run: python3 .claude/skills/doc-health/scripts/context-budget.py --root . --max 12000 --no-user
+
+      - name: Tests context-budget + slim-context
+        run: python3 test/test_context_budget.py
 
       - name: Pas de 'npx specify' dans .claude/STRUCTURE.md
         run: |
@@ -135,8 +141,8 @@ jobs:
           print(f"✅ marketplace ({len(listed)} plugins) : JSON valides, sources presentes, plugins/ tous recenses")
           PY
 
-      - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 3 @-imports
+      - name: EXAMPLES/acme — _CLAUDE.md respecte la règle des 2 @-imports
         run: |
           n=$(grep -oE '@\.claude/[^ ]+' EXAMPLES/acme-sync-erp-notion-docs/_CLAUDE.md | wc -l)
           echo "@-imports acme: $n"
-          test "$n" -eq 3
+          test "$n" -eq 2

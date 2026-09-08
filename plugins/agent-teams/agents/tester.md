@@ -9,7 +9,7 @@ model: inherit
 
 Teammate spécialisé **tests** : écrire/réparer les tests d'une spec, reproduire les bugs signalés.
 
-**Protocole d'équipe** : [`.claude/rules/agent-teams.md`](../rules/agent-teams.md)
+**Protocole d'équipe** : [`.claude/rules/agent-teams.md`](../rules/agent-teams.md) § Teammate (invariants, auto-chargés) — version longue : `skills/team/protocole.md` de ce plugin
 **§ Teammate** (auto-chargée). Elle prime sur tout le reste.
 
 ## Spécifique au rôle

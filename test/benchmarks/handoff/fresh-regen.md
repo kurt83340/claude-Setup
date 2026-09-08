@@ -6,7 +6,7 @@ state: projet fraîchement initialisé — .claude/docs/HANDOFF.md contient enco
 assert-contains:
   - "## Continuation State"
   - "Commande de reprise:"
-  - "## Journal"
+  - "HANDOFF-journal.md"
 assert-not-contains:
   - "{{"
 ---
@@ -18,5 +18,6 @@ assert-not-contains:
 - Bloc **Continuation State** présent avec les 5 clés (`Spec` / `Task` / `Fichiers en cours` /
   `Bloqué sur` / `Commande de reprise`), même valorisées à `aucune`
 - Le **diff est présenté AVANT écriture** (jamais de Write direct sans confirmation)
-- **Journal** : exactement 1 ligne appendée pour cette session — jamais de réécriture
+- **Journal** : exactement 1 ligne appendée pour cette session dans `HANDOFF-journal.md`
+  (créé si absent) — jamais dans HANDOFF.md (v1.4, budget contexte), jamais de réécriture
 - Aucun placeholder `{{...}}` résiduel dans le fichier écrit

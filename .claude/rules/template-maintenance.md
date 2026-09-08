@@ -72,14 +72,22 @@ Le « n'oublie rien » durable passe par la **promotion** vers les couches versi
 
 | Fichier                          | Fréquence MAJ                                                                  | Qui le met à jour                                                |
 | -------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `.claude/docs/HANDOFF.md` ⭐     | **Chaque fin de session**                                                      | Via `/handoff` (skill)                                           |
+| `.claude/docs/HANDOFF.md` ⭐     | **Chaque fin de session** — **< 30 lignes** (auto-chargé)                        | Via `/handoff` (skill)                                           |
+| `.claude/docs/HANDOFF-journal.md` | +1 ligne par session (append-only) — **non auto-chargé**                       | Via `/handoff` (créé à la 1re session)                           |
 | `.claude/docs/ROADMAP.md`        | Démarrage + fin de feature                                                     | Via `/feature-done` ou manuel                                    |
 | `.claude/docs/CHANGELOG.md`      | Chaque feature livrée + bug fixé                                               | Manuel ou via `/feature-done`                                    |
 | `.claude/docs/ACCESS.md`         | Quand un accès change de statut                                                | Manuel                                                           |
 | `.claude/docs/cadrage/README.md` | À chaque pivot / nouveau contexte client                                       | Manuel                                                           |
 | `.claude/docs/lecons.md`         | À chaque bug/pattern/observation                                               | Append manuel, review hebdo                                      |
-| `.claude/docs/code-map.md` ⭐    | Nouvelle règle de couplage / contrainte d'archi / gotcha (PAS le file-by-file) | Manuel ou `/codemap` ; hook PreToolUse réinjecte les contraintes |
+| `.claude/docs/code-map.md` ⭐    | Nouvelle règle de couplage / contrainte d'archi (PAS le file-by-file) — **< 3k tokens** (auto-chargé) | Manuel ou `/codemap` ; hook PreToolUse réinjecte couplage+intention 1×/session |
+| `.claude/docs/code-map-gotchas.md` | Nouveau gotcha (piège qui a coûté du temps), cité avec son chemin — **non auto-chargé** | Manuel ou `/codemap` ; hook PreToolUse injecte les entrées ciblant le fichier édité |
 | `.claude/docs/stack.md`          | À chaque nouvelle lib / service tiers / LLM utilisé                            | Manuel                                                           |
+
+> 🪶 **Budget de contexte (v1.4)** — mesuré 2026-09-08 : un projet d'un mois démarrait à **144k tokens**
+> (86k pour HANDOFF+ROADMAP+code-map auto-chargées sans borne, 12k pour cette rule ré-importée en `@`
+> malgré son `paths:`). Règles : HANDOFF < 30 lignes (journal à part), code-map < 3k tokens (gotchas à
+> part), ROADMAP en lien simple, **jamais de `@` sur une rule scopée**. Contrôle :
+> `python3 .claude/skills/doc-health/scripts/context-budget.py` (Étape 0 de `/doc-health`, seuil 25k).
 
 ## Les fichiers semi-stables (modifiés sur événements importants)
 
@@ -374,14 +382,15 @@ en cours / Bloqué sur / Commande de reprise) — le point de reprise parseable,
 - ✅ Dater les fichiers de .claude/docs/idees/, .claude/docs/cadrage/reunions/, .claude/docs/cadrage/documents/
 - ✅ Référencer les ADRs depuis les specs concernées
 - ✅ Mettre à jour ROADMAP **à chaque** changement d'état de feature
-- ✅ Garder le `CLAUDE.md` racine court & centré projet (< 60 lignes) ; template & skills → `.claude/CLAUDE.md` ; détail → `@.claude/rules/*.md`
+- ✅ Garder le `CLAUDE.md` racine court & centré projet (< 60 lignes) ; template & skills → `.claude/CLAUDE.md` ; détail → rules scopées `paths:` (jamais ré-importées en `@`)
 - ✅ Préférer un ADR à un long commit message pour les décisions structurantes
 
 ## Agent teams (multi-agent) — anti-collision
 
-> **Source unique du protocole** (lead / teammate, cycle de vie lead-owned vs user-owned,
-> topologie hub-and-spoke vs mesh, worktrees, débrief mémoire, hooks) :
-> [agent-teams.md](agent-teams.md) — une rule auto-chargée, comme celle-ci. Ne pas redupliquer ici.
+> **Invariants** (§ Teammate 6 règles / § Lead 5 invariants) : [agent-teams.md](agent-teams.md) — rule
+> auto-chargée, volontairement courte (budget contexte v1.4). **Protocole complet** (cycle de vie
+> lead-owned vs user-owned, topologie hub-and-spoke vs mesh, worktrees, débrief mémoire, hooks) :
+> `skills/team/protocole.md` du plugin `agent-teams`, lu par `/agent-teams:team`. Ne pas redupliquer ici.
 >
 > Câblage : `settings.json` (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode: "tmux"`).
 > Orchestration : `/agent-teams:team` + rôles d'exécution + hook de trace = **plugin `agent-teams`**

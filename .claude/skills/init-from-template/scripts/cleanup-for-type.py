@@ -74,6 +74,7 @@ SCRIPT_JETABLE = {
         ".claude/rules/agent-teams.md",
         # Hooks code (pas de code structuré)
         ".claude/hooks/pretooluse-inject-codemap.py",
+        ".claude/docs/code-map-gotchas.md",
         ".claude/hooks/posttooluse-growth-detection.py",
         # Workflows folder
         "workflows/",
@@ -413,7 +414,8 @@ def prune_dead_inventory(root: Path, profile: dict) -> None:
             print(f"🔧 {rel} : inventaire purgé ({removed} ligne(s) morte(s))")
 
 
-_ON_DEMAND_LINKS = {"ACCESS.md", "GLOSSARY.md", "RUNBOOK.md", "STAKEHOLDERS.md"}
+_ON_DEMAND_LINKS = {"ACCESS.md", "GLOSSARY.md", "RUNBOOK.md", "STAKEHOLDERS.md",
+                    "HANDOFF-journal.md"}  # journal créé par /handoff (v1.4)
 _PATTERN_HINTS = ("{{", "}}", "XXX", "YYY", "00X", "YYYY", "...", "…", "*")
 
 

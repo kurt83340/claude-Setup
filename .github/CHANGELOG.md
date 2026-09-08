@@ -3,6 +3,69 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.4.0] — 2026-09-08
+
+### Changed — budget de contexte (« le template lit trop au démarrage »)
+
+Mesuré via `claude -p --output-format json` (usage du 1er tour, Claude Code 2.1.263) : dossier vide
+28,7k tokens · template vierge 59,0k · **projet généré d'un mois : 144,0k** (14 % d'un contexte 1M
+avant le premier prompt), dont **86,3k pour les 3 `@-imports`** HANDOFF/ROADMAP/code-map (journal
+append-only 12,8k est., gotchas 7,2k, « Quand mettre à jour » 4,7k, ROADMAP Phase 1 6,1k) et
+**12,1k pour `@rules/template-maintenance.md`** importé depuis `.claude/CLAUDE.md` alors que son
+`paths:` le rend déjà conditionnel (vérifié : sans `@`, une rule scopée n'est PAS chargée au
+démarrage). Le hook PreToolUse réinjectait en plus ~2,2k tokens à **chaque** Edit/Write, et ces
+injections restent dans le transcript pour toute la session (vérifié via `--resume`).
+Après migration `slim-context.py` sur le même projet : **59,8k** (−58 %). L'estimation `chars/4` du template sous-évaluait
+d'un facteur 2 sur du markdown français → **calibrée à `chars/2`**.
+
+- **`.claude/CLAUDE.md` n'importe plus `@rules/template-maintenance.md`** (lien simple) — la rule
+  garde son `paths: .claude/docs/**` et se charge quand on touche la doc. −12k sur tous les projets.
+- **HANDOFF : le Journal append-only sort dans `.claude/docs/HANDOFF-journal.md`** (non importé,
+  créé par `/handoff` Étape 3bis, migration des entrées existantes sans perte). HANDOFF revient à
+  sa règle « < 30 lignes ».
+- **code-map scindée** : `code-map.md` (vue macro + couplage + intention, auto-chargée, < 3k tokens)
+  / **`code-map-gotchas.md`** (non auto-chargé). Chaque gotcha cite en backticks le chemin/fichier/
+  dossier qu'il concerne — c'est la clé de ciblage du hook.
+- **Hook `pretooluse-inject-codemap.py` sous budget** : couplage + intention **une fois par
+  session** (marker `.claude/.cache/codemap-injected-<session>.json`, effacé par le hook SessionStart
+  post-compaction → ré-armé là où le rappel compte) ; gotchas **uniquement ceux qui ciblent le
+  fichier édité** (+ § Globaux), une fois par (session, fichier). Fallback sur § Gotchas de
+  `code-map.md` pour un projet < 1.4. Tests réécrits (13 assertions).
+- **ROADMAP n'est plus importée** (lien simple dans « Lus à la demande ») : dashboard lu
+  explicitement par les 11 skills qui en ont besoin. Invariant CI « 3 `@-imports` » → **2**
+  (racine + EXAMPLES/acme), `verify-e2e` 1-2, `adopt-template` max 2.
+- **Rule `agent-teams.md` réduite aux invariants** (§ Teammate 6 règles, § Lead 5 invariants, ~2,5k
+  chars au lieu de 9,5k — auto-chargée partout, teammates compris). Le protocole complet déménage
+  dans le plugin : `plugins/agent-teams/skills/team/protocole.md`, lu par `/agent-teams:team`
+  (Étape 0). Références mises à jour (plugin README/SKILL/rôles, agents/README, template-maintenance).
+
+### Added
+
+- **`context-budget.py`** (`.claude/skills/doc-health/scripts/`, stdlib) : chiffre la surface
+  auto-chargée (index + `@-imports` récursifs ≤ 4 niveaux hors fences/spans + rules non scopées ;
+  user et auto-memory à part), flague une rule scopée ré-importée en `@` et les fichiers > 4k tokens
+  avec leur remède, `--max` → exit 1. `/doc-health` **Étape 0** (seuil 25k), `/handoff` Étape 5,
+  **CI : template vierge < 12k**.
+- **`slim-context.py`** (`init-from-template/scripts/`, à lancer depuis le checkout du template
+  avec `--root <projet>`) : migration **idempotente** d'un projet < v1.4 — de-`@` des rules scopées,
+  journal et gotchas déplacés sans perte, ROADMAP en lien, fichiers v1.4 copiés (hook, rule courte,
+  context-budget) avec sauvegarde de l'ancienne rule. `--dry-run` d'abord.
+- `test/test_context_budget.py` (32 assertions, en CI) ; placeholder `.claude/docs/code-map-gotchas.md` ;
+  `_ON_DEMAND_LINKS` + `HANDOFF-journal.md` (le pointeur survit au cleanup) ; `script-jetable` retire
+  aussi `code-map-gotchas.md` ; USAGE § troubleshooting « contexte à 15-20 % au premier prompt » ;
+  STRUCTURE : exemple de CLAUDE.md remis en just-in-time (il montrait 12 `@`).
+
+### Migration d'un projet existant
+
+```bash
+python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root <projet> --dry-run
+python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root <projet>
+python3 .claude/skills/doc-health/scripts/context-budget.py   # dans le projet
+```
+
+Hors template (socle ~29k) : `~/.claude/CLAUDE.md` et le hook SessionStart du plugin n8n
+(~4k, injecté sur tout projet) pèsent aussi — visibles dans le rapport, hors périmètre ici.
+
 ## [1.3.3] — 2026-09-08
 
 ### Fixed

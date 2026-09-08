@@ -1,7 +1,7 @@
 ---
 name: doc-health
 description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision, cohérence ROADMAP vs frontmatter status des specs, instructions mortes dans les skills (no-op audit), patterns auto-memory à consolider. Génère un rapport priorisé sans modifier.
-allowed-tools: Read, Glob, Grep, Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(date:*)
+allowed-tools: Read, Glob, Grep, Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(date:*), Bash(python3 .claude/skills/doc-health/scripts/context-budget.py:*)
 disable-model-invocation: false
 ---
 
@@ -12,6 +12,22 @@ disable-model-invocation: false
 > **Réversibilité** : 🟢 lecture seule — ne modifie RIEN (rapport uniquement).
 
 Ton rôle : scanner la santé documentaire du projet et produire un rapport actionnable.
+
+## Étape 0 — Budget de contexte auto-chargé (v1.4)
+
+```bash
+python3 .claude/skills/doc-health/scripts/context-budget.py --max 25000
+```
+
+Liste ce que Claude Code charge **sans qu'on le lui demande** au démarrage (CLAUDE.md + `@-imports`,
+`.claude/CLAUDE.md`, rules non scopées ; user et auto-memory à part) avec l'estimation calibrée
+(tokens ≈ chars/2). Seuil **25k tokens** (projet) → au-delà, 🔴 dans le rapport avec les coupables :
+
+- HANDOFF > 30 lignes → journal dans `HANDOFF-journal.md` (`/handoff` Étape 3bis le fait)
+- code-map > 3k tokens → gotchas dans `code-map-gotchas.md`, § « Quand mettre à jour » = 3 lignes
+- rule scopée (`paths:`) importée en `@` → retirer le `@` (scoping court-circuité)
+- ROADMAP en `@` → lien simple (les skills la lisent explicitement)
+- projet généré < v1.4 → `python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root . --dry-run`
 
 ## Étape 1 — Fraîcheur des fichiers vivants
 

@@ -62,7 +62,8 @@ Plugin agents ne supportent PAS les frontmatter fields : `hooks`, `mcpServers`, 
 
 Les rôles portent chacun UNIQUEMENT leur spécialité ; le protocole d'équipe
 (communication, périmètre, cycle de vie, topologie) vit dans la **rule**
-[.claude/rules/agent-teams.md](../rules/agent-teams.md) — pas de duplication ici.
+[.claude/rules/agent-teams.md](../rules/agent-teams.md) (invariants, auto-chargés) et, en version
+longue, dans `skills/team/protocole.md` du plugin `agent-teams` — pas de duplication ici.
 
 > 🧩 Les **rôles d'exécution** (`worker` · `front-end` · `back-end` · `tester`) +
 > `/agent-teams:team` + le hook de trace vivent dans le **plugin `agent-teams`**

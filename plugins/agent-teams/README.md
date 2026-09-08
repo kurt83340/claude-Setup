@@ -12,7 +12,7 @@
 ## Ce qui reste dans le CŒUR du template (dépendances des skills cœur)
 
 - **`reviewer`** (revue adverse de `/conception` + review d'équipe) et les **explorateurs** `explore-code`/`explore-docs`/`explore-memoire` → `.claude/agents/`
-- La **rule [`agent-teams.md`](../../.claude/rules/agent-teams.md)** (protocole lead/teammate, SOURCE UNIQUE — auto-chargée, valable plugin installé ou pas)
+- La **rule [`agent-teams.md`](../../.claude/rules/agent-teams.md)** (invariants lead/teammate — auto-chargée, courte, valable plugin installé ou pas). Le **protocole complet** est ici : [`skills/team/protocole.md`](skills/team/protocole.md) (lu par `/agent-teams:team`)
 - Le câblage `settings.json` : `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode: "tmux"` (inertes sans le plugin)
 
 ## Installer (dans un projet)

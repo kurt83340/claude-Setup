@@ -104,11 +104,13 @@ mon-projet/
     │   │       └── (diagrams/      # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
     │   │
     │   ├── 🔄 HANDOFF.md           # ⭐ état de session — VIVANT (MAJ FIN de chaque session) : status, échecs tentés, next, blockers
+    │   ├── 🔄 HANDOFF-journal.md   # journal append-only (1 ligne/session via /handoff) — NON auto-chargé (v1.4)
     │   ├── 🔄 ROADMAP.md           # DASHBOARD vivant : status courant des features (synthèse de conception/tasks.md + specs/*/tasks.md)
     │   ├── 🔄 CHANGELOG.md         # historique features livrées + bugs fixés (format Keep a Changelog, versions = tags git)
     │   ├── 🔄 ACCESS.md            # checklist accès (API keys, comptes, VPN) avec statuts ✅ obtenu / ⏳ en attente / 🔒 stockage
     │   ├── 🔄 lecons.md            # journal bugs/patterns/observations — sas entre auto-memory et promotion (ADR/rule/discard)
     │   ├── 🔄 code-map.md          # ⭐ règles de couplage + intention + gotchas (non-déductibles) — PAS de file-by-file
+    │   ├── 🔄 code-map-gotchas.md  # pièges non évidents, entrées citant leur chemin — NON auto-chargé, injectés par le hook (v1.4)
     │   ├── 🔄 stack.md             # inventaire technique (libs Python + services tiers + LLM + deploy + auth)
     │   │
     │   ├── 📚 adr/                 # Architecture Decision Records (transversal — décisions tech structurantes, IMMUABLES)
@@ -654,21 +656,21 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## Documentation
 
-- Cadrage (+ interlocuteurs) : @.claude/docs/cadrage/README.md
-- Vision produit : @.claude/docs/conception/PRD.md
-- Architecture : @.claude/docs/conception/ARCHITECTURE.md
-- Roadmap : @.claude/docs/ROADMAP.md
-- Accès requis : @.claude/docs/ACCESS.md
-- Reprise session : @.claude/docs/HANDOFF.md ⭐
-- Décisions tech : @.claude/docs/adr/
-- Glossaire métier : @.claude/docs/GLOSSARY.md (si jargon)
-- Procédures ops : @.claude/docs/RUNBOOK.md (si en prod)
+> 🪶 Just-in-time : **2 `@` maximum** (état vivant), tout le reste en liens simples lus à la demande.
+> Mesuré v1.4 : tout charger en `@` → 144k tokens au 1er tour sur un projet d'un mois.
+
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal dans HANDOFF-journal.md)
+- Code map : @.claude/docs/code-map.md ⭐ (< 3k tokens — gotchas dans code-map-gotchas.md)
+- Roadmap (dashboard) : [ROADMAP](.claude/docs/ROADMAP.md) · Cadrage : [cadrage/README](.claude/docs/cadrage/README.md)
+- Conception : [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md)
+- Accès : [ACCESS](.claude/docs/ACCESS.md) · ADR : [adr/](.claude/docs/adr/) · [GLOSSARY](.claude/docs/GLOSSARY.md) · [RUNBOOK](.claude/docs/RUNBOOK.md)
 
 ## Conventions
 
-- Code style : @.claude/rules/code-style.md
-- Tests : @.claude/rules/testing.md
-- Git : @.claude/rules/git-workflow.md
+> Les rules `.claude/rules/*.md` sont **déjà auto-chargées** (sauf celles scopées `paths:`, chargées
+> à la demande) — **jamais** de `@` dessus (double chargement / scoping court-circuité).
+
+- [code-style](.claude/rules/code-style.md) · [testing](.claude/rules/testing.md) · [git-workflow](.claude/rules/git-workflow.md)
 
 ## Reminders critiques
 
@@ -685,7 +687,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 
 ## 🧭 Comment vivre avec ce template
 
-**Lis EN PREMIER** : @rules/template-maintenance.md ⚠️ chemin relatif à `.claude/` (PAS `@.claude/rules/…`)
+**Avant d'écrire dans `.claude/docs/`** : [rules/template-maintenance.md](rules/template-maintenance.md) — rule scopée `paths:`, chargée toute seule au bon moment ; ⚠️ **jamais en `@`** (v1.4 : +12k tokens/session)
 
 ## Skills (`.claude/skills/`)
 

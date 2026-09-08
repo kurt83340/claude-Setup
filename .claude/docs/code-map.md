@@ -43,10 +43,11 @@ Le détail fichier-par-fichier se découvre à la demande (`grep`, lecture) — 
 - {{Pattern imposé : ex. toute requête externe passe par `{{client}}:{{ligne}}` (retry + rate-limit centralisés)}}
 - {{Invariant : ex. les montants sont toujours en centimes int, jamais float}}
 
-## Gotchas (pièges non évidents)
+## Gotchas → `code-map-gotchas.md`
 
-- ⚠️ {{Comportement contre-intuitif : ex. `{{fichier}}:{{ligne}}` — l'API renvoie 200 même en erreur, vérifier le body}}
-- ⚠️ {{Effet de bord : ex. modifier `{{fichier}}` invalide le cache de `{{autre}}`}}
+Les pièges non évidents vivent dans [code-map-gotchas.md](code-map-gotchas.md) (**non auto-chargé**) :
+le hook PreToolUse n'injecte que ceux qui citent le fichier en cours d'édition. Ici ne restent que
+la vue macro, le couplage et l'intention — ce fichier est auto-chargé à chaque session : **< 3k tokens**.
 
 ## Quand mettre à jour ce fichier
 
@@ -56,6 +57,7 @@ Le détail fichier-par-fichier se découvre à la demande (`grep`, lecture) — 
 - ❌ **NE PAS** ajouter de description fichier-par-fichier ni de liste de dépendances : Claude les retrouve seul, et elles drifteraient.
 
 > 🔁 **Entretien** : le skill `/codemap` régénère la vue macro et **détecte les violations
-> de couplage** (par grep des imports). Le hook `pretooluse-inject-codemap.py` réinjecte les
-> **règles de couplage + gotchas** avant chaque édition de code — pas une carte structurelle
-> (qui serait déductible et périssable).
+> de couplage** (par grep des imports). Le hook `pretooluse-inject-codemap.py` réinjecte
+> **couplage + intention une fois par session** (ré-armé après compaction) et les **gotchas qui
+> ciblent le fichier édité** — pas une carte structurelle (déductible et périssable), pas un
+> rappel à chaque édition (mesuré v1.4 : ~2k tokens × N éditions, cumulés dans la session).

@@ -7,9 +7,11 @@ disable-model-invocation: false
 
 # /team — Orchestrer une équipe de teammates sur une feature
 
-Tu es le **LEAD**. Le protocole (rôles, périmètres, cycle de vie lead-owned/user-owned,
-topologie hub-and-spoke/mesh, débrief mémoire) = la rule **`agent-teams.md`** du template
-(`.claude/rules/`, auto-chargée dans chaque session). Ce skill = la **séquence opératoire**.
+Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead) = la rule **`agent-teams.md`** du
+template (`.claude/rules/`, auto-chargée dans chaque session, courte). Le **protocole complet**
+(politique teammate vs subagent, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh,
+worktrees, spawn, suivi, débrief mémoire) = **`protocole.md`, dans le dossier de ce skill** — lis-le
+en Étape 0 s'il n'est pas déjà dans ton contexte. Ce skill = la **séquence opératoire**.
 
 **Argument** : `/agent-teams:team <spec-id>` (ex. `/agent-teams:team 001-erp-connector`) ou
 `/agent-teams:team "<mission libre>"`. Les rôles d'exécution (`worker`, `front-end`,
@@ -78,7 +80,7 @@ principal et les worktrees.
 
 ⚠️ **D'abord : reviens à la racine du repo** — `cd "$(git rev-parse --show-toplevel)"`. Un `cd`
 Bash antérieur est hérité par le teammate, qui se fige alors EN SILENCE sur le dialogue
-d'imports CLAUDE.md (cf. rule `agent-teams.md` § Lead / Spawn).
+d'imports CLAUDE.md (cf. `protocole.md` § Lead / Spawn).
 
 Pour chaque teammate (rôle préconfiguré = son nom d'agent ; ad-hoc = nom + prompt), la
 mission contient :
@@ -121,7 +123,7 @@ d'intégration → **tests après CHAQUE merge** (jamais deux merges sans vert e
    juste à l'utilisateur qu'il est encore actif.
 3. `git worktree remove ../<repo>--<x>` pour chaque worktree mergé + `git worktree prune`.
 4. Tous les tasks ✅ → propose `/feature-done <id>`.
-5. `/handoff` (le Journal note : « session équipe : N teammates, X tasks, branches mergées »).
+5. `/handoff` (la ligne de `HANDOFF-journal.md` note : « session équipe : N teammates, X tasks, branches mergées »).
 
 ## Anti-patterns
 

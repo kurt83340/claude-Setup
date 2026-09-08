@@ -91,23 +91,71 @@ r2 = run_hook("sessionstart-inject-handoff.py", {"session_id": "absent", "cwd": 
 ok("pas de marker → exit 0 silencieux", r2.returncode == 0 and r2.stdout.strip() == "")
 shutil.rmtree(sb, ignore_errors=True)
 
-# 3. pretooluse-inject-codemap → injecte sur code, pas sur .md
+# 3. pretooluse-inject-codemap → budget v1.4 : couplage 1×/session, gotchas ciblés 1×/(session, fichier)
+#    (mesuré 2026-09-08 : l'ancienne version réinjectait ~2,2k tokens à CHAQUE Edit, cumulés dans la session)
 print("\n== pretooluse-inject-codemap ==")
-sb = sandbox()
-if (DOCS / "code-map.md").exists():
-    shutil.copy2(DOCS / "code-map.md", sb / ".claude/docs/code-map.md")
+GOTCHAS = """# Gotchas
+
+## Globaux
+
+- ⚠️ montants en centimes int partout
+
+## Par zone
+
+- ⚠️ `src/sync/notion.py` — l'API renvoie 200 même en erreur
+- ⚠️ `src/api/` — le cache est invalidé par tout write
+  (suite indentée de l'entrée api)
+
+### src/jobs/
+
+- ⚠️ le scheduler ignore les jobs sans `retry`
+"""
+
+
+def inject(sb, path, session="S1", tool="Edit"):
     r = run_hook("pretooluse-inject-codemap.py",
-                 {"tool_name": "Edit", "tool_input": {"file_path": str(sb / "src/app.py")}, "cwd": str(sb)}, sb)
-    try:
-        inj = json.loads(r.stdout).get("hookSpecificOutput", {}).get("additionalContext", "")
-    except Exception:
-        inj = ""
-    ok("contexte injecté pour fichier src/", "Règles de couplage" in inj)
-    r2 = run_hook("pretooluse-inject-codemap.py",
-                  {"tool_name": "Edit", "tool_input": {"file_path": str(sb / "src/README.md")}, "cwd": str(sb)}, sb)
-    ok("pas d'injection pour un .md", r2.stdout.strip() == "")
-else:
-    ok("code-map.md absent du template (skip)", True)
+                 {"session_id": session, "tool_name": tool, "tool_input": {"file_path": str(sb / path)}, "cwd": str(sb)}, sb)
+    if not r.stdout.strip():
+        return ""
+    return json.loads(r.stdout).get("hookSpecificOutput", {}).get("additionalContext", "")
+
+
+sb = sandbox()
+shutil.copy2(DOCS / "code-map.md", sb / ".claude/docs/code-map.md")
+(sb / ".claude/docs/code-map-gotchas.md").write_text(GOTCHAS, encoding="utf-8")
+i1 = inject(sb, "src/sync/notion.py")
+ok("1re édition : couplage + intention injectés", "Règles de couplage" in i1 and "Intention" in i1)
+ok("1re édition : gotcha ciblé (notion.py) + global injectés, gotchas des autres zones NON",
+   "renvoie 200" in i1 and "centimes" in i1 and "invalidé" not in i1 and "scheduler" not in i1)
+ok("marker par session écrit dans .claude/.cache/", (sb / ".claude/.cache/codemap-injected-S1.json").is_file())
+ok("même fichier, même session → aucune ré-injection", inject(sb, "src/sync/notion.py") == "")
+i3 = inject(sb, "src/api/http.py")
+ok("autre fichier, même session : gotcha de sa zone (`src/api/` + suite indentée) SANS couplage",
+   "invalidé" in i3 and "suite indentée" in i3 and "Règles de couplage" not in i3 and "renvoie 200" not in i3)
+i4 = inject(sb, "src/jobs/nightly.py")
+ok("heading `### src/jobs/` cible ses entrées", "scheduler" in i4)
+i5 = inject(sb, "src/other/x.py")
+ok("fichier sans gotcha ciblé : seuls les Globaux (1×/fichier), ni couplage ni zones",
+   "centimes" in i5 and "Règles de couplage" not in i5 and "renvoie 200" not in i5 and "invalidé" not in i5)
+ok("nouvelle session → couplage ré-injecté", "Règles de couplage" in inject(sb, "src/sync/notion.py", session="S2"))
+ok("pas d'injection pour un .md", inject(sb, "src/README.md") == "")
+ok("pas d'injection hors src/tests/lib/app", inject(sb, "scripts/tool.py") == "")
+# ré-armement post-compaction : SessionStart(compact) efface le marker
+run_hook("sessionstart-inject-handoff.py", {"session_id": "S1", "source": "compact", "cwd": str(sb)}, sb)
+ok("après compaction : marker effacé → couplage ré-injecté à la prochaine édition",
+   not (sb / ".claude/.cache/codemap-injected-S1.json").exists() and "Règles de couplage" in inject(sb, "src/sync/notion.py"))
+shutil.rmtree(sb, ignore_errors=True)
+
+# fallback projet < 1.4 : gotchas encore dans code-map.md § Gotchas → ciblage identique
+sb = sandbox()
+(sb / ".claude/docs/code-map.md").write_text(
+    "# CM\n\n## Règles de couplage\n\n- ❌ jamais A → B\n\n## Gotchas (pièges non évidents)\n\n"
+    "- ⚠️ `src/sync/notion.py` — 200 même en erreur\n- ⚠️ `src/api/` — cache invalidé\n", encoding="utf-8")
+i = inject(sb, "src/sync/notion.py")
+ok("projet < 1.4 (gotchas dans code-map.md) : ciblage appliqué quand même",
+   "200 même en erreur" in i and "cache invalidé" not in i and "Règles de couplage" in i)
+ok("taille d'une injection bornée (≤ 4k chars + en-tête)", len(i) < 4600)
+ok("sans Globaux, fichier sans gotcha ciblé et couplage déjà fait → silence total", inject(sb, "src/other/y.py") == "")
 shutil.rmtree(sb, ignore_errors=True)
 
 # 4. posttooluse-growth-detection → flag API_KEY

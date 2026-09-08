@@ -33,7 +33,7 @@ Si l'un échoue → STOP, demander au user de fixer.
 
 > ℹ️ **Approbation des imports CLAUDE.md (machine-locale, non shippable)** : au premier
 > lancement interactif dans le projet, Claude Code peut afficher « Allow external CLAUDE.md
-> file imports? » (les `@-imports` HANDOFF/ROADMAP/code-map) → approuver. Le flag est stocké
+> file imports? » (les `@-imports` HANDOFF/code-map) → approuver. Le flag est stocké
 > dans `~/.claude.json`, **keyé par le chemin du projet** — le template ne peut pas le
 > pré-poser. Conséquence agent-teams : un teammate spawné depuis un **sous-dossier** re-tombe
 > sur ce dialogue (chemin différent) et se fige en silence → toujours spawner depuis la

@@ -6,7 +6,7 @@
 
 ## 🧭 Comment vivre avec ce template
 
-**Lis EN PREMIER** : @rules/template-maintenance.md
+**Avant d'écrire dans `.claude/docs/`** : [rules/template-maintenance.md](rules/template-maintenance.md) — rule **scopée** (`paths: .claude/docs/**`) : Claude Code la charge tout seul dès que tu touches la doc. **Ne PAS la ré-importer en `@`** (v1.4.0, mesuré : +12k tokens sur chaque session, scoping court-circuité).
 → explique la structure, le workflow fin/début de session, quel skill/agent invoquer.
 
 **Guide d'usage pratique** : [USAGE.md](USAGE.md) (workflows quotidiens, skills, hooks, pivot, ADR, leçons).
@@ -77,7 +77,7 @@ Quand un projet ajoute d'autres skills liés à sa stack, les installer dans `.c
 ## Agent perso (`.claude/agents/`)
 
 - `doc-maintainer` — subagent (Task tool), gère tout le workflow doc (HANDOFF, ROADMAP, ADRs, pivot, promotion)
-- `reviewer` — teammate/subagent **lecture seule** : revue adverse des plans (`/conception`) + review des diffs d'équipe. Les **rôles d'exécution** (`worker` · `front-end` · `back-end` · `tester`) + `/agent-teams:team` + hook de trace = **plugin `agent-teams`**. Protocole commun (SendMessage, périmètre, cycle de vie, topologie) : source unique [rules/agent-teams.md](rules/agent-teams.md)
+- `reviewer` — teammate/subagent **lecture seule** : revue adverse des plans (`/conception`) + review des diffs d'équipe. Les **rôles d'exécution** (`worker` · `front-end` · `back-end` · `tester`) + `/agent-teams:team` + hook de trace = **plugin `agent-teams`**. Invariants d'équipe auto-chargés : [rules/agent-teams.md](rules/agent-teams.md) ; protocole complet : `skills/team/protocole.md` du plugin
 - `explore-code` · `explore-docs` · `explore-memoire` — **explorateurs lecture seule réutilisables** (subagents par défaut, teammates en mode visible) : étape Explore de `/conception` + toute investigation ; `reviewer` assure aussi la revue adverse des plans
 
 ---

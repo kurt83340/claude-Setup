@@ -61,12 +61,12 @@ def main():
     ok(".claude/template-version présent", tcl.is_file())
     claude_md = root / "CLAUDE.md"
     if claude_md.is_file():
-        # 3 @-imports en profil complet ; script-jetable en garde légitimement moins
-        # (ROADMAP/code-map supprimés par le profil) → invariant : 1 à 3, tous vivants.
+        # 2 @-imports en profil complet (HANDOFF + code-map — v1.4 : ROADMAP en lien simple) ;
+        # script-jetable en garde légitimement moins → invariant : 1 à 2, tous vivants.
         imps = re.findall(r"@(\.claude/\S+)", claude_md.read_text(encoding="utf-8"))
         broken = [i for i in imps if not (root / i).exists()]
-        ok(f"CLAUDE.md : 1-3 @-imports, tous vivants (trouvés : {len(imps)})",
-           1 <= len(imps) <= 3 and not broken)
+        ok(f"CLAUDE.md : 1-2 @-imports, tous vivants (trouvés : {len(imps)})",
+           1 <= len(imps) <= 2 and not broken)
         if broken:
             print(f"     → morts : {broken}")
     inv = root / ".claude" / "CLAUDE.md"

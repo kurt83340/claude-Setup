@@ -8,13 +8,13 @@ Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB
 
 ## Documentation projet
 
-> 🪶 **Chargement just-in-time** : seuls les 3 docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = liens lus à la demande (mesuré : ~1,5k vs ~14,6k tokens si on charge tout).
+> 🪶 **Chargement just-in-time** : seuls les 2 docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = liens lus à la demande (mesuré : ~1,5k vs ~14,6k tokens si on charge tout).
 
 ### 🔄 Auto-chargés (`@` — état vivant)
 
 - Reprise session : @.claude/docs/HANDOFF.md ⭐
-- Roadmap : @.claude/docs/ROADMAP.md
-- **Code map** : @.claude/docs/code-map.md ⭐ (règles de couplage + gotchas — à respecter avant d'éditer)
+- Roadmap (dashboard) : [ROADMAP.md](.claude/docs/ROADMAP.md) — lu à la demande par les skills
+- **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + couplage + intention — gotchas dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook)
 
 ### 📂 Lus à la demande (liens — pas auto-chargés)
 

@@ -11,7 +11,7 @@ Tu es un **teammate** d'exécution. Le lead te confie UNE sous-tâche précise.
 
 **Protocole d'équipe** (communication `SendMessage`, périmètre, interdits, fin de tâche) :
 applique [`.claude/rules/agent-teams.md`](../rules/agent-teams.md) **§ Teammate** —
-auto-chargée dans ton contexte. Elle prime sur tout le reste.
+auto-chargée dans ton contexte (version longue : `skills/team/protocole.md` de ce plugin). Elle prime sur tout le reste.
 
 ## Spécifique au rôle
 

@@ -34,11 +34,9 @@ La gestion d'erreurs transverse → `src/error_handler/`. Le détail des fichier
 - `notion_writer/mapping.py` = pure functions (SAP `Order` → props Notion), testables sans I/O — ne jamais y mettre d'appel réseau
 - Montants : centimes `int` partout, jamais `float`
 
-## Gotchas
+## Gotchas → `code-map-gotchas.md`
 
-- ⚠️ L'API Notion renvoie parfois `200` avec une erreur dans le body → `notion_writer/_http.py` vérifie le body, pas seulement le status
-- ⚠️ `error_handler.notifier` a un cooldown (`state.track_recent_errors`) : en cas de boucle d'erreurs, toutes les alertes ne partent pas — c'est voulu (anti-spam), ne pas « corriger »
-- ⚠️ SAP B1 rate-limite à ~100 req/min → la pagination dans `sap_connector/client.py` respecte un délai ; ne pas paralléliser sans revoir ça
+Pièges non évidents dans [code-map-gotchas.md](code-map-gotchas.md) (non auto-chargé, injectés par le hook pour le fichier édité).
 
 ## Quand mettre à jour ce fichier
 

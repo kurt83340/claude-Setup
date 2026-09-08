@@ -63,8 +63,8 @@ Scanne et présente à l'utilisateur :
 Rien à merger : le rsync a tout posé, passe directement à l'Étape 3.
 
 - **`CLAUDE.md` existant** : préserver 100 % du contenu user ; proposer d'y AJOUTER l'index
-  just-in-time du template (3 `@-import` : HANDOFF/ROADMAP/code-map + liens à la demande).
-  ⚠️ Max 3 `@-import` au total — si l'existant en a déjà, arbitrer avec l'utilisateur.
+  just-in-time du template (2 `@-import` : HANDOFF/code-map — ROADMAP en lien simple — + liens à la demande).
+  ⚠️ Max 2 `@-import` au total — si l'existant en a déjà, arbitrer avec l'utilisateur.
 - **`.claude/settings.json` existant** : merge JSON proposé en diff — unions des
   `permissions.allow/ask/deny`, append des hooks du template (sans doublon), ajout
   `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode` + `autoMemoryEnabled`.

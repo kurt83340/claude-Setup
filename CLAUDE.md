@@ -6,16 +6,16 @@
 
 ## Documentation projet
 
-> 🪶 **Chargement just-in-time** : seuls les 3 docs d'état vivant ci-dessous sont auto-chargés (`@`) à chaque session ; le reste = **liens simples** que Claude lit **à la demande**. Tout charger en `@` coûte ~10× plus de contexte au démarrage (mesuré : ~14,6k vs ~1,5k tokens sur un projet rempli) et dégrade la qualité quand le contexte gonfle ([context engineering, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)). **Garde la liste auto-chargée courte.**
+> 🪶 **Chargement just-in-time** : seuls les **2** docs d'état vivant ci-dessous sont auto-chargés (`@`) à chaque session ; le reste = **liens simples** que Claude lit **à la demande**. Tout charger en `@` dégrade la qualité quand le contexte gonfle ([context engineering, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)). Mesuré (v1.4.0) : un projet d'un mois démarrait à **144k tokens** au 1er tour, dont 86k pour 3 docs auto-chargées sans borne → **59,8k** après régime. **Budget** : `python3 .claude/skills/doc-health/scripts/context-budget.py` (seuil 25k ; `/doc-health` Étape 0).
 
 ### 🔄 Auto-chargés (`@` — état vivant, toujours en contexte)
 
-- Reprise session : @.claude/docs/HANDOFF.md ⭐
-- Roadmap : @.claude/docs/ROADMAP.md
-- **Code map** : @.claude/docs/code-map.md ⭐ (règles de couplage + gotchas non-déductibles — à respecter avant d'éditer)
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
+- **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + règles de couplage + intention, < 3k tokens — les gotchas vivent dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook pour le seul fichier édité)
 
 ### 📂 Lus à la demande (liens — pas auto-chargés)
 
+- 🗺️ **Roadmap** (dashboard) : [ROADMAP.md](.claude/docs/ROADMAP.md) — lu par `/spec`, `/conception`, `/feature-done`, `/doc-health`
 - 📥 **Cadrage** : [cadrage/README.md](.claude/docs/cadrage/README.md)
 - 🎨 **Conception** : [research](.claude/docs/conception/research.md) · [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md) · [tasks (plan MVP)](.claude/docs/conception/tasks.md) · specs → `.claude/docs/specs/00X-feature/`
 - 🔄 **Suivi** : [ACCESS](.claude/docs/ACCESS.md) · [CHANGELOG](.claude/docs/CHANGELOG.md) · [leçons](.claude/docs/lecons.md) · [stack](.claude/docs/stack.md)

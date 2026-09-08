@@ -84,7 +84,7 @@ stack.md — la trace = `template-version` seul) · @-imports CLAUDE.md tous viv
 
 **Actions** : sur la fixture brownfield, rsync `--ignore-existing` (excludes documentés) →
 render → `--check` → `cleanup --type python-app --brownfield` → étapes agentiques : merge
-CLAUDE.md existant (≤3 @-imports au total), rétro-remplissage `stack.md` (+ version) et
+CLAUDE.md existant (≤2 @-imports au total), rétro-remplissage `stack.md` (+ version) et
 `HANDOFF` (← git log).
 
 **PASS si** : fichiers USER **intacts** (README, CLAUDE.md à lui, `.github/` à lui, code) ·

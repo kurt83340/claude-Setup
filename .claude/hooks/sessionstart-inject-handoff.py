@@ -18,6 +18,7 @@ Stdout = injecté automatiquement dans le contexte par Claude Code (documenté).
 
 import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -101,6 +102,18 @@ Le snapshot auto de fin de session est plus récent que `.claude/docs/HANDOFF.md
             pass
 
 
+def rearm_codemap_injection(data) -> None:
+    """Post-compaction : efface le marker « couplage déjà injecté » du hook PreToolUse
+    (budget v1.4 : une injection par session) → la prochaine édition de code ré-injecte les
+    règles de couplage, là où le rappel a de la valeur (le contexte vient d'être résumé)."""
+    cwd = data.get("cwd", os.getcwd())
+    sid = re.sub(r"[^\w.-]", "_", str(data.get("session_id", "nosession")))
+    try:
+        (Path(cwd) / ".claude" / ".cache" / f"codemap-injected-{sid}.json").unlink()
+    except OSError:
+        pass
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -110,6 +123,7 @@ def main():
     if data.get("source") == "startup":
         inject_session_end_net(data)
     else:
+        rearm_codemap_injection(data)
         inject_compact_marker(data)
 
     sys.exit(0)

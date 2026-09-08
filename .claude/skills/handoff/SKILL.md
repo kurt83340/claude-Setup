@@ -1,7 +1,7 @@
 ---
 name: handoff
 description: Met à jour .claude/docs/HANDOFF.md à la fin d'une session de travail. Génère un snapshot narratif court (status + échecs tentés + blockers + next steps) à partir du git status + tests + contexte chat courant. À invoquer à chaque fin de session pour préserver l'état entre sessions Claude Code.
-allowed-tools: Read, Write, Edit, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(pytest:*), Bash(npm test:*), Bash(ruff:*)
+allowed-tools: Read, Write, Edit, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(pytest:*), Bash(npm test:*), Bash(ruff:*), Bash(python3 .claude/skills/doc-health/scripts/context-budget.py:*)
 disable-model-invocation: false
 ---
 
@@ -9,8 +9,8 @@ disable-model-invocation: false
 
 > **Quand ne PAS utiliser** : reprendre une session précise → `/resume` (natif, fidélité 100%) ·
 > feature terminée à livrer → `/feature-done` · pattern technique appris → auto-memory ou `/lecon`.
-> **Réversibilité** : 🟢 n'écrit que `.claude/docs/HANDOFF.md`, après confirmation —
-> undo : `git checkout -- .claude/docs/HANDOFF.md`.
+> **Réversibilité** : 🟢 n'écrit que `.claude/docs/HANDOFF.md` (après confirmation) + 1 ligne appendée
+> à `.claude/docs/HANDOFF-journal.md` — undo : `git checkout -- .claude/docs/HANDOFF.md .claude/docs/HANDOFF-journal.md`.
 
 Ton rôle : générer une mise à jour propre de `.claude/docs/HANDOFF.md` qui permettra de reprendre le travail demain sans perdre le contexte.
 
@@ -86,10 +86,28 @@ Fichiers en cours: <chemins séparés par virgule | aucun>
 Bloqué sur: <rien | description courte>
 Commande de reprise: <la 1re commande à lancer en reprenant | aucune>
 
-## Journal (append-only — 1 ligne par session, NE JAMAIS réécrire)
-
-- YYYY-MM-DD — <ce qui a été fait cette session, en 1 phrase>
+→ **Journal des sessions** (append-only) : [HANDOFF-journal.md](HANDOFF-journal.md) — non auto-chargé.
 ```
+
+## Étape 3bis — Journal (fichier frère, append-only)
+
+Le journal **ne vit plus dans HANDOFF.md** (v1.4 — budget contexte : HANDOFF est auto-chargé à
+chaque session et le journal grossit sans borne ; mesuré 25k tokens sur un projet d'un mois).
+
+1. Si `.claude/docs/HANDOFF-journal.md` n'existe pas → le créer :
+
+```markdown
+# Journal HANDOFF — append-only
+
+> 1 ligne par session, ajoutée par `/handoff`, **jamais réécrite**. Non auto-chargé : lu à la demande.
+
+## Journal
+
+```
+
+2. **Migration** (projet < v1.4) : si HANDOFF.md contient encore une section `## Journal` → déplacer
+   ses entrées telles quelles dans le journal (jamais les perdre), puis remplacer la section par le pointeur.
+3. **Appender** 1 ligne : `- YYYY-MM-DD — <ce qui a été fait cette session, en 1 phrase>`
 
 > Le **Continuation State** duplique volontairement l'essentiel de « Next » en grammaire fixe :
 > c'est le point de reprise **parseable** (par un agent frais ou un script) quand la prose ambiguë
@@ -123,10 +141,19 @@ Si HANDOFF n'a pas changé (rien de neuf) :
 
 - Skip l'écriture, juste timestamp update
 
+Budget contexte (si `/doc-health` est installé sur ce projet) :
+
+```bash
+[ -f .claude/skills/doc-health/scripts/context-budget.py ] && python3 .claude/skills/doc-health/scripts/context-budget.py --max 25000 --no-user | tail -3
+```
+
+- Seuil dépassé → 1 ligne au user avec le coupable (HANDOFF > 30 lignes ? code-map > 3k ? rule ré-importée ?)
+
 ## Anti-patterns à éviter
 
-- ❌ Écrire un roman (HANDOFF court = < 30 lignes ; le **Journal** est l'exception : il gagne 1 ligne/session)
-- ❌ Réécrire/écraser le **Journal** : on APPEND seulement (1 ligne/session) → l'arc complet reste reconstructible depuis le seul HANDOFF
+- ❌ Écrire un roman (HANDOFF court = **< 30 lignes**, il est auto-chargé à chaque session ; le **Journal** gagne 1 ligne/session mais dans `HANDOFF-journal.md`, pas ici)
+- ❌ Réécrire/écraser le **Journal** : on APPEND seulement (1 ligne/session) → l'arc complet reste reconstructible depuis le journal
+- ❌ Remettre le Journal dans HANDOFF.md « pour l'avoir sous les yeux » : c'est exactement ce qui gonfle le contexte
 - ❌ Dupliquer ce qui est déjà dans CHANGELOG (factuel) ou auto-memory (patterns)
 - ❌ Lister TOUS les commits (juste le sens général)
 - ❌ Mentionner des credentials/secrets
