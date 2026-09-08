@@ -3,6 +3,22 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.3.3] — 2026-09-08
+
+### Fixed
+
+- **`cleanup-for-type.py` : les purges post-cleanup respectent le contexte CODE markdown**
+  (bug vécu sur un projet généré 2026-09-08, reproduit sur les 5 profils) — dans
+  `.claude/rules/template-maintenance.md`, 3 blocs légitimes étaient perdus à chaque init :
+  `` `![](path)` `` (syntaxe citée en code inline → « lien mort »), `[path/to/spec](path)`
+  du pattern HANDOFF fencé (idem) et `## Contexte / ## Options considérées / ## Décision` du
+  pattern ADR fencé (repliés comme « sections vides »). Nouveau masque `_fenced()` (blocs
+  ``` / ~~~) + `_in_code_span()` partagés par `prune_dead_nav_links`, `_drop_empty_sections`,
+  `_drop_section` et `prune_dead_inventory` : **un bloc fencé est un exemple, jamais de la
+  navigation, de la structure ni de l'inventaire — aucune purge n'y touche** (y compris une
+  réf `` `/skill` `` mort citée dans un exemple). Garde-fou 7 + 4 assertions dans
+  `test/test_cleanup.py` (rouges sur l'ancien script).
+
 ## [1.3.2] — 2026-09-02
 
 ### Changed

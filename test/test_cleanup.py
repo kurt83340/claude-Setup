@@ -18,6 +18,9 @@ Garde-fous testés ici :
      purgé des skills supprimés (forme `/nom` backtickée UNIQUEMENT, jamais les chemins),
      compte « N skills cœur » recalé, sections mortes repliées (Agent perso, Pipelines,
      Agent teams), liens de nav morts recousus, pointeurs create-on-demand CONSERVÉS
+  7. contexte CODE markdown inviolable (bug 2026-09-08) — les purges de liens morts /
+     sections vides / inventaire ne touchent JAMAIS un bloc fencé (patterns HANDOFF/ADR)
+     ni un lien cité en code inline (`![](path)`) — 3 blocs légitimes perdus sur 5 profils
 
 Usage : python3 test/test_cleanup.py   (exit 0 = tout vert)
 """
@@ -124,6 +127,8 @@ MAINTENANCE_MD = """| `/init-from-template` ⭐ | UNE FOIS |
 
 Détails complets : [adr/README.md](../docs/adr/README.md)
 
+⚠️ `![](path)` dans un .md n'est PAS auto-suivi par Claude (syntaxe citée, pas un lien).
+
 ### Agent perso (`.claude/agents/`)
 
 | doc-maintainer | Task tool |
@@ -136,10 +141,30 @@ Détails complets : [adr/README.md](../docs/adr/README.md)
 
 > Source unique : [agent-teams.md](agent-teams.md)
 
+## Pattern HANDOFF / ADR (format minimal)
+
+```markdown
+# HANDOFF — YYYY-MM-DD
+
+**Spec en cours** : [path/to/spec](path)
+- `/spec` cité dans un EXEMPLE fencé (pas une rangée d'inventaire)
+
+## Contexte
+
+## Options considérées
+
+## Décision
+
+## Conséquences
+```
+
 ## Fin
 
 ok
 """
+
+FENCED_KEPT = ("[path/to/spec](path)", "- `/spec` cité dans un EXEMPLE fencé",
+               "## Contexte\n\n## Options considérées\n\n## Décision\n\n## Conséquences\n```")
 
 CADRAGE_MD = """# Cadrage
 
@@ -247,6 +272,10 @@ with tempfile.TemporaryDirectory() as td:
     ok("inventaire rules : ligne bootstrap purgée", "/init-from-template" not in tm)
     ok("rules : sections agents/teams + lien adr conservés",
        "Agent teams" in tm and "Agents disponibles" in tm and "adr/README.md" in tm)
+    ok("rules : `![](path)` en code inline conservé (syntaxe citée ≠ lien mort)",
+       "`![](path)`" in tm)
+    ok("rules : bloc fencé intact (lien-exemple, bullet, headings du pattern ADR)",
+       all(k in tm for k in FENCED_KEPT))
     nav = (g / "CLAUDE.md").read_text()
     ok("nav intacte : @-imports + liens vivants + pointeurs on-demand conservés",
        "@.claude/docs/ROADMAP.md" in nav and "[tasks]" in nav
@@ -335,7 +364,11 @@ with tempfile.TemporaryDirectory() as td:
     ok("cadrage : ligne pattern (TICKET-XXX) conservée", "TICKET-XXX" in cad)
     tm = (j / ".claude/rules/template-maintenance.md").read_text()
     ok("rules : rangée `/spec` purgée, `/handoff` conservée",
-       "`/spec" not in tm and "`/handoff" in tm)
+       "| `/spec` ⭐ |" not in tm and "`/handoff" in tm)
+    ok("rules : `![](path)` en code inline conservé malgré la purge nav",
+       "`![](path)`" in tm)
+    ok("rules : bloc fencé intact malgré sections repliées + inventaire/nav purgés",
+       all(k in tm for k in FENCED_KEPT))
     ok("rules : sections agents/teams repliées",
        "Agent perso" not in tm and "Agents disponibles" not in tm and "Agent teams" not in tm)
     ok("rules : lien adr mort purgé, section suivante intacte",

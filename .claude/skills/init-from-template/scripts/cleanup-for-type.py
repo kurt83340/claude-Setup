@@ -283,15 +283,49 @@ def _profile_skill_names(profile: dict) -> list:
             if (m := re.match(r"^\.claude/skills/([a-z0-9-]+)/$", rel))]
 
 
+_FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+
+
+def _fenced(lines: list) -> list:
+    """Masque ligne → bool : True si la ligne est DANS un bloc de code fencé (``` / ~~~),
+    fences comprises. Un bloc fencé est un EXEMPLE (pattern HANDOFF/ADR, commande) : ses
+    headings ne structurent pas le document, ses liens ne naviguent nulle part, ses
+    bullets ne sont pas de l'inventaire → AUCUNE purge n'y touche. Bug 2026-09-08 : dans
+    template-maintenance.md, `[path/to/spec](path)` (pattern HANDOFF) était retiré comme
+    lien mort et `## Contexte / ## Options considérées / ## Décision` (pattern ADR)
+    repliés comme sections vides — sur les 5 profils."""
+    mask, fence = [], None
+    for line in lines:
+        m = _FENCE_RE.match(line)
+        if fence is None:
+            if m:
+                fence = m.group(1)[0]
+            mask.append(m is not None)
+        else:
+            mask.append(True)
+            if m and m.group(1)[0] == fence:
+                fence = None
+    return mask
+
+
+def _in_code_span(line: str, pos: int) -> bool:
+    """True si `pos` tombe dans un span de code inline (`…`) — ex. `![](path)` cité
+    comme SYNTAXE (même bug 2026-09-08), pas comme lien à résoudre."""
+    return any(m.start() <= pos < m.end() for m in re.finditer(r"`[^`]+`", line))
+
+
 def _drop_section(text: str, heading_prefix: str) -> str:
     """Retire une section entière : du heading matché au prochain heading de niveau ≤
-    (ou séparateur `---`), exclus. Gère `##` comme `###`."""
+    (ou séparateur `---`), exclus. Gère `##` comme `###`. Les lignes fencées ne sont
+    jamais des headings/séparateurs (elles suivent le sort de leur section)."""
+    lines = text.split("\n")
     out, skipping, level = [], False, 0
-    for line in text.split("\n"):
-        m = re.match(r"(#{1,4}) ", line)
-        if skipping and ((m and len(m.group(1)) <= level) or line.startswith("---")):
+    for line, in_code in zip(lines, _fenced(lines)):
+        m = None if in_code else re.match(r"(#{1,4}) ", line)
+        if skipping and ((m and len(m.group(1)) <= level)
+                         or (not in_code and line.startswith("---"))):
             skipping = False
-        if not skipping and line.startswith(heading_prefix) and m:
+        if not skipping and m and line.startswith(heading_prefix):
             level = len(m.group(1))
             skipping = True
         if not skipping:
@@ -302,18 +336,22 @@ def _drop_section(text: str, heading_prefix: str) -> str:
 def _drop_empty_sections(text: str) -> str:
     """Replie les headings dont la section a été intégralement vidée par la purge (le
     prochain contenu non vide est un heading de niveau ≤ — ex. `### Audit` sans plus
-    aucun bullet). Une section dont il reste du texte (blockquote, prose) est conservée."""
+    aucun bullet). Une section dont il reste du texte (blockquote, prose) est conservée.
+    Un heading fencé (ex. `## Contexte` du pattern ADR) n'est ni candidat ni borne."""
     lines = text.split("\n")
     changed = True
     while changed:
         changed = False
+        fenced = _fenced(lines)
         out = []
         for i, line in enumerate(lines):
-            m = re.match(r"(#{2,4}) ", line)
+            m = None if fenced[i] else re.match(r"(#{2,4}) ", line)
             if m:
-                nxt = next((x for x in lines[i + 1:] if x.strip()), "")
-                nm = re.match(r"(#{1,4}) ", nxt)
-                if not nxt or nxt.startswith("---") or (nm and len(nm.group(1)) <= len(m.group(1))):
+                j = next((k for k in range(i + 1, len(lines)) if lines[k].strip()), None)
+                nxt = "" if j is None else lines[j]
+                nm = None if (j is None or fenced[j]) else re.match(r"(#{1,4}) ", nxt)
+                if j is None or (not fenced[j] and nxt.startswith("---")) \
+                        or (nm and len(nm.group(1)) <= len(m.group(1))):
                     changed = True
                     continue
             out.append(line)
@@ -353,8 +391,8 @@ def prune_dead_inventory(root: Path, profile: dict) -> None:
             continue
         text = p.read_text(encoding="utf-8")
         lines = text.split("\n")
-        kept = [l for l in lines
-                if not (pat.search(l) and l.lstrip().startswith(("-", "|")))]
+        kept = [l for l, in_code in zip(lines, _fenced(lines))
+                if in_code or not (pat.search(l) and l.lstrip().startswith(("-", "|")))]
         removed = len(lines) - len(kept)
         new = "\n".join(kept)
         if rel == ".claude/CLAUDE.md":
@@ -383,8 +421,10 @@ def prune_dead_nav_links(root: Path) -> None:
     """Purge des hubs de navigation (CLAUDE.md racine, cadrage/README.md) les liens
     markdown relatifs dont la cible vient d'être supprimée par le profil. Conserve les
     pointeurs create-on-demand (_ON_DEMAND_LINKS — fichiers créés par trigger, jamais
-    shippés) et les liens-patterns/exemples. Ligne sans plus aucun lien vivant →
-    retirée ; sinon seuls les liens morts sont retirés (séparateurs « · » recousus).
+    shippés) et les liens-patterns/exemples : hints `{{`/`XXX`/`00X`…, ET tout ce qui est
+    du CODE markdown — ligne dans un bloc fencé, lien dans un span inline `…` (syntaxe
+    citée, ex. `![](path)`). Ligne sans plus aucun lien vivant → retirée ; sinon seuls
+    les liens morts sont retirés (séparateurs « · » recousus).
     Greenfield uniquement (en brownfield, ces fichiers appartiennent à l'utilisateur)."""
     link_re = re.compile(r"\[[^\]]*\]\(([^)\s#]+)\)")
     for rel in ("CLAUDE.md", ".claude/docs/cadrage/README.md",
@@ -393,9 +433,15 @@ def prune_dead_nav_links(root: Path) -> None:
         if not p.exists():
             continue
         out, removed = [], 0
-        for line in p.read_text(encoding="utf-8").split("\n"):
+        lines = p.read_text(encoding="utf-8").split("\n")
+        for line, in_code in zip(lines, _fenced(lines)):
+            if in_code:  # bloc fencé = exemple, jamais de la navigation
+                out.append(line)
+                continue
             spans, alive = [], 0
             for m in link_re.finditer(line):
+                if _in_code_span(line, m.start()):
+                    continue  # syntaxe citée entre backticks, pas un lien à résoudre
                 target = m.group(1)
                 if target.startswith(("http", "mailto:", "/")) or \
                         any(h in target for h in _PATTERN_HINTS):
