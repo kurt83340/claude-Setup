@@ -71,6 +71,22 @@ if [ ! -f "$HANDOFF" ]; then
   exit 0
 fi
 
+# Garde-fou TAILLE (v1.4.1) — HANDOFF est auto-chargé à CHAQUE session (@-import), cible < 30 lignes.
+# Vécu 2026-09-16 (projet hors template) : 55 sections datées empilées → 175 Ko rechargés à chaque
+# appel, plafond 1M dépassé à la reprise. Seuil 12 000 octets (~6k tokens) ; une fois par session.
+MAX_BYTES="${CLAUDE_HANDOFF_MAX_BYTES:-12000}"
+SIZE=$(stat -c %s "$HANDOFF" 2>/dev/null || stat -f %z "$HANDOFF" 2>/dev/null || echo 0)
+if [ "$MAX_BYTES" -gt 0 ] && [ "$SIZE" -gt "$MAX_BYTES" ]; then
+  SID=$(printf '%s' "$INPUT" | python3 -c 'import json,sys,re; print(re.sub(r"[^\w.-]","_",str(json.load(sys.stdin).get("session_id","nosession"))))' 2>/dev/null || echo nosession)
+  MARK="$CWD/.claude/.cache/handoff-size-warned-$SID"
+  if [ ! -f "$MARK" ]; then
+    mkdir -p "$CWD/.claude/.cache" 2>/dev/null && : > "$MARK"
+    LINES=$(wc -l < "$HANDOFF" 2>/dev/null | tr -d ' ')
+    echo "{\"systemMessage\": \"📏 HANDOFF.md fait $((SIZE / 1024)) Ko / ${LINES} lignes — auto-chargé à chaque session (cible < 30 lignes). /handoff le condense : l'historique part dans HANDOFF-journal.md.\"}"
+    exit 0
+  fi
+fi
+
 # Âge en secondes
 NOW=$(date +%s)
 MTIME=$(stat -c %Y "$HANDOFF" 2>/dev/null || stat -f %m "$HANDOFF" 2>/dev/null || echo "$NOW")

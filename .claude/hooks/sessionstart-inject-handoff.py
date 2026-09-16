@@ -6,7 +6,7 @@ SessionStart hook — deux flux d'injection selon la source :
    re-inject le snapshot pré-compaction pointé par le marker
    /tmp/claude-handoff-marker-<session_id>.json (écrit par precompact-snapshot-handoff.py).
 
-2. source="startup" (matcher startup) — filet « n'oublie rien » :
+2. source="startup" (matcher startup) — filet « n'oublie rien » (+ flux 3 : filet budget v1.4.1) :
    si .claude/.cache/session-end-snapshot.md (écrit par sessionend-snapshot.py) est
    PLUS FRAIS que .claude/docs/HANDOFF.md → la session précédente s'est fermée sans
    /handoff → injecter le snapshot. Dans TOUS les cas, le consommer (unlink) pour ne
@@ -19,6 +19,7 @@ Stdout = injecté automatiquement dans le contexte par Claude Code (documenté).
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -114,6 +115,48 @@ def rearm_codemap_injection(data) -> None:
         pass
 
 
+BUDGET_MAX_TOK = 25000  # override : CLAUDE_CONTEXT_BUDGET_MAX=<tok> (0 = désactivé)
+
+
+def warn_context_budget(data) -> None:
+    """Flux 3 (v1.4.1) — filet budget au démarrage : si la surface AUTO-CHARGÉE (CLAUDE.md +
+    @-imports + rules non scopées) dépasse le seuil, le dire à Claude (stdout = contexte) avec
+    les coupables et le remède. Claude Code affiche bien une notice native « Large <fichier>
+    will impact performance (N chars > seuil) », mais rien n'en découle. Vécu 2026-09-16 sur un
+    projet hors template : 13 imports, 780 Ko → plafond 1M dépassé à la reprise, session bloquée.
+    Silencieux si context-budget.py est absent (profil script-jetable) ou si le seuil est à 0."""
+    try:
+        max_tok = int(os.environ.get("CLAUDE_CONTEXT_BUDGET_MAX", BUDGET_MAX_TOK))
+    except ValueError:
+        max_tok = BUDGET_MAX_TOK
+    if max_tok <= 0:
+        return
+    cwd = Path(data.get("cwd", os.getcwd()))
+    script = cwd / ".claude" / "skills" / "doc-health" / "scripts" / "context-budget.py"
+    if not script.is_file():
+        return
+    try:
+        r = subprocess.run([sys.executable, str(script), "--root", str(cwd), "--json", "--no-user"],
+                           capture_output=True, text=True, timeout=10)
+        j = json.loads(r.stdout)
+    except Exception:
+        return
+    total = int(j.get("total_tok", 0))
+    if total <= max_tok:
+        return
+    top = sorted(j.get("files", []), key=lambda f: -f.get("tok", 0))[:3]
+    lines = [f"- {f['tok']} tok  `{f['path']}`" + (f" → {f['remedy']}" if f.get("remedy") else "")
+             for f in top]
+    print(f"""## 📏 Budget de contexte dépassé — {total} tokens auto-chargés (seuil {max_tok})
+
+Cette session démarre lourde : CLAUDE.md, ses `@-imports` et les rules non scopées pèsent ~{total} tokens
+(estimation chars/2), rechargés à CHAQUE appel API. Coupables :
+{chr(10).join(lines)}
+
+→ Signale-le à l'utilisateur en 1 ligne et propose `/doc-health` (Étape 0) — projet < v1.4 : `slim-context.py`
+du template. Ne modifie aucun fichier sans son accord.""")
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -122,6 +165,7 @@ def main():
 
     if data.get("source") == "startup":
         inject_session_end_net(data)
+        warn_context_budget(data)
     else:
         rearm_codemap_injection(data)
         inject_compact_marker(data)

@@ -240,6 +240,20 @@ if has_git:
     (sb / ".claude/archived").unlink()
 else:
     ok("git absent (skip test rappel)", True)
+# garde-fou TAILLE (v1.4.1) : HANDOFF > 12 000 octets → rappel même s'il est FRAIS, une fois par session
+ho.write_text("# HANDOFF\n" + ("## 15/09 — preuve empilée\n\n- bla bla bla bla bla\n" * 400))
+os.utime(ho, None)
+r6 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "S1"}, sb)
+ok("HANDOFF > 12 Ko (frais) → rappel taille avec Ko/lignes", "📏" in r6.stdout and "Ko" in r6.stdout and "HANDOFF-journal" in r6.stdout)
+r7 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "S1"}, sb)
+ok("même session → rappel taille une seule fois", r7.stdout.strip() == "")
+r8 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "S2"}, sb)
+ok("autre session → rappel taille à nouveau", "📏" in r8.stdout)
+r9 = subprocess.run(["bash", str(HOOKS / "stop-handoff-reminder.sh")],
+                    input=json.dumps({"cwd": str(sb), "session_id": "S3"}), capture_output=True, text=True,
+                    cwd=sb, env=dict(os.environ, CLAUDE_HANDOFF_MAX_BYTES="0"))
+ok("CLAUDE_HANDOFF_MAX_BYTES=0 → garde-fou taille désactivé", "📏" not in r9.stdout)
+ho.write_text("# HANDOFF\n")
 shutil.rmtree(sb, ignore_errors=True)
 
 # 6. sessionend-snapshot → filet fin de session (cache, overwrite, reason rendu)
@@ -275,6 +289,25 @@ ok("snapshot purgé quand même (consume-once)", not snap.exists())
 r3 = run_hook("sessionstart-inject-handoff.py",
               {"session_id": "n3", "cwd": str(sb), "source": "startup"}, sb)
 ok("pas de snapshot → exit 0 silencieux", r3.returncode == 0 and r3.stdout.strip() == "")
+# filet BUDGET (v1.4.1) : context-budget.py présent + surface auto-chargée > 25k tok → avertissement
+BUDGET = ROOT / ".claude/skills/doc-health/scripts/context-budget.py"
+(sb / ".claude/skills/doc-health/scripts").mkdir(parents=True, exist_ok=True)
+shutil.copy2(BUDGET, sb / ".claude/skills/doc-health/scripts/context-budget.py")
+(sb / "CLAUDE.md").write_text("# P\n\n- Reprise : @.claude/docs/HANDOFF.md\n")
+ho.write_text("# HANDOFF\n" + ("## 15/09 — section empilée\n\n- bla bla bla bla\n" * 1500))  # ≈ 60 Ko ≈ 30k tok est.
+r4 = run_hook("sessionstart-inject-handoff.py", {"session_id": "n4", "cwd": str(sb), "source": "startup"}, sb)
+ok("surface auto-chargée > seuil → avertissement budget avec le coupable (HANDOFF) et le remède",
+   "Budget de contexte dépassé" in r4.stdout and "HANDOFF.md" in r4.stdout and "journal" in r4.stdout.lower())
+ho.write_text("# HANDOFF\ncourt\n")
+r4b = run_hook("sessionstart-inject-handoff.py", {"session_id": "n5", "cwd": str(sb), "source": "startup"}, sb)
+ok("surface sous le seuil → silence", r4b.stdout.strip() == "")
+ho.write_text("# HANDOFF\n" + ("x" * 70000) + "\n")
+r4c = subprocess.run([sys.executable, str(HOOKS / "sessionstart-inject-handoff.py")],
+                     input=json.dumps({"session_id": "n6", "cwd": str(sb), "source": "startup"}),
+                     capture_output=True, text=True, cwd=sb, env=dict(os.environ, CLAUDE_CONTEXT_BUDGET_MAX="0"))
+ok("CLAUDE_CONTEXT_BUDGET_MAX=0 → filet budget désactivé", r4c.stdout.strip() == "")
+shutil.rmtree(sb / ".claude/skills", ignore_errors=True)
+ho.write_text("# HANDOFF\n")
 # routing : source="compact" → flux marker (comportement historique préservé)
 run_hook("precompact-snapshot-handoff.py",
          {"session_id": "cmp", "transcript_path": "", "cwd": str(sb), "trigger": "auto"}, sb)

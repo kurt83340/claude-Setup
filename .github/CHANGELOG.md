@@ -3,6 +3,30 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.4.1] — 2026-09-16
+
+### Fixed — le HANDOFF ne peut plus redevenir un journal empilé
+
+Vécu 2026-09-16 sur un projet hors template : `CLAUDE.md` importait 13 docs (780 Ko ≈ 200k tokens),
+HANDOFF de **175 Ko** (55 sections datées « préservées » session après session), reprise de session →
+`prompt is too long` (1 004 513 > 1 000 000), session bloquée, plafond de dépenses consommé. Claude Code
+affiche bien la notice native « Large <fichier> will impact performance (N chars > seuil) » au
+démarrage, mais rien n'en découle. Vérifié sur le template v1.4.0 : `CHANGELOG`/`lecons`/`ROADMAP`
+sont des liens (jamais importés), 2 `@` seulement ; restait la **règle `/handoff` « préserver les
+sections custom »**, exactement le mécanisme d'empilement.
+
+- **`/handoff` Étape 2** : HANDOFF **réécrit** au format strict, jamais appendé ; sections hors format
+  conservées seulement si non datées ET fichier < 30 lignes, sinon **déplacées** dans
+  `HANDOFF-journal.md` sous `## Archive <date>` (jamais supprimées, dit dans le diff).
+- **Hook Stop — garde-fou taille** : HANDOFF > 12 000 octets (~6k tokens) → `systemMessage` avec
+  Ko/lignes et le remède, même si le fichier est frais, **une fois par session**
+  (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off).
+- **Hook SessionStart(startup) — filet budget** : si `context-budget.py` est présent et que la surface
+  auto-chargée dépasse 25k tokens, injecte les 3 coupables + remède (Claude le signale en 1 ligne et
+  propose `/doc-health` / `slim-context.py`, sans rien modifier). `CLAUDE_CONTEXT_BUDGET_MAX` (0 = off).
+  Silencieux sur `script-jetable` (pas de doc-health).
+- Tests : +7 assertions `test_hooks.py` (taille 1×/session, désactivation, budget dépassé/sous seuil/off).
+
 ## [1.4.0] — 2026-09-08
 
 ### Changed — budget de contexte (« le template lit trop au démarrage »)

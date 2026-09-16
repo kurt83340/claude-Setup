@@ -551,10 +551,10 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 | `PreCompact`               | Avant compaction du contexte  | Snapshot dans `.claude/.cache/` (non-versionné) + marker `/tmp/`      |
 | `SessionStart(compact)`    | Reprise après compaction      | Re-inject le snapshot                     |
 | `SessionEnd`               | À CHAQUE fin de session       | Filet « n'oublie rien » : snapshot d'état dans `.claude/.cache/` |
-| `SessionStart(startup)`    | Nouveau démarrage             | Injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme |
-| `PreToolUse(Edit\|Write)`  | Avant Edit/Write fichier code | Réinjecte les règles de couplage + gotchas (non-déductibles) |
+| `SessionStart(startup)`    | Nouveau démarrage             | Injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme ; **filet budget** (v1.4.1) : surface auto-chargée > 25k tokens → coupables + remède injectés (`CLAUDE_CONTEXT_BUDGET_MAX`, 0 = off) |
+| `PreToolUse(Edit\|Write)`  | Avant Edit/Write fichier code | Couplage + intention **1×/session** (ré-armé après compaction) + gotchas **ciblant le fichier** (v1.4) |
 | `PostToolUse(Edit\|Write)` | Après Edit/Write fichier      | Détecte API_KEY/deploy/RGPD → flag growth |
-| `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h        |
+| `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h ; **garde-fou taille** (v1.4.1) : HANDOFF > 12 Ko → rappel 1×/session (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off) |
 | `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (plugin `agent-teams`) | Trace JSON dans `.claude/.cache/team-progress.log` |
 
 **Tous non-bloquants** : si un hook échoue, Claude continue.

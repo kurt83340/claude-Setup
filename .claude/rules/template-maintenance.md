@@ -88,6 +88,8 @@ Le « n'oublie rien » durable passe par la **promotion** vers les couches versi
 > malgré son `paths:`). Règles : HANDOFF < 30 lignes (journal à part), code-map < 3k tokens (gotchas à
 > part), ROADMAP en lien simple, **jamais de `@` sur une rule scopée**. Contrôle :
 > `python3 .claude/skills/doc-health/scripts/context-budget.py` (Étape 0 de `/doc-health`, seuil 25k).
+> Filets automatiques (v1.4.1) : hook Stop → HANDOFF > 12 Ko ; hook SessionStart → surface > 25k tokens.
+> `/handoff` **réécrit** HANDOFF (jamais d'append) et archive les sections hors format dans le journal.
 
 ## Les fichiers semi-stables (modifiés sur événements importants)
 
