@@ -37,7 +37,7 @@ import os
 import sys
 from pathlib import Path
 
-from snapshot_common import (build_snapshot, git_fingerprint, pop_session_start,
+from snapshot_common import (build_snapshot, git_fingerprint, pop_session_start, run,
                              transcript_started_at, work_after)
 
 
@@ -82,6 +82,8 @@ def main():
             kind = "fin de session — travail APRÈS le dernier /handoff"
         elif start and start.get("git") and start["git"] == fingerprint:
             sys.exit(0)  # session sans trace git → rien à rattraper
+        elif not start and not run("git status --porcelain -- . ':(exclude).claude'", cwd=cwd):
+            sys.exit(0)  # sans marqueur de début (hook SessionStart absent) : arbre propre → rien à rattraper
 
         cache_dir.mkdir(parents=True, exist_ok=True)
         snapshot = build_snapshot(kind, reason, session_id, transcript_path, cwd)

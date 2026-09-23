@@ -144,7 +144,7 @@ def work_after(cwd, since: float) -> bool:
             files.add(line.strip())
     for rel in files:
         try:
-            if (Path(cwd) / rel).stat().st_mtime > since + 1:
+            if (Path(cwd) / rel).stat().st_mtime > since:
                 return True
         except OSError:
             continue

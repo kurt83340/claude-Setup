@@ -58,6 +58,7 @@ SCOPE_FILES = (".claude/settings.json", ".claude/CLAUDE.md", ".claude/USAGE.md",
                ".claude/STRUCTURE.md", ".claude/template-version", "CLAUDE.md", ".gitignore",
                ".pre-commit-config.yaml", "workflows/README.md")
 PROFILES = ("script-jetable", "automation-n8n", "python-app", "web-app", "bdd-migration", "other")
+BOOTSTRAP_PREFIXES = (".claude/skills/init-from-template/", ".claude/skills/adopt-template/")
 TEAM_RULE = ".claude/rules/agent-teams.md"
 TEAM_RULE_SRC = "plugins/agent-teams/skills/team/agent-teams-rule.md"  # (v1.5.0+) dans le dépôt
 TEAM_ENV = "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
@@ -455,7 +456,8 @@ HANDOFF_TEAM_NOTE = re.compile(r"^> 🧑‍🤝‍🧑 \*\*Multi-agent / agent t
 def migrate_1_5_0(project: Path, raw_target: Path, dry: bool, log: list):
     # Les skills v1.4.x (/debug, /feature-done, protocole d'équipe) écrivaient encore des gotchas dans
     # code-map.md (auto-chargée) : on rejoue la migration du budget (idempotente) pour les sortir.
-    migrate_1_4_0(project, raw_target, dry, log)
+    if not any(m.startswith("migration 1.4.0") for m in log):  # pas deux fois dans le même upgrade
+        migrate_1_4_0(project, raw_target, dry, log)
     ho = project / ".claude" / "docs" / "HANDOFF.md"
     if ho.is_file():
         text = ho.read_text(encoding="utf-8")
@@ -563,6 +565,13 @@ def plan_and_apply(a) -> dict:
         # présent le trahit — l'init greenfield les retire toujours, l'adoption les laisse.
         stack = project / ".claude" / "docs" / "stack.md"
         adopted_mark = stack.is_file() and "adopté le" in stack.read_text(encoding="utf-8", errors="replace")
+        # L'init greenfield PURGE les lignes d'inventaire des skills bootstrap ; l'adoption (brownfield)
+        # les laisse — un indice qui survit au retrait des skills bootstrap eux-mêmes.
+        for idx in (".claude/USAGE.md", ".claude/CLAUDE.md", ".claude/rules/template-maintenance.md"):
+            f = project / idx
+            if f.is_file() and re.search(r"^\s*[-|].*`/(adopt-template|init-from-template)",
+                                         f.read_text(encoding="utf-8", errors="replace"), re.M):
+                adopted_mark = True
         if a.mode:
             brownfield = a.mode == "brownfield"
         else:
@@ -628,6 +637,8 @@ def plan_and_apply(a) -> dict:
                 continue
             if B is None and T is None:
                 continue  # fichier propre au projet (skill, hook, rule maison) — jamais touché
+            if O is None and rel.startswith(BOOTSTRAP_PREFIXES):
+                continue  # skills bootstrap retirés après adoption (proposé par /adopt-template) : respecté
             if rel == ".claude/settings.json" and O is not None and T is not None:
                 try:
                     oj = json.loads(O)

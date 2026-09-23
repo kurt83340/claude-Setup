@@ -410,6 +410,9 @@ if shutil.which("git"):
     (sb / "app.py").write_text("print(5)\n"); ho.write_text("# HANDOFF\nv3\n")
     end("NOMARK", transcript=str(tr))
     ok("F. sans marqueur : début lu dans le transcript → /handoff détecté, pas de filet", not net.exists())
+    subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "F"], cwd=sb)
+    end("NOMARK2", transcript=str(tr))
+    ok("F. sans marqueur ni /handoff, arbre propre → pas de filet (hook SessionStart absent)", not net.exists())
     # G. fork (/fork, /branch, --fork-session) : marqueur posé, pas de fausse alerte ensuite
     net.unlink(missing_ok=True) if net.exists() else None
     rF = start("FORK", source="fork")
