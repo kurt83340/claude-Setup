@@ -92,13 +92,41 @@ tokens sur chaque session de chaque projet. La rule vit dans le plugin ; le 1er 
 de travail » autonome (en mode panes, le corps d'agent **remplace** le system prompt par défaut).
 Plugin `agent-teams` 1.1.0.
 
+### Fixed — revue adverse et simulation (avant publication)
+
+Une relecture adverse à contexte frais (15 constats, tous reproduits) et la simulation de croissance
+ont trouvé, puis fait corriger avant publication :
+
+- **upgrade** : hooks sans `command` (`prompt`, `agent`, `http`, `mcp_tool`) ou à `if` différents
+  qui s'écrasaient à la fusion (un garde `git push` disparaissait) → identité = handler complet ;
+  écritures à travers un lien symbolique (dossier partagé réécrit hors du dépôt) → refusées ;
+  faux conflits (titre du CLAUDE.md retouché, fichiers propres au projet, skills bootstrap retirés
+  après adoption) ; retraits volontaires réintroduits à chaque upgrade d'un projet adopté ;
+  conflits oubliés → mémorisés dans le lock jusqu'à `--ack-conflicts` ; gotchas transversaux
+  migrés là où le hook ne les lisait plus ; toute erreur → code 2.
+- **hooks** : source `fork` (/fork, /branch) qui ramenait la fausse alerte ; travail fait APRÈS un
+  /handoff de mi-session ; filet d'une session parallèle supprimé ; projets hors git ; résumé de
+  compaction et messages de teammates pris pour des messages humains ; entrée d'exemple du gabarit
+  (`{{…}}`) injectée à chaque fichier ; workflows n8n `.json` jamais ciblés ; marqueurs `$TMPDIR`
+  jamais purgés.
+- **réglages** : `secrets.*` qui masquait `src/lib/secrets.ts` ; `git branch -df` qui contournait
+  la confirmation de suppression.
+- **migration 1.4.0** : prose de « Quand mettre à jour » perdue ; gotchas v1.4.x restés
+  auto-chargés. Cible HANDOFF « < 30 lignes » intenable (le format strict en fait 39) → ≤ 40.
+
 ### Tests
 
-`test_hooks` 62 → 87 (séquences réelles startup → travail → SessionEnd → startup, fixture de
-transcript réaliste, purge) · `test_cleanup` 80 → 86 · `test_skills` 148 → 156 ·
-`test_context_budget` 33 → 34 · **`test_upgrade`** (nouveau, 47) · **`sim-growth`** (nouveau :
-projets qui grossissent session après session) · **`live-hooks-check`** (nouveau, manuel : vraies
-sessions `claude -p`) · harnais Phase 0 × 6 profils.
+`test_hooks` 62 → 99 (séquences réelles startup → travail → SessionEnd → startup, fork, sessions
+parallèles, fixture de transcript réaliste, purge) · `test_cleanup` 80 → 86 · `test_skills` 148 → 166 ·
+`test_context_budget` 33 → 38 · **`test_upgrade`** (nouveau, 66 : les 17 versions taguées, personnalisations,
+conflits, adoption, liens symboliques, hooks exotiques) · **`sim-growth`** (nouveau : 60 sessions ×
+v1.3.3 vs 1.5.0 + upgrade à mi-vie + 6 profils, 72/72 ; `--quick` en CI) · **`live-hooks-check`**
+(nouveau, manuel : vraies sessions `claude -p`, 10/10) · harnais Phase 0 × 6 profils.
+
+Mesuré par `sim-growth` (60 sessions, même croissance seedée, python-app) : budget au démarrage
+**29,3k → 38,5k tokens (v1.3.3) contre 6,4k → 6,6k (1.5.0)** ; fausses alertes du filet 50 → 0 ;
+snapshots sans message humain 62/62 → 0/12 ; HANDOFF final 373 → 37 lignes ; injections PreToolUse
+6,6k → 0,6k caractères par session.
 
 ## [1.4.1] — 2026-09-16
 
