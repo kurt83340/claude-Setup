@@ -146,7 +146,7 @@ def step_handoff_journal(root: Path) -> None:
 
 
 # ── Étape 3 : Gotchas code-map ──────────────────────────────────────────────────────────────
-GOTCHAS_HEADER = """# Gotchas — pièges non évidents (injectés à la demande)
+GOTCHAS_INTRO = """# Gotchas — pièges non évidents (injectés à la demande)
 
 > **Non auto-chargé** (budget contexte v1.4). Le hook `pretooluse-inject-codemap.py` injecte,
 > à l'édition d'un fichier de code, UNIQUEMENT les entrées qui **le ciblent** — une fois
@@ -154,16 +154,42 @@ GOTCHAS_HEADER = """# Gotchas — pièges non évidents (injectés à la demande
 > nom de fichier ou un dossier : `` `src/sync/notion.py` ``, `` `notion.py` ``, `` `src/sync/` ``.
 > Une entrée sans chemin cité n'est injectée que sous un heading « Globaux » (rare et court).
 
-## Globaux (injectés pour TOUTE édition de code — max 5 lignes)
-
-## Par zone
-
 """
 GOTCHAS_POINTER = """## Gotchas → `code-map-gotchas.md`
 
 Les pièges non évidents vivent dans [code-map-gotchas.md](code-map-gotchas.md) (**non auto-chargé**) :
 le hook PreToolUse n'injecte que ceux qui citent le fichier en cours d'édition. Ici ne restent que
 la vue macro, le couplage et l'intention — ce fichier est auto-chargé à chaque session : < 3k tokens."""
+
+
+def _has_path(entry: str) -> bool:
+    """Même critère que le hook PreToolUse : un token en backticks qui ressemble à un chemin/fichier."""
+    toks = re.findall(r"`([^`\n]+)`", entry)
+    return any(("/" in t or "." in t) and " " not in t.strip() for t in toks)
+
+
+def write_gotchas(gf: Path, text: str, origin: str) -> None:
+    """Écrit des gotchas migrés dans code-map-gotchas.md en les RANGEANT : une entrée sans chemin
+    cité (piège transversal, injecté à CHAQUE édition par le hook < 1.4) va sous un heading
+    « Globaux » — sinon le hook ≥ 1.4 ne l'injecterait plus jamais (v1.5.0) ; les autres sous
+    « Par zone »."""
+    entries = split_entries(text)
+    rest = text
+    for e in entries:
+        rest = rest.replace(e, "", 1)
+    rest = re.sub(r"\n{3,}", "\n\n", rest).strip("\n")
+    glob = [e for e in entries if not _has_path(e)]
+    zone = [e for e in entries if _has_path(e)] + ([rest] if rest.strip() else [])
+    if gf.is_file():
+        out = gf.read_text(encoding="utf-8").rstrip("\n")
+        if glob:
+            out += f"\n\n## Globaux — migrés depuis {origin}\n\n" + "\n".join(glob)
+        if zone:
+            out += f"\n\n## Migrés depuis {origin}\n\n" + "\n".join(zone)
+        write(gf, out + "\n")
+    else:
+        write(gf, GOTCHAS_INTRO + "## Globaux (injectés pour TOUTE édition de code — max 5 lignes)\n\n"
+              + ("\n".join(glob) + "\n\n" if glob else "") + "## Par zone\n\n" + "\n".join(zone) + "\n")
 
 
 def step_codemap_gotchas(root: Path) -> None:
@@ -206,11 +232,7 @@ def step_codemap_gotchas(root: Path) -> None:
         log("⏭ 3. code-map.md : gotchas déjà externalisés")
         step_codemap_update_section(root)  # 3b indépendante : des ⚠️ ont pu s'empiler depuis
         return
-    body = "\n\n".join(bodies)
-    if gf.is_file():
-        write(gf, gf.read_text(encoding="utf-8").rstrip("\n") + "\n\n## Migrés depuis code-map.md\n\n" + body + "\n")
-    else:
-        write(gf, GOTCHAS_HEADER + body + "\n")
+    write_gotchas(gf, "\n\n".join(bodies), "code-map.md")
     write(cm, text)
     log(f"✅ 3. code-map.md : § Gotchas ({moved_chars} chars) → code-map-gotchas.md + pointeur")
     step_codemap_update_section(root)
@@ -256,12 +278,7 @@ def step_codemap_update_section(root: Path) -> None:
     for e in moved:
         new_body = new_body.replace(e + "\n", "", 1) if (e + "\n") in new_body else new_body.replace(e, "", 1)
     new_body = re.sub(r"\n{3,}", "\n\n", new_body).strip("\n")
-    if gf.is_file():
-        write(gf, gf.read_text(encoding="utf-8").rstrip("\n")
-              + "\n\n## Migrés depuis « Quand mettre à jour ce fichier » (à classer par zone, chemin en backticks)\n\n"
-              + "\n".join(moved) + "\n")
-    else:
-        write(gf, GOTCHAS_HEADER + "## Migrés depuis « Quand mettre à jour ce fichier » (à classer par zone)\n\n" + "\n".join(moved) + "\n")
+    write_gotchas(gf, "\n".join(moved), "« Quand mettre à jour ce fichier »")
     new_section = head + "\n\n" + new_body
     write(cm, (before.rstrip("\n") + "\n\n" + new_section.rstrip("\n") + "\n\n" + after.lstrip("\n")).rstrip("\n") + "\n")
     log(f"✅ 3b. code-map.md : {len(moved)} entrée(s) ⚠️/longues de « Quand mettre à jour » → code-map-gotchas.md ({sum(len(e) for e in moved)} chars)")

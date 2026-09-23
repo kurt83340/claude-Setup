@@ -237,6 +237,24 @@ with tempfile.TemporaryDirectory() as td:
        "note de prose à conserver" in cmt and "deuxième ligne de la note" in cmt
        and "Nouvelle règle" in cmt and "Découpage modifié" in cmt)
 
+    print("\n== 5a-bis. gotchas migrés : sans chemin → « Globaux » (sinon plus jamais injectés) ==")
+    q2 = tmp / "gotchas-globaux"
+    write(q2 / ".claude/docs/HANDOFF.md", "# HANDOFF\n")
+    write(q2 / "CLAUDE.md", "# P\n- @.claude/docs/HANDOFF.md\n")
+    write(q2 / ".claude/docs/code-map.md", "# CM\n\n## Gotchas (pièges non évidents)\n\n"
+          "- ⚠️ les montants sont en centimes partout, jamais en float\n"
+          "- ⚠️ `src/api/client.py` — l'API renvoie 200 même en erreur\n")
+    run(SLIM, "--root", str(q2), "--no-template-files")
+    g2 = (q2 / ".claude/docs/code-map-gotchas.md").read_text(encoding="utf-8")
+    ok("piège transversal (sans chemin) rangé sous « Globaux », piège ciblé sous « Par zone »",
+       g2.index("centimes") < g2.index("## Par zone") < g2.index("renvoie 200")
+       and g2.index("## Globaux") < g2.index("centimes"))
+    hook = ROOT / ".claude/hooks/pretooluse-inject-codemap.py"
+    r = subprocess.run([sys.executable, str(hook)], input=json.dumps({"session_id": "S", "tool_name": "Edit",
+                        "tool_input": {"file_path": str(q2 / "src/other.py")}, "cwd": str(q2)}),
+                       capture_output=True, text=True)
+    ok("… et le hook l'injecte bien à l'édition d'un fichier de code quelconque", "centimes" in r.stdout)
+
     print("\n== 5b. Listing skills : nom + description seulement, hors disable-model-invocation ==")
     k = tmp / "skills-listing"
     write(k / "CLAUDE.md", "# P\n")

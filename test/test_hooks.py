@@ -515,5 +515,9 @@ r4 = run_hook("teamtask-log.py", {"hook_event_name": "TaskCreated", "cwd": "/non
 ok("cwd inexistant → exit 0 silencieux", r4.returncode == 0 and r4.stdout.strip() == "")
 shutil.rmtree(sb, ignore_errors=True)
 
+# Ménage : marqueurs PreCompact des sessions de test laissés dans $TMPDIR (sessions sans compaction suivie)
+for _sid in ("sess-A", "sess-B", "sess-M", "sess-OLD", "loop", "cmp", "unknown"):
+    (Path(tempfile.gettempdir()) / f"claude-handoff-marker-{_sid}.json").unlink(missing_ok=True)
+
 print(f"\n{'🎉 TOUS LES HOOKS OK' if FAIL == 0 else '⚠️  ÉCHEC'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

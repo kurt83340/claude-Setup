@@ -38,6 +38,9 @@ jobs:
       - name: Upgrade — toutes les versions taguées → version courante (merge 3 voies, migrations)
         run: python3 test/test_upgrade.py
 
+      - name: Simulation de croissance (v1.3.3 vs courante, upgrade à mi-vie, profils — mode rapide)
+        run: python3 test/sim-growth.py --quick
+
       - name: settings.json est un JSON valide
         run: python3 -m json.tool .claude/settings.json > /dev/null
 
