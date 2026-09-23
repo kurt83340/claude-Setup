@@ -13,7 +13,7 @@ SessionStart hook — flux selon la source :
    PLUS FRAIS que .claude/docs/HANDOFF.md → l'injecter. Dans TOUS les cas, le consommer
    (unlink) pour ne jamais réinjecter un filet périmé.
 
-3. source="startup" | "resume" | "clear" — marqueur de début de session (horodatage +
+3. source="startup" | "resume" | "clear" | "fork" — marqueur de début de session (horodatage +
    empreinte git) relu par sessionend-snapshot.py ; au startup, purge du cache par-session
    de plus de 7 jours.
 
@@ -93,9 +93,9 @@ def inject_session_end_net(data) -> None:
         if snap_mtime > handoff_mtime:
             content = snap.read_text(encoding="utf-8")[:5000]
             print(
-                f"""## ⚠️ Filet mémoire — session précédente fermée sans /handoff
+                f"""## ⚠️ Filet mémoire — la session précédente a laissé du travail non consigné dans HANDOFF.md
 
-Le snapshot auto de fin de session est plus récent que `.claude/docs/HANDOFF.md` (probable /handoff oublié) :
+Fermée sans /handoff (ou avec du travail après le dernier /handoff) — snapshot automatique de fin de session :
 
 {content}
 
@@ -174,7 +174,10 @@ def main():
 
     source = data.get("source")
     cwd = data.get("cwd", os.getcwd())
-    if source in ("startup", "resume", "clear"):
+    if source in ("compact", None):  # post-compaction (ou schéma historique sans « source »)
+        rearm_codemap_injection(data)
+        inject_compact_marker(data)
+    else:  # startup · resume · clear · fork (/fork, /branch, --fork-session) · futures sources
         if (Path(cwd) / ".claude").is_dir():
             if source == "startup":
                 purge_stale_cache(cwd)
@@ -182,9 +185,6 @@ def main():
         if source == "startup":
             inject_session_end_net(data)
             warn_context_budget(data)
-    else:
-        rearm_codemap_injection(data)
-        inject_compact_marker(data)
 
     sys.exit(0)
 

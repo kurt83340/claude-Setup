@@ -21,6 +21,7 @@ from pathlib import Path
 NOISE_PREFIXES = (
     "<command-", "<local-command", "<system-reminder", "<bash-", "<task-notification",
     "[Request interrupted", "This session is being continued from a previous conversation",
+    "<teammate-message", "<cross-session-message", "Another Claude session sent a message",
 )
 
 # Fichiers par-session du cache, purgés au démarrage passé ce délai (sinon 1 fichier/session
@@ -127,6 +128,27 @@ def git_fingerprint(cwd) -> str:
         except OSError:
             pass
     return h.hexdigest()
+
+
+def work_after(cwd, since: float) -> bool:
+    """Du travail (hors .claude/ — méthode, doc, cache) a-t-il été fait APRÈS `since` (epoch) ?
+    Fichiers modifiés non commités + fichiers des commits postérieurs, dont le mtime est > since.
+    Un simple commit de ce qui existait déjà au /handoff ne compte pas (mtimes inchangés)."""
+    files = set()
+    for line in run("git status --porcelain -- . ':(exclude).claude'", cwd=cwd).splitlines():
+        path = line[3:].strip().strip('"')
+        files.add(path.split(" -> ")[-1])
+    iso = datetime.fromtimestamp(since).strftime("%Y-%m-%d %H:%M:%S")
+    for line in run(f"git log --since='{iso}' --name-only --format= -- . ':(exclude).claude'", cwd=cwd).splitlines():
+        if line.strip():
+            files.add(line.strip())
+    for rel in files:
+        try:
+            if (Path(cwd) / rel).stat().st_mtime > since + 1:
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def mark_session_start(cwd, session_id) -> None:

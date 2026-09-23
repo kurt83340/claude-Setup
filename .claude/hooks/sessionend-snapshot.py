@@ -10,10 +10,12 @@ lui-même (event cleanup-only, doc officielle) — d'où le duo écriture-ici / 
 Quand NE PAS écrire (v1.5.0 — avant, le filet partait à CHAQUE fin de session : SessionEnd
 passe toujours APRÈS /handoff, donc le snapshot était toujours « plus frais » que HANDOFF.md
 → fausse alerte « session fermée sans /handoff » à chaque démarrage) :
-  1. HANDOFF.md modifié PENDANT la session (/handoff fait) → rien à rattraper ; un ancien
-     filet est périmé → supprimé.
+  1. HANDOFF.md mis à jour PENDANT la session (/handoff, /feature-done…) et aucun travail hors
+     .claude/ après cette mise à jour → rien à rattraper ; un filet plus ancien que ce HANDOFF est
+     périmé → supprimé (un filet plus récent, écrit par une session parallèle, est gardé).
   2. Session sans trace git (même HEAD, même état de l'arbre qu'au démarrage : question,
      lecture, revue…) → rien à rattraper.
+  3. Hors dépôt git → pas de trace mesurable → pas de filet.
 Début de session = marqueur posé par SessionStart (startup/resume/clear), à défaut la 1re
 entrée datée du transcript.
 
@@ -36,7 +38,7 @@ import sys
 from pathlib import Path
 
 from snapshot_common import (build_snapshot, git_fingerprint, pop_session_start,
-                             transcript_started_at)
+                             transcript_started_at, work_after)
 
 
 def main():
@@ -62,20 +64,27 @@ def main():
             started_at = transcript_started_at(transcript_path)
 
         handoff = Path(cwd) / ".claude" / "docs" / "HANDOFF.md"
-        if started_at is not None and handoff.is_file() \
-                and handoff.stat().st_mtime >= started_at:
-            # Cas 1 : /handoff fait pendant la session → pas de filet, l'ancien est périmé.
-            try:
-                net.unlink()
-            except OSError:
-                pass
-            sys.exit(0)
-
-        if start and start.get("git") and start["git"] == git_fingerprint(cwd):
-            sys.exit(0)  # Cas 2 : session sans trace git → rien à rattraper
+        fingerprint = git_fingerprint(cwd)
+        if not fingerprint:
+            sys.exit(0)  # hors dépôt git : pas de trace mesurable → pas de filet (sinon alerte à chaque démarrage)
+        kind = "fin de session"
+        h_mtime = handoff.stat().st_mtime if handoff.is_file() else None
+        if started_at is not None and h_mtime is not None and h_mtime >= started_at:
+            # HANDOFF mis à jour pendant la session (/handoff, /feature-done…) : filet seulement si du
+            # travail a suivi cette mise à jour (sinon l'état est consigné).
+            if not work_after(cwd, h_mtime):
+                try:  # un filet plus ANCIEN que ce HANDOFF est périmé ; un plus récent (autre session) reste
+                    if net.is_file() and net.stat().st_mtime <= h_mtime:
+                        net.unlink()
+                except OSError:
+                    pass
+                sys.exit(0)
+            kind = "fin de session — travail APRÈS le dernier /handoff"
+        elif start and start.get("git") and start["git"] == fingerprint:
+            sys.exit(0)  # session sans trace git → rien à rattraper
 
         cache_dir.mkdir(parents=True, exist_ok=True)
-        snapshot = build_snapshot("fin de session", reason, session_id, transcript_path, cwd)
+        snapshot = build_snapshot(kind, reason, session_id, transcript_path, cwd)
         net.write_text(snapshot, encoding="utf-8")
     except Exception:
         pass  # filet best-effort : ne jamais gêner la fermeture de session

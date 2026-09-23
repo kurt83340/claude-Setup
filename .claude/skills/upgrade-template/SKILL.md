@@ -46,7 +46,8 @@ python3 "$TPL/.claude/skills/upgrade-template/scripts/upgrade.py" --project . --
 ```
 
 (argument `vX.Y.Z` → ajouter `--to vX.Y.Z` ; sinon dernier tag.) Présente à l'utilisateur :
-versions (de → vers), profil (déduit ? → le faire confirmer, `--profile <type>` sinon), fichiers
+versions (de → vers), profil et mode (déduits ? → les faire confirmer ; `--profile <type>`,
+`--mode greenfield|brownfield` sinon), fichiers
 mis à jour / ajoutés / retirés / fusionnés, personnalisations gardées, **conflits**, changements de
 `settings.json`, migrations de la doc. Résume les nouveautés depuis `"$TPL/.github/CHANGELOG.md"`
 (sections entre les deux versions). **AskUserQuestion** : appliquer / ajuster le profil / annuler.
@@ -64,7 +65,15 @@ Code retour 0 = appliqué sans conflit · 1 = appliqué avec conflits · 2 = err
 Pour chaque fichier listé : lire la version du projet, `.claude/.cache/upgrade-<v>/<fichier>.template`
 (cible) et `<fichier>.merge` (merge annoté, s'il existe). Proposer une fusion qui garde l'intention
 locale ET le correctif amont, montrer le diff, **valider avec l'utilisateur**, puis écrire. Un hook
-ou un script fusionné se re-teste (`python3 -m py_compile …`, `bash -n …`).
+ou un script fusionné se re-teste (`python3 -m py_compile …`, `bash -n …`). Un chemin qui passe par
+un **lien symbolique** (dossier partagé hors projet) n'est jamais modifié : le signaler, ne pas forcer.
+
+Les conflits sont mémorisés dans `.claude/template-lock.json` (`pending_conflicts`, versionné) : une
+relance les re-signale (code 1) tant qu'ils ne sont pas acquittés. Une fois TOUS résolus :
+
+```bash
+python3 "$TPL/.claude/skills/upgrade-template/scripts/upgrade.py" --project . --template "$TPL" --ack-conflicts
+```
 
 ## Étape 5 — Vérifier et committer
 

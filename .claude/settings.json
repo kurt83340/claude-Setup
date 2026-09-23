@@ -5,10 +5,8 @@
       "Bash(ruff:*)",
       "Bash(mypy:*)",
       "Bash(alembic:*)",
-      "Bash(git branch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git tag:*)",
       "Bash(git worktree add:*)",
       "Bash(git worktree list:*)",
       "Bash(git worktree prune:*)",
@@ -26,11 +24,6 @@
       "Bash(git push:*)",
       "Bash(git reset:*)",
       "Bash(git merge:*)",
-      "Bash(git branch -d:*)",
-      "Bash(git branch -D:*)",
-      "Bash(git branch --delete:*)",
-      "Bash(git tag -d:*)",
-      "Bash(git tag --delete:*)",
       "Bash(git worktree remove:*)",
       "Bash(alembic downgrade:*)",
       "Bash(./scripts/deploy:*)"
@@ -42,7 +35,14 @@
       "Read(!.env.example)",
       "Read(!.env.sample)",
       "Read(!.env.template)",
-      "Read(secrets.*)",
+      "Read(!.env.*.example)",
+      "Read(!.env.*.sample)",
+      "Read(!.env.*.template)",
+      "Read(secrets.json)",
+      "Read(secrets.yaml)",
+      "Read(secrets.yml)",
+      "Read(secrets.toml)",
+      "Read(secrets.env)",
       "Read(*.pem)",
       "Read(*.key)"
     ]
@@ -62,7 +62,7 @@
     ],
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact",
+        "matcher": "startup|resume|clear|compact|fork",
         "hooks": [
           {
             "type": "command",

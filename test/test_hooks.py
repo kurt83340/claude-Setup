@@ -286,6 +286,14 @@ shutil.rmtree(sb, ignore_errors=True)
 print("\n== sessionend-snapshot ==")
 sb = sandbox()
 (sb / ".claude/docs/HANDOFF.md").write_text("# HANDOFF\n")
+r_ng = run_hook("sessionend-snapshot.py", {"session_id": "ng", "transcript_path": "", "cwd": str(sb), "reason": "other"}, sb)
+ok("hors dépôt git → aucun filet (sinon alerte à chaque démarrage)",
+   r_ng.returncode == 0 and not (sb / ".claude/.cache/session-end-snapshot.md").exists())
+for c in (["git", "init", "-q"], ["git", "config", "user.email", "t@t.t"], ["git", "config", "user.name", "t"]):
+    subprocess.run(c, cwd=sb)
+(sb / "app.py").write_text("x = 1\n")
+subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "init"], cwd=sb)
+(sb / "app.py").write_text("x = 2\n")  # trace git (sans marqueur de début : filet écrit)
 for _ in range(2):
     run_hook("sessionend-snapshot.py",
              {"session_id": "end-A", "transcript_path": "", "cwd": str(sb), "reason": "other"}, sb)
@@ -402,6 +410,35 @@ if shutil.which("git"):
     (sb / "app.py").write_text("print(5)\n"); ho.write_text("# HANDOFF\nv3\n")
     end("NOMARK", transcript=str(tr))
     ok("F. sans marqueur : début lu dans le transcript → /handoff détecté, pas de filet", not net.exists())
+    # G. fork (/fork, /branch, --fork-session) : marqueur posé, pas de fausse alerte ensuite
+    net.unlink(missing_ok=True) if net.exists() else None
+    rF = start("FORK", source="fork")
+    ok("G. fork → marqueur de début posé, aucune injection",
+       (sb / ".claude/.cache/session-start-FORK.json").is_file() and rF.stdout.strip() == "")
+    end("FORK")
+    ok("G. fork en lecture seule → aucun filet (la fausse alerte revenait avant)", not net.exists())
+    # H. travail APRÈS un /handoff en cours de session → filet
+    subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "etat"], cwd=sb)
+    start("H"); time.sleep(0.05)
+    ho.write_text("# HANDOFF\nv4 (/handoff à mi-session)\n"); time.sleep(1.2)
+    (sb / "app.py").write_text("print(6)\n")
+    end("H")
+    ok("H. travail après le /handoff de mi-session → filet écrit", net.exists()
+       and "APRÈS le dernier /handoff" in net.read_text(encoding="utf-8"))
+    # I. /handoff puis simple commit (rien de neuf) → pas de filet
+    net.unlink()
+    start("I"); time.sleep(0.05)
+    (sb / "app.py").write_text("print(7)\n"); time.sleep(1.2)
+    ho.write_text("# HANDOFF\nv5\n")
+    subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "apres handoff"], cwd=sb)
+    end("I")
+    ok("I. /handoff puis commit de l'existant → aucun filet", not net.exists())
+    # J. sessions parallèles : un filet PLUS RÉCENT que le HANDOFF (autre session) n'est pas supprimé
+    start("J"); time.sleep(0.05)
+    ho.write_text("# HANDOFF\nv6\n"); time.sleep(1.2)
+    net.write_text("filet d'une session parallèle\n")
+    end("J")
+    ok("J. filet d'une session parallèle (plus récent que le HANDOFF) conservé", net.exists())
     shutil.rmtree(sb, ignore_errors=True)
 else:
     ok("git absent (skip séquences)", True)
@@ -426,6 +463,8 @@ entries = [
     {"type": "user", "message": {"role": "user", "content": "[Request interrupted by user]"}},
     {"type": "user", "isCompactSummary": True, "message": {"role": "user", "content": "This session is being continued from a previous conversation that ran out of context."}},
     {"type": "user", "message": {"role": "user", "content": "This session is being continued from a previous conversation (sans drapeau)."}},
+    {"type": "user", "message": {"role": "user", "content": "<teammate-message teammate_id=\"x\">rapport</teammate-message>"}},
+    {"type": "user", "message": {"role": "user", "content": "Another Claude session sent a message:\n<teammate-message>…"}},
 ]
 fx.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in entries) + "\n{json cassé\n", encoding="utf-8")
 msgs = snapshot_common.extract_last_user_messages(str(fx))

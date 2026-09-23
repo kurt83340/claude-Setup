@@ -140,7 +140,9 @@ Projet généré avec une version plus ancienne du template → `/upgrade-templa
 - Toujours un `--dry-run` montré et validé d'abord, sur un arbre git propre, en un seul commit (`git revert` pour annuler).
 - **Conflit** (ex. modifié des deux côtés sans fusion propre) → ton fichier est **gardé tel quel** ; la version cible
   (`<fichier>.template`) et le merge annoté (`<fichier>.merge`) atterrissent dans `.claude/.cache/upgrade-<version>/`
-  avec un `REPORT.md` — Claude propose une fusion, tu valides.
+  avec un `REPORT.md` — Claude propose une fusion, tu valides. Les conflits restent inscrits dans le lock
+  (`pending_conflicts`) et sont re-signalés jusqu'à `--ack-conflicts`. Un chemin via lien symbolique
+  (dossier partagé) n'est jamais modifié.
 
 Projet **< 1.5** (le skill n'existe pas encore chez toi) : lancer le moteur du template le plus récent.
 

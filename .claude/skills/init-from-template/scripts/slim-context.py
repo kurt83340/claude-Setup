@@ -188,6 +188,20 @@ def step_codemap_gotchas(root: Path) -> None:
             bodies.append(body)
         pointer = "" if "## Gotchas →" in text else GOTCHAS_POINTER + "\n\n"
         text = (before.rstrip("\n") + "\n\n" + pointer + after.lstrip("\n")).rstrip("\n") + "\n"
+    # Puces empilées SOUS le pointeur « ## Gotchas → … » (skills v1.4.x qui écrivaient encore dans
+    # code-map.md) : la prose du pointeur reste, les puces partent dans code-map-gotchas.md.
+    ptr = split_section(text, "Gotchas →")
+    if ptr is not None:
+        before, section, after = ptr
+        head, _, pbody = section.partition("\n")
+        bullets = split_entries(pbody)
+        if bullets:
+            moved_chars += sum(len(b) for b in bullets)
+            bodies.append("\n".join(bullets))
+            for b in bullets:
+                pbody = pbody.replace(b + "\n", "", 1) if (b + "\n") in pbody else pbody.replace(b, "", 1)
+            pbody = re.sub(r"\n{3,}", "\n\n", pbody).strip("\n")
+            text = (before.rstrip("\n") + "\n\n" + head + "\n\n" + pbody + "\n\n" + after.lstrip("\n")).rstrip("\n") + "\n"
     if not moved_chars:
         log("⏭ 3. code-map.md : gotchas déjà externalisés")
         step_codemap_update_section(root)  # 3b indépendante : des ⚠️ ont pu s'empiler depuis

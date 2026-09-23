@@ -211,8 +211,10 @@ def infer_vars(raw_base: Path, project: Path) -> dict:
     """Retrouve les valeurs des placeholders CORE en alignant les fichiers bruts de la version de
     base (avec {{VAR}}) sur les fichiers rendus du projet (lignes appariées par difflib)."""
     found = {}
-    for rel in ("CLAUDE.md", ".claude/CLAUDE.md", "README.md", ".env.example", ".claude/docs/HANDOFF.md",
-                ".claude/docs/cadrage/README.md", ".claude/docs/stack.md"):
+    # Ordre = priorité : .claude/CLAUDE.md d'abord (fichier de méthode, rarement retouché) ; le titre du
+    # CLAUDE.md racine (souvent réécrit, et propre à l'utilisateur en brownfield) en dernier.
+    for rel in (".claude/CLAUDE.md", "README.md", ".env.example", ".claude/docs/stack.md",
+                ".claude/docs/cadrage/README.md", ".claude/docs/HANDOFF.md", "CLAUDE.md"):
         b, o = raw_base / rel, project / rel
         if not (b.is_file() and o.is_file()):
             continue
@@ -304,7 +306,9 @@ def merge_value(o, b, t, path: str, notes: list, protect: set):
         return o
     if o == b:
         if t is MISSING:
-            notes.append(f"settings `{path}` retiré (retiré du template)")
+            extra = (" — les agent teams sont opt-in : `/plugin install agent-teams@claude-setup` puis "
+                     "`/agent-teams:team` pour les réactiver") if path in (f"env.{TEAM_ENV}", "teammateMode") else ""
+            notes.append(f"settings `{path}` retiré (retiré du template){extra}")
         elif b is MISSING:
             notes.append(f"settings `{path}` ajouté")
         else:
@@ -317,13 +321,39 @@ def merge_value(o, b, t, path: str, notes: list, protect: set):
     return o
 
 
+def _hook_id(h) -> str:
+    """Identité d'un handler : tout le handler sauf ses réglages (timeout, statusMessage). Un hook
+    `prompt` / `agent` / `http` / `mcp_tool` n'a pas de `command`, et deux handlers peuvent partager
+    une commande avec des `if` différents : la commande seule ne suffit pas (hooks perdus avant)."""
+    if not isinstance(h, dict):
+        return json.dumps(h, sort_keys=True, ensure_ascii=False)
+    return json.dumps({k: v for k, v in h.items() if k not in ("timeout", "statusMessage")},
+                      sort_keys=True, ensure_ascii=False)
+
+
 def _flat_hooks(s: dict) -> dict:
+    """{(événement, signature du groupe, identité du handler, n° d'occurrence): (groupe sans hooks, handler)}."""
     out = {}
-    for ev, groups in (s.get("hooks") or {}).items():
+    hooks = s.get("hooks") if isinstance(s, dict) else None
+    for ev, groups in (hooks or {}).items():
         for g in groups or []:
-            for h in (g or {}).get("hooks") or []:
-                out[(ev, g.get("matcher", ""), h.get("command", ""))] = h
+            if not isinstance(g, dict):
+                continue
+            gmeta = {k: v for k, v in g.items() if k != "hooks"}
+            gsig = json.dumps(gmeta, sort_keys=True, ensure_ascii=False)
+            for h in g.get("hooks") or []:
+                base = (ev, gsig, _hook_id(h))
+                n = 0
+                while base + (n,) in out:
+                    n += 1
+                out[base + (n,)] = (gmeta, h)
     return out
+
+
+def _hook_label(key) -> str:
+    ev, gsig = key[0], json.loads(key[1])
+    m = gsig.get("matcher")
+    return f"{ev}" + (f" ({m})" if m else "")
 
 
 def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set, additive: bool = False) -> dict:
@@ -366,30 +396,34 @@ def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set, additiv
                 if key in fb and key not in ft:  # retiré en amont
                     if key in fo and fo[key] != fb[key]:
                         merged[key] = fo[key]
-                        notes.append(f"⚠️ hook {key[0]} `{key[2]}` personnalisé, retiré du template → gardé")
-                    else:
-                        notes.append(f"hook {key[0]}{f' ({key[1]})' if key[1] else ''} retiré")
+                        notes.append(f"⚠️ hook {_hook_label(key)} personnalisé, retiré du template → gardé")
+                    elif key in fo:
+                        notes.append(f"hook {_hook_label(key)} retiré")
                     continue
                 if key not in fo:
                     if key in fb and not additive:  # retiré volontairement par le projet → on respecte
                         if ft.get(key) != fb[key]:
-                            notes.append(f"⚠️ hook {key[0]} `{key[2]}` retiré ici mais modifié en amont → laissé retiré")
+                            notes.append(f"⚠️ hook {_hook_label(key)} retiré ici mais modifié en amont → laissé retiré")
                         continue
-                    merged[key] = ft[key]  # nouveau en amont
-                    notes.append(f"hook {key[0]}{f' ({key[1]})' if key[1] else ''} ajouté")
+                    merged[key] = ft[key]  # nouveau en amont (ou projet adopté : fusion additive)
+                    notes.append(f"hook {_hook_label(key)} ajouté")
                     continue
                 if key in ft and key in fb and fo[key] == fb[key]:
-                    merged[key] = ft[key]
+                    merged[key] = ft[key]  # réglages (timeout…) mis à jour
                 else:
-                    merged[key] = fo[key]
+                    merged[key] = fo[key]  # propre au projet, ou personnalisé : jamais perdu
             hooks = {}
-            for (ev, matcher, _), h in merged.items():
+            for key, (gmeta, h) in merged.items():
+                ev, gsig = key[0], key[1]
                 groups = hooks.setdefault(ev, [])
-                grp = next((g for g in groups if g.get("matcher", "") == matcher), None)
+                grp = next((g for g in groups if g["__sig"] == gsig), None)
                 if grp is None:
-                    grp = {"matcher": matcher, "hooks": []} if matcher else {"hooks": []}
+                    grp = dict(gmeta, hooks=[], __sig=gsig)
                     groups.append(grp)
                 grp["hooks"].append(h)
+            for groups in hooks.values():
+                for g in groups:
+                    del g["__sig"]
             if hooks or "hooks" in o:
                 res[k] = hooks
         else:
@@ -419,6 +453,9 @@ HANDOFF_TEAM_NOTE = re.compile(r"^> 🧑‍🤝‍🧑 \*\*Multi-agent / agent t
 
 
 def migrate_1_5_0(project: Path, raw_target: Path, dry: bool, log: list):
+    # Les skills v1.4.x (/debug, /feature-done, protocole d'équipe) écrivaient encore des gotchas dans
+    # code-map.md (auto-chargée) : on rejoue la migration du budget (idempotente) pour les sortir.
+    migrate_1_4_0(project, raw_target, dry, log)
     ho = project / ".claude" / "docs" / "HANDOFF.md"
     if ho.is_file():
         text = ho.read_text(encoding="utf-8")
@@ -436,6 +473,22 @@ MIGRATIONS = [("1.4.0", migrate_1_4_0), ("1.5.0", migrate_1_5_0)]
 
 
 # ── Moteur ───────────────────────────────────────────────────────────────────────────────────
+
+def unsafe_path(project: Path, rel: str) -> bool:
+    """Écrire/supprimer `rel` traverserait-il un lien symbolique, ou sortirait-il du projet ?
+    (ex. `.claude/rules` lié à un dossier partagé : l'upgrade réécrivait des fichiers HORS du projet,
+    invisibles pour son git — donc irrécupérables par `git revert`)."""
+    p = project
+    for part in Path(rel).parts:
+        p = p / part
+        if p.is_symlink():
+            return True
+    try:
+        (project / rel).resolve().relative_to(project.resolve())
+    except ValueError:
+        return True
+    return False
+
 
 def git_dirty(project: Path):
     if not is_git_repo(project):
@@ -477,11 +530,28 @@ def plan_and_apply(a) -> dict:
         raw_t = tmp / "raw-target"
         if not extract(repo, to_ref, raw_t):
             raise UpgradeError(f"version cible introuvable dans le template : {to_ref}")
-        to_v = (raw_t / ".claude" / "template-version").read_text(encoding="utf-8").strip()
+        tvt = raw_t / ".claude" / "template-version"
+        if not tvt.is_file():
+            raise UpgradeError(f"{to_ref} n'est pas une version du template claude-Setup (pas de .claude/template-version)")
+        to_v = tvt.read_text(encoding="utf-8").strip()
         report["to"] = to_v
+        pending = [c for c in lock.get("pending_conflicts", []) if isinstance(c, str)]
         if vtuple(from_v) == vtuple(to_v) and not a.force:
+            if pending and not a.ack_conflicts:
+                report["conflicts"] = pending
+                report["status"] = f"à jour — {len(pending)} conflit(s) en attente de la mise à jour précédente"
+                report["warnings"].append("Résoudre chaque fichier (version cible : .claude/.cache/upgrade-"
+                                          f"{to_v}/<fichier>.template si présent), puis relancer avec --ack-conflicts")
+                return report
+            if pending and a.ack_conflicts and not a.dry_run:
+                lock.pop("pending_conflicts", None)
+                lock_path.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                report["warnings"].append(f"{len(pending)} conflit(s) marqué(s) résolu(s)")
             report["status"] = "à jour"
             return report
+        if pending:
+            report["warnings"].append("conflits NON résolus de la mise à jour précédente (traités ici comme des "
+                                      "personnalisations) : " + ", ".join(pending))
         if vtuple(from_v) > vtuple(to_v) and not a.force:
             raise UpgradeError(f"le projet ({from_v}) est plus récent que la cible ({to_v}) — rien à faire")
 
@@ -491,11 +561,25 @@ def plan_and_apply(a) -> dict:
         report["profile"] = profile + ("" if (a.profile or lock.get("profile")) else " (déduit)")
         # Adopté (/adopt-template) : le lock le dit ; sans lock (< 1.5), un skill bootstrap encore
         # présent le trahit — l'init greenfield les retire toujours, l'adoption les laisse.
-        brownfield = lock.get("mode") == "brownfield" or (not lock and any(
-            (project / ".claude" / "skills" / s).is_dir() for s in ("adopt-template", "init-from-template")))
+        stack = project / ".claude" / "docs" / "stack.md"
+        adopted_mark = stack.is_file() and "adopté le" in stack.read_text(encoding="utf-8", errors="replace")
+        if a.mode:
+            brownfield = a.mode == "brownfield"
+        else:
+            brownfield = lock.get("mode") == "brownfield" or (not lock and (adopted_mark or any(
+                (project / ".claude" / "skills" / s).is_dir() for s in ("adopt-template", "init-from-template"))))
+        # Fusion additive (hooks/règles du template absents du projet → ajoutés) : UNIQUEMENT à la
+        # 1re mise à jour d'un projet adopté sans lock (< 1.5, fusion manuelle à l'adoption). Ensuite,
+        # sémantique 3 voies stricte — sinon un retrait volontaire (ex. Edit(./**)) revenait à chaque fois.
+        additive = brownfield and not lock
 
         raw_b = tmp / "raw-base"
         has_base = extract(repo, f"v{from_v}", raw_b) if is_git_repo(repo) else False
+        if not has_base and vtuple(from_v) == vtuple(to_v):
+            # --force sur la même version (tag pas encore publié) : la cible EST la base
+            shutil.rmtree(raw_b, ignore_errors=True)
+            shutil.copytree(raw_t, raw_b)
+            has_base = True
         if not has_base:
             report["warnings"].append(f"tag v{from_v} introuvable dans le template → mode prudent : toute "
                                       "différence avec la cible est traitée comme une personnalisation")
@@ -559,7 +643,7 @@ def plan_and_apply(a) -> dict:
                     continue
                 if tj is not None:
                     notes = []
-                    merged = merge_settings(oj, bj, tj, notes, protect, additive=brownfield)
+                    merged = merge_settings(oj, bj, tj, notes, protect, additive=additive)
                     out = (json.dumps(merged, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
                     report["settings"] = notes
                     if out != O:
@@ -610,9 +694,25 @@ def plan_and_apply(a) -> dict:
                 if merged is not None:
                     writes[f"__aside__/{rel}.merge"] = merged
 
+        # Chemins traversant un lien symbolique : jamais modifiés, signalés en conflit
+        for rel in [r for r in list(writes) if not r.startswith("__aside__/")] + list(deletes):
+            if unsafe_path(project, rel):
+                content = writes.pop(rel, None)
+                if rel in deletes:
+                    deletes.remove(rel)
+                for x in report["actions"]:
+                    if x["path"] == rel:
+                        x["action"], x["detail"] = "conflict", "passe par un lien symbolique (hors projet) — non modifié"
+                report["conflicts"].append(rel)
+                if content is not None:
+                    writes[f"__aside__/{rel}.template"] = content
+
         # Application
         if not a.dry_run:
+            aside_ok = not unsafe_path(project, conflict_dir.relative_to(project).as_posix())
             for rel, content in writes.items():
+                if rel.startswith("__aside__/") and not aside_ok:
+                    continue
                 dst = conflict_dir / rel[len("__aside__/"):] if rel.startswith("__aside__/") else project / rel
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 dst.write_bytes(content)
@@ -641,6 +741,10 @@ def plan_and_apply(a) -> dict:
             if re.match(r"^(https?://|git@|ssh://)", source):
                 lock["source"] = source
             lock.setdefault("source", DEFAULT_SOURCE)
+            if report["conflicts"]:
+                lock["pending_conflicts"] = sorted(set(report["conflicts"]))
+            else:
+                lock.pop("pending_conflicts", None)
             lock_path.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
             if report["conflicts"]:
                 (conflict_dir / "REPORT.md").parent.mkdir(parents=True, exist_ok=True)
@@ -692,10 +796,14 @@ def main() -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--force", action="store_true", help="rejouer même si la version est identique")
+    ap.add_argument("--mode", choices=("greenfield", "brownfield"), default=None,
+                    help="forcer le mode d'init d'origine (défaut : lock, sinon déduit)")
+    ap.add_argument("--ack-conflicts", action="store_true",
+                    help="marquer résolus les conflits en attente de la mise à jour précédente")
     a = ap.parse_args()
     try:
         report = plan_and_apply(a)
-    except UpgradeError as e:
+    except Exception as e:  # noqa: BLE001 — code 2 « erreur » quoi qu'il arrive (1 = conflits)
         if a.json:
             print(json.dumps({"status": "erreur", "error": str(e)}, ensure_ascii=False))
         else:

@@ -60,7 +60,10 @@ def main():
     tcl = root / ".claude" / "template-version"
     ok(".claude/template-version présent", tcl.is_file())
     lk = root / ".claude" / "template-lock.json"
-    if lk.is_file():  # v1.5.0+ : base de /upgrade-template
+    tv_s = tcl.read_text(encoding="utf-8").strip() if tcl.is_file() else ""
+    if tuple(int(x) for x in re.findall(r"\d+", tv_s)[:3]) >= (1, 5, 0):
+        ok("template-lock.json présent (v1.5.0+ : base de /upgrade-template)", lk.is_file())
+    if lk.is_file():
         try:
             lock = json.loads(lk.read_text(encoding="utf-8"))
         except ValueError:
