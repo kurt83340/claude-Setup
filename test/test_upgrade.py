@@ -300,6 +300,47 @@ try:
        rc == 0 and rep.get("profile", "").startswith("web-app")
        and (p / ".claude/rules/code-style-web.md").is_file() and not (p / ".claude/rules/code-style.md").exists())
 
+    # ── 4b. Projet ADOPTÉ (brownfield, < 1.5 : pas de lock) ──────────────────────────────────
+    print(f"\n== 4b. projet adopté en {base_tag} (brownfield, sans lock) → {target_v} ==")
+    b = TMP / "adopted"
+    (b / "src").mkdir(parents=True)
+    (b / "src/main.py").write_text("print('app existante')\n", encoding="utf-8")
+    (b / "CLAUDE.md").write_text("# App existante\n\nMes instructions à moi, écrites avant le template.\n", encoding="utf-8")
+    (b / ".gitignore").write_text("build/\n", encoding="utf-8")
+    (b / ".claude").mkdir()
+    (b / ".claude/settings.json").write_text(json.dumps({"permissions": {"allow": ["Bash(make:*)"]},
+                                                         "model": "opus"}, indent=2) + "\n", encoding="utf-8")
+    sh(["git", "init", "-q"], cwd=b)
+    commit(b, "projet existant")
+    raw = TMP / "raw-adopt"
+    materialize(base_tag, raw)
+    for f in raw.rglob("*"):  # rsync --ignore-existing (hors README/.env.example) : l'existant gagne
+        rel = f.relative_to(raw).as_posix()
+        if f.is_file() and rel not in ("README.md", ".env.example") and not (b / rel).exists():
+            (b / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, b / rel)
+    vf = TMP / "vars-adopt.json"
+    vf.write_text(json.dumps(VARS), encoding="utf-8")
+    sc = b / ".claude/skills/init-from-template/scripts"
+    sh([sys.executable, str(sc / "render.py"), "--vars", str(vf), "--root", str(b)])
+    sh([sys.executable, str(sc / "cleanup-for-type.py"), "--type", "python-app", "--root", str(b), "--brownfield"])
+    commit(b, "adoption du template")
+    user_claude = (b / "CLAUDE.md").read_bytes()
+    rc, rep = upgrade_json(b)
+    st = json.loads((b / ".claude/settings.json").read_text(encoding="utf-8"))
+    ok("adopté sans lock : mode brownfield déduit (skills bootstrap encore présents)", rep.get("mode") == "brownfield")
+    ok("adopté : code 0/1 sans erreur", rc in (0, 1))
+    ok("adopté : CLAUDE.md de l'utilisateur intact", (b / "CLAUDE.md").read_bytes() == user_claude)
+    ok("adopté : settings utilisateur gardés (allow make, model)",
+       "Bash(make:*)" in st.get("permissions", {}).get("allow", []) and st.get("model") == "opus")
+    ok("adopté : TOUS les hooks et deny de secrets du template présents (fusion additive)",
+       all(e in st.get("hooks", {}) for e in ("PreCompact", "SessionStart", "SessionEnd", "PreToolUse",
+                                               "PostToolUse", "Stop"))
+       and "Read(.env.*)" in st.get("permissions", {}).get("deny", []))
+    ok("adopté : code existant intact", (b / "src/main.py").read_text(encoding="utf-8") == "print('app existante')\n")
+    ok("adopté : lock écrit en mode brownfield",
+       json.loads((b / ".claude/template-lock.json").read_text(encoding="utf-8")).get("mode") == "brownfield")
+
     # ── 5. dry-run, arbre sale, équipe active ─────────────────────────────────────────────────
     print("\n== 5. dry-run · arbre sale · équipe d'agents active ==")
     p = init_project(base_tag, "python-app", TMP / "dry")

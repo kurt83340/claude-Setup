@@ -326,7 +326,10 @@ def _flat_hooks(s: dict) -> dict:
     return out
 
 
-def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set) -> dict:
+def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set, additive: bool = False) -> dict:
+    """Fusion 3 voies de settings.json. `additive` (projet adopté/brownfield) : une règle ou un hook
+    du template absent du projet est AJOUTÉ (l'adoption fusionnait à la main, rien ne prouve un
+    retrait volontaire) ; en greenfield, un élément du template retiré par le projet reste retiré."""
     res = {}
     keys = list(t.keys()) + [k for k in o.keys() if k not in t]
     for k in keys:
@@ -343,7 +346,11 @@ def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set) -> dict
                 removed = [x for x in bl if x not in tl]
                 added = [x for x in tl if x not in bl]
                 # ordre du template (règles gardées ou nouvelles), puis les ajouts propres au projet
-                new = [x for x in tl if x in ol or x in added] + [x for x in ol if x not in tl and x not in removed]
+                new = [x for x in tl if x in ol or x in added or additive] + \
+                      [x for x in ol if x not in tl and x not in removed]
+                if additive and [x for x in tl if x not in ol and x not in added]:
+                    notes.append(f"permissions.{kind} : {len([x for x in tl if x not in ol and x not in added])} "
+                                 "règle(s) du template ajoutée(s) (projet adopté : absentes)")
                 gone = [x for x in ol if x in removed]
                 if gone:
                     notes.append(f"permissions.{kind} : {len(gone)} règle(s) retirée(s) par le template")
@@ -364,7 +371,7 @@ def merge_settings(o: dict, b: dict, t: dict, notes: list, protect: set) -> dict
                         notes.append(f"hook {key[0]}{f' ({key[1]})' if key[1] else ''} retiré")
                     continue
                 if key not in fo:
-                    if key in fb:  # retiré volontairement par le projet → on respecte
+                    if key in fb and not additive:  # retiré volontairement par le projet → on respecte
                         if ft.get(key) != fb[key]:
                             notes.append(f"⚠️ hook {key[0]} `{key[2]}` retiré ici mais modifié en amont → laissé retiré")
                         continue
@@ -482,7 +489,10 @@ def plan_and_apply(a) -> dict:
         if profile not in PROFILES:
             raise UpgradeError(f"profil inconnu : {profile}")
         report["profile"] = profile + ("" if (a.profile or lock.get("profile")) else " (déduit)")
-        brownfield = lock.get("mode") == "brownfield"
+        # Adopté (/adopt-template) : le lock le dit ; sans lock (< 1.5), un skill bootstrap encore
+        # présent le trahit — l'init greenfield les retire toujours, l'adoption les laisse.
+        brownfield = lock.get("mode") == "brownfield" or (not lock and any(
+            (project / ".claude" / "skills" / s).is_dir() for s in ("adopt-template", "init-from-template")))
 
         raw_b = tmp / "raw-base"
         has_base = extract(repo, f"v{from_v}", raw_b) if is_git_repo(repo) else False
@@ -502,6 +512,7 @@ def plan_and_apply(a) -> dict:
         else:
             base.mkdir()
         replay_init(raw_t, target, profile, brownfield, vars_, report["warnings"])
+        report["mode"] = "brownfield" if brownfield else "greenfield"
 
         try:
             o_settings = json.loads((project / ".claude" / "settings.json").read_text(encoding="utf-8"))
@@ -546,7 +557,7 @@ def plan_and_apply(a) -> dict:
                     continue
                 if tj is not None:
                     notes = []
-                    merged = merge_settings(oj, bj, tj, notes, protect)
+                    merged = merge_settings(oj, bj, tj, notes, protect, additive=brownfield)
                     out = (json.dumps(merged, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
                     report["settings"] = notes
                     if out != O:
@@ -623,7 +634,7 @@ def plan_and_apply(a) -> dict:
 
         if not a.dry_run:
             lock.update({"template": "claude-Setup", "version": to_v, "profile": profile,
-                         "mode": "brownfield" if brownfield else lock.get("mode", "greenfield"),
+                         "mode": "brownfield" if brownfield else "greenfield",
                          "upgraded": date.today().isoformat()})
             if re.match(r"^(https?://|git@|ssh://)", source):
                 lock["source"] = source
@@ -644,7 +655,7 @@ def render_report(r: dict) -> str:
     for x in r["actions"]:
         counts[x["action"]] = counts.get(x["action"], 0) + 1
     lines = [f"# Mise à jour claude-Setup {r['from']} → {r['to']}" + (" (dry-run)" if r["dry_run"] else ""),
-             "", f"Profil : {r['profile']} · statut : {r['status']}", ""]
+             "", f"Profil : {r['profile']} · mode : {r.get('mode', '?')} · statut : {r['status']}", ""]
     labels = {"update": "mis à jour", "add": "ajoutés", "remove": "retirés", "merge": "fusionnés (3 voies)",
               "merge-json": "settings fusionnés", "keep-custom": "personnalisations gardées (template inchangé)",
               "conflict": "CONFLITS"}
