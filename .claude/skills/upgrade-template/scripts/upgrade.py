@@ -533,13 +533,20 @@ def plan_and_apply(a) -> dict:
                 continue
             if rel == ".claude/settings.json" and O is not None and T is not None:
                 try:
+                    oj = json.loads(O)
                     bj = json.loads(B) if B else {}
                     tj = json.loads(T)
                 except ValueError:
-                    bj, tj = None, None
+                    oj = bj = tj = None
+                if oj is None or not isinstance(oj, dict):  # JSON du projet invalide → jamais écrasé
+                    report["actions"].append({"path": rel, "action": "conflict",
+                                              "detail": "settings.json du projet illisible (JSON invalide) — gardé"})
+                    report["conflicts"].append(rel)
+                    writes[f"__aside__/{rel}.template"] = T
+                    continue
                 if tj is not None:
                     notes = []
-                    merged = merge_settings(o_settings, bj, tj, notes, protect)
+                    merged = merge_settings(oj, bj, tj, notes, protect)
                     out = (json.dumps(merged, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
                     report["settings"] = notes
                     if out != O:

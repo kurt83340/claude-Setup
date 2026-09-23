@@ -320,6 +320,14 @@ try:
        st2.get("env", {}).get("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS") == "1" and "teammateMode" in st2
        and st2.get("enabledPlugins") == {"agent-teams@claude-setup": True})
     rule = p / ".claude/rules/agent-teams.md"
+    p2 = init_project(base_tag, "python-app", TMP / "badjson")
+    bad = p2 / ".claude/settings.json"
+    bad.write_text(bad.read_text(encoding="utf-8").replace("{", "{ // commentaire invalide", 1), encoding="utf-8")
+    commit(p2, "settings cassé à la main")
+    before_bad = bad.read_bytes()
+    rc_b, rep_b = upgrade_json(p2)
+    ok("settings.json projet en JSON invalide → conflit, fichier GARDÉ (jamais remplacé)",
+       rc_b == 1 and bad.read_bytes() == before_bad and ".claude/settings.json" in rep_b.get("conflicts", []))
     ok("équipe active : rule d'équipe mise à jour depuis le plugin (pas retirée)",
        rule.is_file() and rule.read_bytes() == (ROOT / "plugins/agent-teams/skills/team/agent-teams-rule.md").read_bytes())
 finally:
