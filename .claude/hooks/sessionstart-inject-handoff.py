@@ -72,9 +72,11 @@ Le contexte vient d'être compacté. Voici le snapshot HANDOFF.md récent pour r
 → Continue ton travail. Si tu finis ta session, lance `/handoff` pour propre snapshot."""
     )
 
-    # Flip needs_inject à false
-    marker["needs_inject"] = False
-    marker_path.write_text(json.dumps(marker))
+    # Consommé : un marqueur par session compactée s'accumulait dans $TMPDIR (jamais purgé)
+    try:
+        marker_path.unlink()
+    except OSError:
+        pass
 
 
 def inject_session_end_net(data) -> None:

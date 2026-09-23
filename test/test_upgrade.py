@@ -232,7 +232,10 @@ try:
     ok("hook Stop : seuil maison (48 h) + correctif amont (1×/session) fusionnés",
        '"$AGE_HOURS" -lt 48' in stt and "first_time handoff-age-warned" in stt
        and sh(["bash", "-n", str(stop)], check=False).returncode == 0)
-    ok("skill maison intact", (p / ".claude/skills/deploy-client/SKILL.md").is_file())
+    ok("skill maison intact ET jamais signalé comme conflit (fichier propre au projet)",
+       (p / ".claude/skills/deploy-client/SKILL.md").is_file()
+       and not any("deploy-client" in c for c in rep.get("conflicts", []))
+       and ".claude/skills/deploy-client/SKILL.md" not in acts)
     ok("skill retiré ici et inchangé en amont → reste retiré", not (p / ".claude/skills/pivot").exists())
     ok("skill retiré ici mais modifié en amont → conflit signalé, pas réintroduit",
        not (p / ".claude/skills/debug").exists() and ".claude/skills/debug/SKILL.md" in rep.get("conflicts", []))

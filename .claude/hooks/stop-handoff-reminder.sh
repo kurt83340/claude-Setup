@@ -83,7 +83,7 @@ first_time() {
   return 0
 }
 
-# Garde-fou TAILLE (v1.4.1) — HANDOFF est auto-chargé à CHAQUE session (@-import), cible < 30 lignes.
+# Garde-fou TAILLE (v1.4.1) — HANDOFF est auto-chargé à CHAQUE session (@-import), cible ≤ 40 lignes.
 # Vécu 2026-09-16 (projet hors template) : 55 sections datées empilées → 175 Ko rechargés à chaque
 # appel, plafond 1M dépassé à la reprise. Seuil 12 000 octets (~6k tokens) ; une fois par session.
 MAX_BYTES="${CLAUDE_HANDOFF_MAX_BYTES:-12000}"
@@ -91,7 +91,7 @@ SIZE=$(stat -c %s "$HANDOFF" 2>/dev/null || stat -f %z "$HANDOFF" 2>/dev/null ||
 if [ "$MAX_BYTES" -gt 0 ] && [ "$SIZE" -gt "$MAX_BYTES" ]; then
   if first_time handoff-size-warned; then
     LINES=$(wc -l < "$HANDOFF" 2>/dev/null | tr -d ' ')
-    echo "{\"systemMessage\": \"📏 HANDOFF.md fait $((SIZE / 1024)) Ko / ${LINES} lignes — auto-chargé à chaque session (cible < 30 lignes). /handoff le condense : l'historique part dans HANDOFF-journal.md.\"}"
+    echo "{\"systemMessage\": \"📏 HANDOFF.md fait $((SIZE / 1024)) Ko / ${LINES} lignes — auto-chargé à chaque session (cible ≤ 40 lignes). /handoff le condense : l'historique part dans HANDOFF-journal.md.\"}"
     exit 0
   fi
 fi

@@ -190,6 +190,7 @@ def step_codemap_gotchas(root: Path) -> None:
         text = (before.rstrip("\n") + "\n\n" + pointer + after.lstrip("\n")).rstrip("\n") + "\n"
     if not moved_chars:
         log("⏭ 3. code-map.md : gotchas déjà externalisés")
+        step_codemap_update_section(root)  # 3b indépendante : des ⚠️ ont pu s'empiler depuis
         return
     body = "\n\n".join(bodies)
     if gf.is_file():
@@ -234,15 +235,20 @@ def step_codemap_update_section(root: Path) -> None:
     moved = [e for e in entries if "⚠️" in e.split("\n")[0] or len(e) > 300]
     if not moved:
         return
-    kept = [e for e in entries if e not in moved]
-    tail = body[body.rfind(entries[-1]) + len(entries[-1]):] if entries else ""
+    # On RETIRE les entrées déplacées du corps d'origine — tout le reste (prose, blockquote entre
+    # deux puces, consignes) est conservé tel quel (v1.5.0 : la reconstruction « puces gardées +
+    # queue » perdait le texte non-puce situé avant/entre les entrées).
+    new_body = body
+    for e in moved:
+        new_body = new_body.replace(e + "\n", "", 1) if (e + "\n") in new_body else new_body.replace(e, "", 1)
+    new_body = re.sub(r"\n{3,}", "\n\n", new_body).strip("\n")
     if gf.is_file():
         write(gf, gf.read_text(encoding="utf-8").rstrip("\n")
               + "\n\n## Migrés depuis « Quand mettre à jour ce fichier » (à classer par zone, chemin en backticks)\n\n"
               + "\n".join(moved) + "\n")
     else:
         write(gf, GOTCHAS_HEADER + "## Migrés depuis « Quand mettre à jour ce fichier » (à classer par zone)\n\n" + "\n".join(moved) + "\n")
-    new_section = head + "\n\n" + "\n".join(kept) + ("\n" + tail.strip("\n") if tail.strip() else "")
+    new_section = head + "\n\n" + new_body
     write(cm, (before.rstrip("\n") + "\n\n" + new_section.rstrip("\n") + "\n\n" + after.lstrip("\n")).rstrip("\n") + "\n")
     log(f"✅ 3b. code-map.md : {len(moved)} entrée(s) ⚠️/longues de « Quand mettre à jour » → code-map-gotchas.md ({sum(len(e) for e in moved)} chars)")
 

@@ -23,7 +23,7 @@ Liste ce que Claude Code charge **sans qu'on le lui demande** au démarrage (CLA
 `.claude/CLAUDE.md`, rules non scopées ; user et auto-memory à part) avec l'estimation calibrée
 (tokens ≈ chars/2). Seuil **25k tokens** (projet) → au-delà, 🔴 dans le rapport avec les coupables :
 
-- HANDOFF > 30 lignes → journal dans `HANDOFF-journal.md` (`/handoff` Étape 3bis le fait)
+- HANDOFF > 40 lignes → journal dans `HANDOFF-journal.md` (`/handoff` Étape 3bis le fait)
 - code-map > 3k tokens → gotchas dans `code-map-gotchas.md`, § « Quand mettre à jour » = 3 lignes
 - rule scopée (`paths:`) importée en `@` → retirer le `@` (scoping court-circuité)
 - ROADMAP en `@` → lien simple (les skills la lisent explicitement)

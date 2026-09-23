@@ -26,7 +26,7 @@ le « n'oublie rien » durable passe par `.claude/docs/`.
 
 ## Budget de contexte (fichiers auto-chargés)
 
-- `HANDOFF.md` : **réécrit** à chaque `/handoff`, < 30 lignes — jamais empilé ; historique → `HANDOFF-journal.md` (append-only, non chargé).
+- `HANDOFF.md` : **réécrit** à chaque `/handoff`, ≤ 40 lignes — jamais empilé ; historique → `HANDOFF-journal.md` (append-only, non chargé).
 - `code-map.md` : vue macro + règles de couplage + intention, < 3k tokens. Les gotchas vont dans `code-map-gotchas.md` (non chargé ; le hook injecte ceux du fichier édité).
 - Tout autre doc = **lien simple** depuis CLAUDE.md, jamais `@` (un `@` recharge le fichier à CHAQUE appel). Contrôle : `python3 .claude/skills/doc-health/scripts/context-budget.py`.
 

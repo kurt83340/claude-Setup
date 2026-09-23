@@ -542,6 +542,8 @@ def plan_and_apply(a) -> dict:
                 T = team_rule_src.read_bytes()  # la rule d'équipe vient du plugin (projet équipé)
             if O == T:
                 continue
+            if B is None and T is None:
+                continue  # fichier propre au projet (skill, hook, rule maison) — jamais touché
             if rel == ".claude/settings.json" and O is not None and T is not None:
                 try:
                     oj = json.loads(O)

@@ -88,7 +88,7 @@ def remedy(rel: str, tok: int, scoped_import: bool) -> str:
         return ""
     n = rel.lower()
     if "handoff" in n:
-        return "HANDOFF > 30 lignes ? journal append-only → HANDOFF-journal.md (non importé)"
+        return "HANDOFF > 40 lignes ? journal append-only → HANDOFF-journal.md (non importé)"
     if "code-map" in n:
         return "gotchas → code-map-gotchas.md (injectés par le hook, ciblés) ; « Quand mettre à jour » = 3 lignes"
     if "roadmap" in n:

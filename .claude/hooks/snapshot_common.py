@@ -20,7 +20,7 @@ from pathlib import Path
 # tool_result) ou « caveat / <command-name>/exit / Goodbye! » (SessionEnd).
 NOISE_PREFIXES = (
     "<command-", "<local-command", "<system-reminder", "<bash-", "<task-notification",
-    "[Request interrupted",
+    "[Request interrupted", "This session is being continued from a previous conversation",
 )
 
 # Fichiers par-session du cache, purgés au démarrage passé ce délai (sinon 1 fichier/session
@@ -44,8 +44,8 @@ def run(cmd: str, cwd: str = None) -> str:
 def human_text(entry: dict) -> str:
     """Texte d'un message HUMAIN du transcript, ou "" (résultat d'outil, méta, commande
     locale, rappel système…)."""
-    if not isinstance(entry, dict) or entry.get("type") != "user" \
-            or entry.get("isMeta") or "toolUseResult" in entry:
+    if not isinstance(entry, dict) or entry.get("type") != "user" or entry.get("isMeta") \
+            or entry.get("isCompactSummary") or "toolUseResult" in entry:
         return ""
     content = (entry.get("message") or {}).get("content", "")
     if isinstance(content, list):
@@ -155,13 +155,16 @@ def pop_session_start(cwd, session_id):
 
 
 def purge_stale_cache(cwd, days: int = STALE_CACHE_DAYS) -> int:
-    """Supprime les fichiers par-session du cache plus vieux que `days` jours."""
+    """Supprime les fichiers par-session du cache (et les marqueurs PreCompact laissés dans
+    $TMPDIR par des sessions interrompues) plus vieux que `days` jours."""
+    import tempfile
     d = cache_dir(cwd)
-    if not d.is_dir():
-        return 0
     limit, removed = time.time() - days * 86400, 0
-    for pattern in STALE_CACHE_GLOBS:
-        for f in d.glob(pattern):
+    targets = [(Path(tempfile.gettempdir()), "claude-handoff-marker-*.json")]
+    if d.is_dir():
+        targets += [(d, pattern) for pattern in STALE_CACHE_GLOBS]
+    for folder, pattern in targets:
+        for f in folder.glob(pattern):
             try:
                 if f.is_file() and f.stat().st_mtime < limit:
                     f.unlink()

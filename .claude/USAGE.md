@@ -212,7 +212,7 @@ Claude va :
 
 1. Lire git status + log + diff + tests
 2. Lire HANDOFF.md actuel
-3. Te proposer un nouveau HANDOFF **réécrit** (< 30 lignes, jamais empilé : status / échecs / blockers / next steps
+3. Te proposer un nouveau HANDOFF **réécrit** (≤ 40 lignes, jamais empilé : status / échecs / blockers / next steps
    + **Continuation State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
 4. Te demander confirmation avant d'écrire, puis ajouter 1 ligne à `HANDOFF-journal.md` (non auto-chargé)
 

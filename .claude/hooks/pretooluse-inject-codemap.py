@@ -19,8 +19,10 @@ Ciblage : une entrée cible un fichier en citant en backticks un chemin, un nom 
 dossier (ou via son heading `###`) ; les entrées sous un heading « Globaux » valent pour toute
 édition de code. Projet < 1.4 sans code-map-gotchas.md → § Gotchas de code-map.md.
 
-Fichiers concernés (v1.5.0) : tout fichier DU PROJET hors `.claude/` et hors docs/config
-(.md, .json, .yaml…) — plus de liste fixe src/tests/lib/app (ratait packages/, backend/…).
+Fichiers concernés (v1.5.0) : tout fichier DU PROJET hors `.claude/` — plus de liste fixe
+src/tests/lib/app (ratait packages/, backend/…). Docs/config (.md, .json, .yaml…) : uniquement les
+gotchas qui les ciblent explicitement (workflows n8n en .json), jamais les Globaux. Les entrées du
+gabarit encore en `{{…}}` ne sont jamais injectées.
 Input stdin : {"session_id": "...", "tool_name": "Edit"|"Write", "tool_input": {"file_path": "..."}, "cwd": "..."}
 Output JSON : {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "..."}}
 Non-bloquant : toute erreur → exit 0 silencieux.
@@ -92,11 +94,14 @@ def heading_tokens(heading: str):
     return path_tokens(heading) + bare
 
 
-def targeted_gotchas(text: str, rel: str, name: str) -> str:
+def targeted_gotchas(text: str, rel: str, name: str, with_globals: bool = True) -> str:
     out = []
     for heading, entry in gotcha_entries(text):
+        if re.search(r"\{\{[^}]*\}\}", entry):
+            continue  # entrée du gabarit jamais remplie (« ⚠️ {{Piège transversal…}} ») → bruit
         if re.search(r"globa", heading, re.IGNORECASE):
-            out.append(entry)
+            if with_globals:
+                out.append(entry)
         elif targets_file(heading_tokens(heading) + path_tokens(entry), rel, name):
             out.append(entry)
     return "\n".join(out)
@@ -129,11 +134,13 @@ def main():
         rel = os.path.relpath(file_path, cwd).replace("\\", "/")
     except ValueError:
         sys.exit(0)
-    # Gate : fichier de code DU PROJET (chemin relatif — un projet rangé sous un dossier
-    # parent nommé « src/ » ne doit pas tout matcher), hors méthode (.claude/) et docs/config.
-    if rel.startswith("../") or rel == ".." or rel.startswith(".claude/") \
-            or file_path.lower().endswith(NON_CODE_EXT):
+    # Gate : fichier DU PROJET (chemin relatif — un projet rangé sous un dossier parent nommé
+    # « src/ » ne doit pas tout matcher), hors méthode (.claude/). Docs/config (.md, .json…) :
+    # seulement les gotchas qui les CIBLENT explicitement (ex. workflows n8n en .json = le code
+    # d'un projet automation-n8n) — jamais les Globaux, réservés au code.
+    if rel.startswith("../") or rel == ".." or rel.startswith(".claude/"):
         sys.exit(0)
+    is_code = not file_path.lower().endswith(NON_CODE_EXT)
 
     docs = cwd / ".claude" / "docs"
     gotchas_file = docs / "code-map-gotchas.md"
@@ -154,7 +161,7 @@ def main():
     if rel in marker["files"]:
         sys.exit(0)  # déjà injecté pour ce fichier dans cette session
 
-    gotchas = targeted_gotchas(gsrc, rel, Path(file_path).name) if gsrc else ""
+    gotchas = targeted_gotchas(gsrc, rel, Path(file_path).name, with_globals=is_code) if gsrc else ""
     marker["files"].append(rel)
     try:
         marker_path.parent.mkdir(parents=True, exist_ok=True)

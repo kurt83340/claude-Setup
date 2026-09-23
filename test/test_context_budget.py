@@ -219,6 +219,24 @@ with tempfile.TemporaryDirectory() as td:
        r.returncode == 0 and "## Status" in ho and "HANDOFF-journal.md" in ho and not (q / ".claude/docs/HANDOFF-journal.md").exists())
     ok("code-map déjà migrée → non touchée", "⏭ 3." in r.stdout)
 
+    print("\n== 5a. slim-context 3b : prose de « Quand mettre à jour » conservée (v1.5.0) ==")
+    m = tmp / "update-section"
+    write(m / ".claude/docs/HANDOFF.md", "# HANDOFF\n")
+    write(m / "CLAUDE.md", "# P\n- @.claude/docs/HANDOFF.md\n")
+    write(m / ".claude/docs/code-map.md",
+          "# CM\n\n## Règles de couplage\n\n- ❌ jamais A → B\n\n## Gotchas → `code-map-gotchas.md`\n\npointeur\n\n"
+          "## Quand mettre à jour ce fichier\n\n- Nouvelle règle → l'ajouter\n- Découpage modifié → revoir\n\n"
+          "> 🔁 **Entretien** : note de prose à conserver\n> (deuxième ligne de la note)\n\n"
+          "- ⚠️ `src/x.py` — piège appendé au mauvais endroit\n- ⚠️ `src/y.py` — autre piège\n")
+    r = run(SLIM, "--root", str(m), "--no-template-files")
+    cmt = (m / ".claude/docs/code-map.md").read_text(encoding="utf-8")
+    gft = (m / ".claude/docs/code-map-gotchas.md").read_text(encoding="utf-8")
+    ok("3b : pièges ⚠️ déplacés vers code-map-gotchas.md", "piège appendé" in gft and "autre piège" in gft
+       and "piège appendé" not in cmt)
+    ok("3b : prose/blockquote entre les puces CONSERVÉE (aucune ligne perdue)",
+       "note de prose à conserver" in cmt and "deuxième ligne de la note" in cmt
+       and "Nouvelle règle" in cmt and "Découpage modifié" in cmt)
+
     print("\n== 5b. Listing skills : nom + description seulement, hors disable-model-invocation ==")
     k = tmp / "skills-listing"
     write(k / "CLAUDE.md", "# P\n")

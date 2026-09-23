@@ -44,19 +44,19 @@ fi
 Sinon (HANDOFF déjà rempli) : le nouveau HANDOFF est **réécrit** au format strict de l'Étape 3 —
 **jamais appendé**, jamais une section datée de plus. Sections hors format (heuristique : tout ce qui
 n'est pas dans le format standard) : conservées **seulement si** elles sont **non datées** ET que le
-fichier reste **< 30 lignes** ; sinon elles sont **déplacées telles quelles** dans `HANDOFF-journal.md`
+fichier reste **≤ 40 lignes** ; sinon elles sont **déplacées telles quelles** dans `HANDOFF-journal.md`
 sous `## Archive YYYY-MM-DD` (jamais supprimées, jamais résumées en silence — dis-le dans le diff).
 
 > Vécu 2026-09-16 (projet hors template) : 55 sections datées « préservées » session après session →
 > HANDOFF de 175 Ko auto-chargé à chaque appel, plafond 1M dépassé à la reprise, session bloquée.
 
 ```bash
-wc -l -c .claude/docs/HANDOFF.md   # > 30 lignes ou > 12 000 octets → archiver en Étape 3, pas préserver
+wc -l -c .claude/docs/HANDOFF.md   # > 40 lignes ou > 12 000 octets → archiver en Étape 3, pas préserver
 ```
 
 ## Étape 3 — Composer le nouveau HANDOFF
 
-Format strict — **réécriture complète**, < 30 lignes (le fichier est auto-chargé à chaque session) :
+Format strict — **réécriture complète**, ≤ 40 lignes (le fichier est auto-chargé à chaque session) :
 
 ```markdown
 # HANDOFF — YYYY-MM-DD HHhMM
@@ -158,11 +158,11 @@ Budget contexte (si `/doc-health` est installé sur ce projet) :
 [ -f .claude/skills/doc-health/scripts/context-budget.py ] && python3 .claude/skills/doc-health/scripts/context-budget.py --max 25000 --no-user | tail -3
 ```
 
-- Seuil dépassé → 1 ligne au user avec le coupable (HANDOFF > 30 lignes ? code-map > 3k ? rule ré-importée ?)
+- Seuil dépassé → 1 ligne au user avec le coupable (HANDOFF > 40 lignes ? code-map > 3k ? rule ré-importée ?)
 
 ## Anti-patterns à éviter
 
-- ❌ Écrire un roman (HANDOFF court = **< 30 lignes**, il est auto-chargé à chaque session ; le **Journal** gagne 1 ligne/session mais dans `HANDOFF-journal.md`, pas ici)
+- ❌ Écrire un roman (HANDOFF court = **≤ 40 lignes**, il est auto-chargé à chaque session ; le **Journal** gagne 1 ligne/session mais dans `HANDOFF-journal.md`, pas ici)
 - ❌ Réécrire/écraser le **Journal** : on APPEND seulement (1 ligne/session) → l'arc complet reste reconstructible depuis le journal
 - ❌ Remettre le Journal dans HANDOFF.md « pour l'avoir sous les yeux » : c'est exactement ce qui gonfle le contexte
 - ❌ Dupliquer ce qui est déjà dans CHANGELOG (factuel) ou auto-memory (patterns)

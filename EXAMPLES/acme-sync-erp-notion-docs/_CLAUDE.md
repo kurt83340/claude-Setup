@@ -12,7 +12,7 @@ Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB
 
 ### 🔄 Auto-chargés (`@` — état vivant, toujours en contexte)
 
-- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (≤ 40 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
 - **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + couplage + intention, < 3k tokens — gotchas dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook pour le seul fichier édité)
 
 ### 📂 Lus à la demande (liens — pas auto-chargés)

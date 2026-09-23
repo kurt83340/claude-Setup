@@ -10,7 +10,7 @@
 
 ### 🔄 Auto-chargés (`@` — état vivant, toujours en contexte)
 
-- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (≤ 40 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
 - **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + règles de couplage + intention, < 3k tokens — les gotchas vivent dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook pour le seul fichier édité)
 
 ### 📂 Lus à la demande (liens — pas auto-chargés)

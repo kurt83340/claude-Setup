@@ -166,6 +166,15 @@ ok("projet < 1.4 (gotchas dans code-map.md) : ciblage appliqué quand même",
    "200 même en erreur" in i and "cache invalidé" not in i and "Règles de couplage" not in i)
 ok("taille d'une injection bornée (≤ 2,5k chars + en-tête)", len(i) < 3000)
 ok("sans Globaux, fichier sans gotcha ciblé → silence total", inject(sb, "src/other/y.py") == "")
+(sb / ".claude/docs/code-map-gotchas.md").write_text(
+    "## Globaux\n\n- ⚠️ {{Piège transversal : ex. les montants sont en centimes}}\n- ⚠️ vrai piège global\n\n"
+    "## Par zone\n\n- ⚠️ `workflows/ventes.json` — le nœud HTTP doit garder retry=3\n", encoding="utf-8")
+ig = inject(sb, "src/z.py", session="G1")
+ok("entrée du gabarit encore en {{…}} jamais injectée (le vrai global, si)",
+   "{{" not in ig and "vrai piège global" in ig)
+iw = inject(sb, "workflows/ventes.json", session="G1")
+ok("workflow n8n .json ciblé par un gotcha → injecté (le code d'un projet n8n)", "retry=3" in iw)
+ok("fichier .json : jamais les Globaux (réservés au code)", "vrai piège global" not in iw)
 big = "## Globaux\n\n" + "".join(f"- ⚠️ piège global numéro {n} " + "x" * 80 + "\n" for n in range(200))
 (sb / ".claude/docs/code-map-gotchas.md").write_text(big, encoding="utf-8")
 ok("gotchas volumineux → injection plafonnée", len(inject(sb, "src/big.py", session="S9")) < 3000)
@@ -331,6 +340,8 @@ run_hook("precompact-snapshot-handoff.py",
 r5 = run_hook("sessionstart-inject-handoff.py",
               {"session_id": "cmp", "cwd": str(sb), "source": "compact"}, sb)
 ok("source=compact → flux marker (ré-injection)", "Re-injection post-compaction" in r5.stdout)
+ok("marqueur PreCompact consommé ($TMPDIR ne s'encombre plus)",
+   not (Path(tempfile.gettempdir()) / "claude-handoff-marker-cmp.json").exists())
 shutil.rmtree(sb, ignore_errors=True)
 
 # 7b. SÉQUENCES RÉELLES (v1.5.0) — l'ordre des événements tel que Claude Code les émet.
@@ -413,10 +424,12 @@ entries = [
     {"type": "user", "message": {"role": "user", "content": "<local-command-stdout>Goodbye!</local-command-stdout>"}},
     {"type": "user", "message": {"role": "user", "content": "<system-reminder>rappel</system-reminder>"}},
     {"type": "user", "message": {"role": "user", "content": "[Request interrupted by user]"}},
+    {"type": "user", "isCompactSummary": True, "message": {"role": "user", "content": "This session is being continued from a previous conversation that ran out of context."}},
+    {"type": "user", "message": {"role": "user", "content": "This session is being continued from a previous conversation (sans drapeau)."}},
 ]
 fx.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in entries) + "\n{json cassé\n", encoding="utf-8")
 msgs = snapshot_common.extract_last_user_messages(str(fx))
-ok("seuls les messages humains sont gardés (ni tool_result, ni méta, ni /exit, ni rappels)",
+ok("seuls les messages humains sont gardés (ni tool_result, ni méta, ni /exit, ni rappels, ni résumé de compaction)",
    msgs == ["ajoute la pagination à l'API", "et garde le curseur opaque"])
 ok("aucune chaîne vide dans les extraits", all(m.strip() for m in msgs))
 ok("début de session lu dans le transcript",
@@ -434,8 +447,11 @@ for f in old_f:
     f.write_text("x"); t_old = time.time() - 10 * 86400; os.utime(f, (t_old, t_old))
 fresh = cache / "codemap-injected-NEW.json"; fresh.write_text("{}")
 keep = cache / "team-progress.log"; keep.write_text("x"); os.utime(keep, (time.time() - 30 * 86400,) * 2)
+old_tmp = Path(tempfile.gettempdir()) / "claude-handoff-marker-vieux-test.json"
+old_tmp.write_text("{}"); os.utime(old_tmp, (time.time() - 10 * 86400,) * 2)
 run_hook("sessionstart-inject-handoff.py", {"session_id": "P", "cwd": str(sb), "source": "startup"}, sb)
 ok("fichiers par-session > 7 j purgés au démarrage", not any(f.exists() for f in old_f))
+ok("vieux marqueurs PreCompact de $TMPDIR purgés aussi", not old_tmp.exists())
 ok("fichiers récents conservés", fresh.exists())
 ok("fichiers hors motifs par-session conservés (team-progress.log)", keep.exists())
 shutil.rmtree(sb, ignore_errors=True)

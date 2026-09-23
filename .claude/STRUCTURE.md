@@ -123,7 +123,7 @@ mon-projet/
     │   │       ├── tasks.md        # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD TYPÉE (command_passes:/file_exists:/manual:) + phases ~35 min max
     │   │       └── (diagrams/      # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
     │   │
-    │   ├── 🔄 HANDOFF.md           # ⭐ état de session — RÉÉCRIT par /handoff à chaque fin de session, < 30 lignes (@-importé) : status, échecs, next, blockers
+    │   ├── 🔄 HANDOFF.md           # ⭐ état de session — RÉÉCRIT par /handoff à chaque fin de session, ≤ 40 lignes (@-importé) : status, échecs, next, blockers
     │   ├── 🔄 HANDOFF-journal.md   # journal append-only (1 ligne/session via /handoff) — NON auto-chargé (v1.4)
     │   ├── 🔄 ROADMAP.md           # DASHBOARD vivant : status courant des features (synthèse de conception/tasks.md + specs/*/tasks.md)
     │   ├── 🔄 CHANGELOG.md         # historique features livrées + bugs fixés (format Keep a Changelog, versions = tags git)
@@ -655,7 +655,7 @@ web et SecureStore côté mobile. Lib : `python-jose`.
 
 ## HANDOFF.md — Reprise de session
 
-Le fichier qui sauve les sessions multi-jours. **Réécrit** (jamais empilé) par `/handoff` **à chaque fin de session**, < 30 lignes — l'historique part dans `HANDOFF-journal.md` (append-only, non auto-chargé).
+Le fichier qui sauve les sessions multi-jours. **Réécrit** (jamais empilé) par `/handoff` **à chaque fin de session**, ≤ 40 lignes — l'historique part dans `HANDOFF-journal.md` (append-only, non auto-chargé).
 
 ```markdown
 # HANDOFF — 2026-05-24 18h
@@ -742,7 +742,7 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 > 🪶 Just-in-time : **2 `@` maximum** (état vivant), tout le reste en liens simples lus à la demande.
 > Mesuré v1.4 : tout charger en `@` → 144k tokens au 1er tour sur un projet d'un mois.
 
-- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal dans HANDOFF-journal.md)
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (≤ 40 lignes — journal dans HANDOFF-journal.md)
 - Code map : @.claude/docs/code-map.md ⭐ (< 3k tokens — gotchas dans code-map-gotchas.md)
 - Roadmap (dashboard) : [ROADMAP](.claude/docs/ROADMAP.md) · Cadrage : [cadrage/README](.claude/docs/cadrage/README.md)
 - Conception : [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md)
