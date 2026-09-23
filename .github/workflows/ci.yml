@@ -47,7 +47,7 @@ jobs:
           echo "@-imports: $n"
           test "$n" -eq 2
 
-      - name: Budget contexte auto-charge du template vierge (< 8k tokens est. — v1.5.0 : 6,5k)
+      - name: "Budget contexte auto-charge du template vierge (< 8k tokens est. — v1.5.0 = 6,5k)"
         run: python3 .claude/skills/doc-health/scripts/context-budget.py --root . --max 8000 --no-user
 
       - name: Tests context-budget + slim-context
@@ -151,3 +151,28 @@ jobs:
           n=$(grep -oE '@\.claude/[^ ]+' EXAMPLES/acme-sync-erp-notion-docs/_CLAUDE.md | wc -l)
           echo "@-imports acme: $n"
           test "$n" -eq 2
+
+  # Tag vX.Y.Z automatique sur main quand la version change : chaque version publiée doit avoir
+  # son tag — c'est la base du merge 3 voies de /upgrade-template pour les projets de cette version.
+  tag:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag de la version du template (si absent)
+        run: |
+          v="v$(tr -d ' \n' < .claude/template-version)"
+          if git rev-parse -q --verify "refs/tags/$v" >/dev/null; then
+            echo "tag $v déjà présent"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$v" -m "claude-Setup $v"
+            git push origin "$v"
+            echo "✅ tag $v créé"
+          fi
