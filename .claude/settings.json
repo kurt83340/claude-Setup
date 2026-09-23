@@ -1,18 +1,10 @@
 {
-  "autoMemoryEnabled": true,
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
-  "teammateMode": "tmux",
   "permissions": {
     "allow": [
       "Bash(pytest:*)",
       "Bash(ruff:*)",
       "Bash(mypy:*)",
       "Bash(alembic:*)",
-      "Bash(git status)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
       "Bash(git branch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
@@ -22,39 +14,37 @@
       "Bash(git worktree prune:*)",
       "Bash(uv:*)",
       "Bash(npm:*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-      "Bash(stat:*)",
       "Bash(date:*)",
-      "Bash(chmod:*)",
       "Bash(git init:*)",
       "Bash(cp:*)",
-      "Bash(tmux -V)",
       "Bash(python3 .claude/skills/init-from-template/scripts/render.py:*)",
       "Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)",
       "Bash(python3 .claude/skills/archive-projet/scripts/archive-projet.py:*)",
-      "Read(./**)",
       "Edit(./**)"
     ],
     "ask": [
       "Bash(git push:*)",
       "Bash(git reset:*)",
       "Bash(git merge:*)",
+      "Bash(git branch -d:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git branch --delete:*)",
+      "Bash(git tag -d:*)",
+      "Bash(git tag --delete:*)",
       "Bash(git worktree remove:*)",
       "Bash(alembic downgrade:*)",
-      "Bash(./scripts/deploy:*)",
-      "Read(./.env.*)"
+      "Bash(./scripts/deploy:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
-      "Read(./.env)",
-      "Read(./.env.local)",
-      "Read(./.env.*.local)",
-      "Read(./.env.development)",
-      "Read(./.env.staging)",
-      "Read(./.env.production)",
-      "Read(./.env.test)",
-      "Read(./secrets.*)"
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(!.env.example)",
+      "Read(!.env.sample)",
+      "Read(!.env.template)",
+      "Read(secrets.*)",
+      "Read(*.pem)",
+      "Read(*.key)"
     ]
   },
   "hooks": {
@@ -72,17 +62,7 @@
     ],
     "SessionStart": [
       {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/sessionstart-inject-handoff.py",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "startup",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
@@ -105,7 +85,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
@@ -117,7 +97,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
@@ -129,7 +109,6 @@
     ],
     "Stop": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",

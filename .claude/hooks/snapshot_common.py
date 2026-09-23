@@ -1,14 +1,33 @@
 #!/usr/bin/env python3
-"""Helpers partagés des hooks de snapshot (PreCompact + SessionEnd).
+"""Helpers partagés des hooks de session (PreCompact, SessionStart, SessionEnd).
 
 Même dossier que les hooks → `import snapshot_common` fonctionne tel quel
-(sys.path[0] = dossier du script exécuté). Source unique du format de snapshot
-et de l'extraction git/transcript — ne pas dupliquer dans les hooks.
+(sys.path[0] = dossier du script exécuté). Source unique du format de snapshot, de
+l'extraction git/transcript et des marqueurs de session — ne pas dupliquer dans les hooks.
 """
 
+import hashlib
 import json
+import re
 import subprocess
+import time
 from datetime import datetime
+from pathlib import Path
+
+# Entrées `type: "user"` du transcript qui ne sont PAS des messages humains. Mesuré sur de
+# vrais transcripts (v1.5.0) : sans ce filtre, les « derniers messages » d'un snapshot étaient
+# 3 chaînes vides (PreCompact : milieu d'une boucle d'outils, 44 entrées user sur 45 = des
+# tool_result) ou « caveat / <command-name>/exit / Goodbye! » (SessionEnd).
+NOISE_PREFIXES = (
+    "<command-", "<local-command", "<system-reminder", "<bash-", "<task-notification",
+    "[Request interrupted",
+)
+
+# Fichiers par-session du cache, purgés au démarrage passé ce délai (sinon 1 fichier/session
+# s'accumule sans fin dans .claude/.cache/).
+STALE_CACHE_GLOBS = ("codemap-injected-*.json", "handoff-size-warned-*", "handoff-age-warned-*",
+                     "session-start-*.json", "handoff-snapshot-*.md")
+STALE_CACHE_DAYS = 7
 
 
 def run(cmd: str, cwd: str = None) -> str:
@@ -22,32 +41,140 @@ def run(cmd: str, cwd: str = None) -> str:
         return ""
 
 
+def human_text(entry: dict) -> str:
+    """Texte d'un message HUMAIN du transcript, ou "" (résultat d'outil, méta, commande
+    locale, rappel système…)."""
+    if not isinstance(entry, dict) or entry.get("type") != "user" \
+            or entry.get("isMeta") or "toolUseResult" in entry:
+        return ""
+    content = (entry.get("message") or {}).get("content", "")
+    if isinstance(content, list):
+        if any(isinstance(c, dict) and c.get("type") == "tool_result" for c in content):
+            return ""
+        content = " ".join(c.get("text", "") for c in content
+                           if isinstance(c, dict) and c.get("type") == "text")
+    text = content.strip() if isinstance(content, str) else ""
+    if not text or text.startswith(NOISE_PREFIXES):
+        return ""
+    return text
+
+
 def extract_last_user_messages(transcript_path: str, n: int = 3) -> list:
-    """Extrait les n derniers messages user du transcript JSONL."""
-    user_msgs = []
+    """Extrait les n derniers messages HUMAINS du transcript JSONL (300 chars max chacun)."""
+    msgs = []
     try:
-        with open(transcript_path) as f:
+        with open(transcript_path, encoding="utf-8") as f:
             for line in f:
-                try:
-                    entry = json.loads(line)
-                    if entry.get("type") == "user":
-                        content = entry.get("message", {}).get("content", "")
-                        if isinstance(content, list):
-                            content = " ".join(
-                                c.get("text", "") for c in content if c.get("type") == "text"
-                            )
-                        user_msgs.append(content[:300])
-                except json.JSONDecodeError:
+                if '"user"' not in line:  # pré-filtre bon marché (transcripts de plusieurs Mo)
                     continue
-    except Exception:
+                try:
+                    text = human_text(json.loads(line))
+                except ValueError:
+                    continue
+                if text:
+                    msgs.append(text[:300])
+    except OSError:
         pass
-    return user_msgs[-n:]
+    return msgs[-n:]
+
+
+def transcript_started_at(transcript_path: str):
+    """Horodatage (epoch) de la 1re entrée datée du transcript, ou None."""
+    try:
+        with open(transcript_path, encoding="utf-8") as f:
+            for i, line in enumerate(f):
+                if i > 50:
+                    break
+                try:
+                    ts = json.loads(line).get("timestamp")
+                except (ValueError, AttributeError):
+                    continue
+                if isinstance(ts, str) and ts:
+                    return datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+# ── Marqueurs de session (.claude/.cache/, non versionné) ────────────────────────────────────
+
+def cache_dir(cwd) -> Path:
+    return Path(cwd) / ".claude" / ".cache"
+
+
+def safe_sid(session_id) -> str:
+    return re.sub(r"[^\w.-]", "_", str(session_id or "nosession"))
+
+
+def git_fingerprint(cwd) -> str:
+    """Empreinte de l'état git (HEAD + contenu du diff + fichiers non suivis) — sert à savoir si
+    une session a laissé une trace. "" hors dépôt git. Le diff COMPLET est haché (une 2e retouche
+    d'un fichier déjà modifié ne change ni `status` ni `--shortstat`) ; les non-suivis comptent
+    par (chemin, taille, mtime), hors `.claude/.cache/` (les marqueurs des hooks eux-mêmes)."""
+    head = run("git rev-parse HEAD", cwd=cwd)
+    if not head:
+        return ""
+    h = hashlib.sha1()
+    spec = "-- . ':(exclude).claude/.cache'"  # même si .gitignore ne l'exclut pas (brownfield)
+    for part in (head, run(f"git status --porcelain {spec}", cwd=cwd),
+                 run(f"git diff HEAD {spec}", cwd=cwd)):
+        h.update(part.encode("utf-8", "replace") + b"\0")
+    untracked = run(f"git ls-files --others --exclude-standard {spec}", cwd=cwd).splitlines()
+    for rel in sorted(u for u in untracked if not u.startswith(".claude/.cache/"))[:500]:
+        try:
+            st = (Path(cwd) / rel).stat()
+            h.update(f"{rel}|{st.st_size}|{st.st_mtime_ns}".encode("utf-8", "replace") + b"\0")
+        except OSError:
+            pass
+    return h.hexdigest()
+
+
+def mark_session_start(cwd, session_id) -> None:
+    """SessionStart : horodate le début de session + empreinte git (relus au SessionEnd)."""
+    try:
+        d = cache_dir(cwd)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / f"session-start-{safe_sid(session_id)}.json").write_text(
+            json.dumps({"t": time.time(), "git": git_fingerprint(cwd)}), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def pop_session_start(cwd, session_id):
+    """Lit ET retire le marqueur de début de session (dict) — None s'il manque."""
+    p = cache_dir(cwd) / f"session-start-{safe_sid(session_id)}.json"
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    try:
+        p.unlink()
+    except OSError:
+        pass
+    return data if isinstance(data, dict) else None
+
+
+def purge_stale_cache(cwd, days: int = STALE_CACHE_DAYS) -> int:
+    """Supprime les fichiers par-session du cache plus vieux que `days` jours."""
+    d = cache_dir(cwd)
+    if not d.is_dir():
+        return 0
+    limit, removed = time.time() - days * 86400, 0
+    for pattern in STALE_CACHE_GLOBS:
+        for f in d.glob(pattern):
+            try:
+                if f.is_file() and f.stat().st_mtime < limit:
+                    f.unlink()
+                    removed += 1
+            except OSError:
+                pass
+    return removed
 
 
 def build_snapshot(
     kind: str, label: str, session_id: str, transcript_path: str, cwd: str
 ) -> str:
-    """Compose un snapshot markdown : git state + derniers messages user.
+    """Compose un snapshot markdown : git state + derniers messages humains.
 
     kind  : "pré-compaction" | "fin de session" (rendu dans le header)
     label : trigger PreCompact ("auto"/"manual") ou reason SessionEnd ("logout"…)
@@ -65,7 +192,7 @@ def build_snapshot(
 ## 📸 Auto-snapshot {kind} ({label}) — {now}
 
 **Branche** : `{branch}`
-**Session ID** : `{session_id[:8]}…`
+**Session ID** : `{str(session_id)[:8]}…`
 
 ### Git status
 ```

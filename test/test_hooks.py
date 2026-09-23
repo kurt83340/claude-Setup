@@ -91,8 +91,9 @@ r2 = run_hook("sessionstart-inject-handoff.py", {"session_id": "absent", "cwd": 
 ok("pas de marker → exit 0 silencieux", r2.returncode == 0 and r2.stdout.strip() == "")
 shutil.rmtree(sb, ignore_errors=True)
 
-# 3. pretooluse-inject-codemap → budget v1.4 : couplage 1×/session, gotchas ciblés 1×/(session, fichier)
-#    (mesuré 2026-09-08 : l'ancienne version réinjectait ~2,2k tokens à CHAQUE Edit, cumulés dans la session)
+# 3. pretooluse-inject-codemap → gotchas ciblés 1×/(session, fichier) — v1.5.0 : plus de réinjection
+#    du couplage (doublon de code-map.md, déjà en contexte) ni de liste fixe src/tests/lib/app
+#    (mesuré 2026-09-08 : la version < 1.4 réinjectait ~2,2k tokens à CHAQUE Edit)
 print("\n== pretooluse-inject-codemap ==")
 GOTCHAS = """# Gotchas
 
@@ -124,26 +125,35 @@ sb = sandbox()
 shutil.copy2(DOCS / "code-map.md", sb / ".claude/docs/code-map.md")
 (sb / ".claude/docs/code-map-gotchas.md").write_text(GOTCHAS, encoding="utf-8")
 i1 = inject(sb, "src/sync/notion.py")
-ok("1re édition : couplage + intention injectés", "Règles de couplage" in i1 and "Intention" in i1)
+ok("1re édition : couplage NON réinjecté (déjà en contexte via code-map.md)",
+   i1 != "" and "Règles de couplage" not in i1 and "Intention" not in i1)
 ok("1re édition : gotcha ciblé (notion.py) + global injectés, gotchas des autres zones NON",
    "renvoie 200" in i1 and "centimes" in i1 and "invalidé" not in i1 and "scheduler" not in i1)
 ok("marker par session écrit dans .claude/.cache/", (sb / ".claude/.cache/codemap-injected-S1.json").is_file())
 ok("même fichier, même session → aucune ré-injection", inject(sb, "src/sync/notion.py") == "")
 i3 = inject(sb, "src/api/http.py")
-ok("autre fichier, même session : gotcha de sa zone (`src/api/` + suite indentée) SANS couplage",
+ok("autre fichier, même session : gotcha de sa zone (`src/api/` + suite indentée) seulement",
    "invalidé" in i3 and "suite indentée" in i3 and "Règles de couplage" not in i3 and "renvoie 200" not in i3)
 i4 = inject(sb, "src/jobs/nightly.py")
 ok("heading `### src/jobs/` cible ses entrées", "scheduler" in i4)
 i5 = inject(sb, "src/other/x.py")
-ok("fichier sans gotcha ciblé : seuls les Globaux (1×/fichier), ni couplage ni zones",
+ok("fichier sans gotcha ciblé : seuls les Globaux (1×/fichier), aucune zone",
    "centimes" in i5 and "Règles de couplage" not in i5 and "renvoie 200" not in i5 and "invalidé" not in i5)
-ok("nouvelle session → couplage ré-injecté", "Règles de couplage" in inject(sb, "src/sync/notion.py", session="S2"))
+ok("nouvelle session → gotchas du fichier ré-injectés", "renvoie 200" in inject(sb, "src/sync/notion.py", session="S2"))
 ok("pas d'injection pour un .md", inject(sb, "src/README.md") == "")
-ok("pas d'injection hors src/tests/lib/app", inject(sb, "scripts/tool.py") == "")
+ok("pas d'injection pour la config (.json/.yaml/.toml)", inject(sb, "backend/config.yaml") == "")
+it = inject(sb, "scripts/tool.py")
+ok("hors src/tests/lib/app (scripts/) : Globaux injectés — plus de liste fixe de dossiers",
+   "centimes" in it and "renvoie 200" not in it)
+ok("fichier sous .claude/ (méthode) → aucune injection", inject(sb, ".claude/hooks/x.py") == "")
+r_out = run_hook("pretooluse-inject-codemap.py",
+                 {"session_id": "S1", "tool_name": "Edit", "tool_input": {"file_path": "/elsewhere/src/a.py"},
+                  "cwd": str(sb)}, sb)
+ok("fichier hors projet (même sous un src/) → aucune injection", r_out.stdout.strip() == "")
 # ré-armement post-compaction : SessionStart(compact) efface le marker
 run_hook("sessionstart-inject-handoff.py", {"session_id": "S1", "source": "compact", "cwd": str(sb)}, sb)
-ok("après compaction : marker effacé → couplage ré-injecté à la prochaine édition",
-   not (sb / ".claude/.cache/codemap-injected-S1.json").exists() and "Règles de couplage" in inject(sb, "src/sync/notion.py"))
+ok("après compaction : marker effacé → gotchas ré-injectés à la prochaine édition",
+   not (sb / ".claude/.cache/codemap-injected-S1.json").exists() and "renvoie 200" in inject(sb, "src/sync/notion.py"))
 shutil.rmtree(sb, ignore_errors=True)
 
 # fallback projet < 1.4 : gotchas encore dans code-map.md § Gotchas → ciblage identique
@@ -153,9 +163,12 @@ sb = sandbox()
     "- ⚠️ `src/sync/notion.py` — 200 même en erreur\n- ⚠️ `src/api/` — cache invalidé\n", encoding="utf-8")
 i = inject(sb, "src/sync/notion.py")
 ok("projet < 1.4 (gotchas dans code-map.md) : ciblage appliqué quand même",
-   "200 même en erreur" in i and "cache invalidé" not in i and "Règles de couplage" in i)
-ok("taille d'une injection bornée (≤ 4k chars + en-tête)", len(i) < 4600)
-ok("sans Globaux, fichier sans gotcha ciblé et couplage déjà fait → silence total", inject(sb, "src/other/y.py") == "")
+   "200 même en erreur" in i and "cache invalidé" not in i and "Règles de couplage" not in i)
+ok("taille d'une injection bornée (≤ 2,5k chars + en-tête)", len(i) < 3000)
+ok("sans Globaux, fichier sans gotcha ciblé → silence total", inject(sb, "src/other/y.py") == "")
+big = "## Globaux\n\n" + "".join(f"- ⚠️ piège global numéro {n} " + "x" * 80 + "\n" for n in range(200))
+(sb / ".claude/docs/code-map-gotchas.md").write_text(big, encoding="utf-8")
+ok("gotchas volumineux → injection plafonnée", len(inject(sb, "src/big.py", session="S9")) < 3000)
 shutil.rmtree(sb, ignore_errors=True)
 
 # 4. posttooluse-growth-detection → flag API_KEY
@@ -222,8 +235,12 @@ if has_git:
     (sb / "f.txt").write_text("y")  # changement non commité
     old = time.time() - 48 * 3600
     os.utime(ho, (old, old))
-    r2 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb)}, sb)
+    r2 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "AGE1"}, sb)
     ok("HANDOFF vieux + git dirty → rappel", "HANDOFF" in r2.stdout)
+    r2b = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "AGE1"}, sb)
+    ok("même session → rappel d'âge UNE seule fois (pas à chaque tour)", r2b.stdout.strip() == "")
+    r2c = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "session_id": "AGE2"}, sb)
+    ok("autre session → rappel d'âge à nouveau", "HANDOFF" in r2c.stdout)
     # gate lead-only : un teammate identifié (agent_type≠lead) ne rappelle PAS
     r3 = run_hook("stop-handoff-reminder.sh", {"cwd": str(sb), "agent_type": "Explore"}, sb)
     ok("teammate (agent_type≠lead) → pas de rappel", r3.stdout.strip() == "")
@@ -314,6 +331,113 @@ run_hook("precompact-snapshot-handoff.py",
 r5 = run_hook("sessionstart-inject-handoff.py",
               {"session_id": "cmp", "cwd": str(sb), "source": "compact"}, sb)
 ok("source=compact → flux marker (ré-injection)", "Re-injection post-compaction" in r5.stdout)
+shutil.rmtree(sb, ignore_errors=True)
+
+# 7b. SÉQUENCES RÉELLES (v1.5.0) — l'ordre des événements tel que Claude Code les émet.
+#     Bug historique : SessionEnd passe TOUJOURS après /handoff → le filet était toujours « plus
+#     frais » que HANDOFF.md → fausse alerte « fermée sans /handoff » à CHAQUE démarrage. Les tests
+#     unitaires ne le voyaient pas (mtime de HANDOFF forcé dans le futur, ordre impossible en vrai).
+print("\n== séquences réelles startup → travail → SessionEnd → startup ==")
+if shutil.which("git"):
+    sb = sandbox()
+    ho = sb / ".claude/docs/HANDOFF.md"; ho.write_text("# HANDOFF\nv0\n")
+    for c in (["git", "init", "-q"], ["git", "config", "user.email", "t@t.t"], ["git", "config", "user.name", "t"]):
+        subprocess.run(c, cwd=sb)
+    (sb / "app.py").write_text("print(1)\n")
+    subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "init"], cwd=sb)
+    net = sb / ".claude/.cache/session-end-snapshot.md"
+
+    def start(sid, source="startup"):
+        return run_hook("sessionstart-inject-handoff.py", {"session_id": sid, "cwd": str(sb), "source": source}, sb)
+
+    def end(sid, reason="prompt_input_exit", transcript=""):
+        return run_hook("sessionend-snapshot.py",
+                        {"session_id": sid, "transcript_path": transcript, "cwd": str(sb), "reason": reason}, sb)
+
+    # A. code modifié + /handoff fait → pas de filet → démarrage suivant silencieux
+    start("A"); time.sleep(0.05)
+    (sb / "app.py").write_text("print(2)\n"); ho.write_text("# HANDOFF\nv1 (/handoff)\n")
+    end("A")
+    ok("A. /handoff fait pendant la session → aucun filet écrit", not net.exists())
+    rB = start("B")
+    ok("A. démarrage suivant : AUCUNE alerte « fermée sans /handoff » (bug v1.4)", "Filet mémoire" not in rB.stdout)
+    ok("A. marqueur de début de session consommé au SessionEnd", not (sb / ".claude/.cache/session-start-A.json").exists())
+    # B. code modifié SANS /handoff → filet écrit → injecté au démarrage suivant puis consommé
+    time.sleep(0.05); (sb / "app.py").write_text("print(3)\n")
+    end("B")
+    ok("B. trace git sans /handoff → filet écrit", net.exists())
+    rC = start("C")
+    ok("B. démarrage suivant : filet injecté", "Filet mémoire" in rC.stdout)
+    ok("B. filet consommé (jamais réinjecté deux fois)", not net.exists())
+    # C. session sans trace git (question, lecture) → pas de filet
+    end("C")
+    ok("C. session sans trace git → aucun filet", not net.exists())
+    # D. un filet périmé est supprimé quand la session suivante fait /handoff
+    start("D"); (sb / "app.py").write_text("print(4)\n"); end("D")
+    ok("D. filet posé (préparation)", net.exists())
+    start("E"); time.sleep(0.05); ho.write_text("# HANDOFF\nv2 (/handoff)\n"); end("E")
+    ok("D. /handoff dans la session suivante → filet périmé supprimé", not net.exists())
+    # E. resume / clear : marqueur posé, rien d'injecté
+    rR = start("R", source="resume")
+    ok("E. resume → marqueur de début posé, aucune injection",
+       (sb / ".claude/.cache/session-start-R.json").is_file() and rR.stdout.strip() == "")
+    rCl = start("CL", source="clear")
+    ok("E. clear → marqueur de début posé, aucune injection",
+       (sb / ".claude/.cache/session-start-CL.json").is_file() and rCl.stdout.strip() == "")
+    # F. sans marqueur (hook SessionStart absent) → repli sur la 1re date du transcript
+    tr = sb / "t.jsonl"
+    tr.write_text(json.dumps({"type": "user", "timestamp": "2020-01-01T00:00:00.000Z",
+                              "message": {"role": "user", "content": "hello"}}) + "\n")
+    (sb / "app.py").write_text("print(5)\n"); ho.write_text("# HANDOFF\nv3\n")
+    end("NOMARK", transcript=str(tr))
+    ok("F. sans marqueur : début lu dans le transcript → /handoff détecté, pas de filet", not net.exists())
+    shutil.rmtree(sb, ignore_errors=True)
+else:
+    ok("git absent (skip séquences)", True)
+
+# 7c. Extraction des messages HUMAINS depuis un transcript réaliste (v1.5.0) — avant : 3 chaînes
+#     vides en PreCompact (tool_result) et « caveat / /exit / Goodbye! » en SessionEnd.
+print("\n== snapshot_common : messages humains (fixture transcript réaliste) ==")
+sys.path.insert(0, str(HOOKS))
+import snapshot_common  # noqa: E402
+fx = Path(tempfile.mkdtemp(prefix="transcript-")) / "t.jsonl"
+entries = [
+    {"type": "user", "timestamp": "2026-09-23T08:00:00.000Z", "message": {"role": "user", "content": "ajoute la pagination à l'API"}},
+    {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "ok"}]}},
+    {"type": "user", "toolUseResult": {"stdout": "x"}, "message": {"role": "user", "content": [{"type": "tool_result", "content": "x"}]}},
+    {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "content": "y"}]}},
+    {"type": "user", "isMeta": True, "message": {"role": "user", "content": "Caveat: meta"}},
+    {"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "et garde le curseur opaque"}]}},
+    {"type": "user", "message": {"role": "user", "content": "<local-command-caveat>Caveat: The messages below…</local-command-caveat>"}},
+    {"type": "user", "message": {"role": "user", "content": "<command-name>/exit</command-name>\n<command-message>exit</command-message>"}},
+    {"type": "user", "message": {"role": "user", "content": "<local-command-stdout>Goodbye!</local-command-stdout>"}},
+    {"type": "user", "message": {"role": "user", "content": "<system-reminder>rappel</system-reminder>"}},
+    {"type": "user", "message": {"role": "user", "content": "[Request interrupted by user]"}},
+]
+fx.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in entries) + "\n{json cassé\n", encoding="utf-8")
+msgs = snapshot_common.extract_last_user_messages(str(fx))
+ok("seuls les messages humains sont gardés (ni tool_result, ni méta, ni /exit, ni rappels)",
+   msgs == ["ajoute la pagination à l'API", "et garde le curseur opaque"])
+ok("aucune chaîne vide dans les extraits", all(m.strip() for m in msgs))
+ok("début de session lu dans le transcript",
+   abs(snapshot_common.transcript_started_at(str(fx)) - 1790150400.0) < 1)
+ok("transcript absent → [] sans exception", snapshot_common.extract_last_user_messages("/nonexistent.jsonl") == [])
+shutil.rmtree(fx.parent, ignore_errors=True)
+
+# 7d. Purge du cache par-session au démarrage (> 7 jours) — sinon 1 fichier/session s'accumule
+print("\n== purge du cache par-session ==")
+sb = sandbox()
+cache = sb / ".claude/.cache"; cache.mkdir(parents=True)
+old_f = [cache / n for n in ("codemap-injected-OLD.json", "handoff-age-warned-OLD", "session-start-OLD.json",
+                             "handoff-snapshot-OLD.md", "handoff-size-warned-OLD")]
+for f in old_f:
+    f.write_text("x"); t_old = time.time() - 10 * 86400; os.utime(f, (t_old, t_old))
+fresh = cache / "codemap-injected-NEW.json"; fresh.write_text("{}")
+keep = cache / "team-progress.log"; keep.write_text("x"); os.utime(keep, (time.time() - 30 * 86400,) * 2)
+run_hook("sessionstart-inject-handoff.py", {"session_id": "P", "cwd": str(sb), "source": "startup"}, sb)
+ok("fichiers par-session > 7 j purgés au démarrage", not any(f.exists() for f in old_f))
+ok("fichiers récents conservés", fresh.exists())
+ok("fichiers hors motifs par-session conservés (team-progress.log)", keep.exists())
 shutil.rmtree(sb, ignore_errors=True)
 
 # 8. teamtask-log → 1 ligne JSON/événement, append, jamais bloquant

@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 """
-PreToolUse hook (matcher: "Edit|Write|MultiEdit") — réinjecte le NON-DÉDUCTIBLE avant une
-édition de code, **sous budget** : une fois par session, ciblé par fichier.
+PreToolUse hook (matcher: "Edit|Write") — injecte les GOTCHAS qui ciblent le fichier édité.
 
-Pourquoi : Claude retrouve seul le rôle/les imports/les tests d'un fichier (agentic search).
-Ce qu'il NE PEUT PAS deviner : les *règles de couplage* (« ne jamais importer X »),
-l'*intention* et les *gotchas*. C'est ça — et seulement ça — qu'on réinjecte.
+Pourquoi : Claude retrouve seul le rôle/les imports/les tests d'un fichier (agentic search), et
+les règles de couplage + l'intention sont DÉJÀ en contexte (`code-map.md` est @-importé par le
+CLAUDE.md racine, relu après chaque compaction). Ce qu'il n'a PAS : les gotchas, rangés dans
+`code-map-gotchas.md` (non auto-chargé, budget v1.4). C'est ça — et seulement ça — qu'on injecte.
 
-Budget (v1.4.0 — mesuré 2026-09-08) : l'ancienne version réinjectait couplage + intention +
-TOUS les gotchas (~2,2k tokens) à CHAQUE Edit/Write, et une injection reste dans le transcript
-pour toute la session (vérifié via `claude -p --resume`) → 40 éditions ≈ 90k tokens. Maintenant :
+Livraison (doc hooks) : l'`additionalContext` d'un PreToolUse arrive « alongside the tool
+result », donc juste APRÈS l'édition — c'est un rattrapage immédiat (Claude corrige dans la
+foulée), pas un blocage préventif.
 
-  1. **Couplage + intention** (code-map.md, déjà auto-chargée au démarrage) : UNE fois par
-     session — marker `.claude/.cache/codemap-injected-<session_id>.json`. Le hook SessionStart
-     (source=compact) efface le marker → ré-armé après chaque compaction (là où le rappel compte).
-  2. **Gotchas** : depuis `code-map-gotchas.md` (v1.4, non auto-chargé) — ou § Gotchas de
-     code-map.md (projet < 1.4) — UNIQUEMENT les entrées qui ciblent le fichier édité :
-     chemin / nom de fichier / dossier cité en backticks dans l'entrée (ou son heading `###`),
-     plus les entrées sous un heading « Globaux ». Une fois par (session, fichier).
+Budget : une injection par (session, fichier) — marker `.claude/.cache/codemap-injected-<sid>.json`,
+effacé par SessionStart(compact) → ré-armé après chaque compaction. Plus de réinjection des
+règles de couplage (v1.5.0 : doublon de code-map.md, déjà en contexte).
 
-Trigger : avant chaque Edit/Write sur un fichier de code (src/, lib/, app/, tests/).
+Ciblage : une entrée cible un fichier en citant en backticks un chemin, un nom de fichier ou un
+dossier (ou via son heading `###`) ; les entrées sous un heading « Globaux » valent pour toute
+édition de code. Projet < 1.4 sans code-map-gotchas.md → § Gotchas de code-map.md.
+
+Fichiers concernés (v1.5.0) : tout fichier DU PROJET hors `.claude/` et hors docs/config
+(.md, .json, .yaml…) — plus de liste fixe src/tests/lib/app (ratait packages/, backend/…).
 Input stdin : {"session_id": "...", "tool_name": "Edit"|"Write", "tool_input": {"file_path": "..."}, "cwd": "..."}
 Output JSON : {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "..."}}
 Non-bloquant : toute erreur → exit 0 silencieux.
@@ -31,11 +32,9 @@ import re
 import sys
 from pathlib import Path
 
-MAX_CHARS = 4000            # cap global de l'additionalContext (doc : 10k max)
-MAX_GOTCHA_CHARS = 2500     # part réservée aux gotchas ciblés
-COUPLING_TITLES = ["Règles de couplage", "Intention & décisions locales"]
-CODE_DIRS = ["/src/", "/tests/", "/lib/", "/app/"]
-NON_CODE_EXT = (".md", ".json", ".yaml", ".yml", ".toml")
+MAX_CHARS = 2500            # cap de l'additionalContext (doc : 10k max)
+NON_CODE_EXT = (".md", ".mdx", ".txt", ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg",
+                ".lock", ".csv", ".log", ".env", ".example")
 
 
 def extract_section(text: str, title: str) -> str:
@@ -106,13 +105,11 @@ def targeted_gotchas(text: str, rel: str, name: str) -> str:
 def load_marker(path: Path) -> dict:
     try:
         d = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(d, dict):
-            d.setdefault("coupling", False)
-            d.setdefault("files", [])
+        if isinstance(d, dict) and isinstance(d.get("files"), list):
             return d
     except Exception:
         pass
-    return {"coupling": False, "files": []}
+    return {"files": []}
 
 
 def main():
@@ -126,68 +123,54 @@ def main():
     file_path = data.get("tool_input", {}).get("file_path", "")
     if not file_path:
         sys.exit(0)
-    # Gate : seulement les fichiers de code (pas .md, pas config)
-    if not any(seg in file_path for seg in CODE_DIRS) or file_path.endswith(NON_CODE_EXT):
-        sys.exit(0)
 
     cwd = Path(data.get("cwd", os.getcwd()))
-    docs = cwd / ".claude" / "docs"
-    codemap = docs / "code-map.md"
-    gotchas_file = docs / "code-map-gotchas.md"
-    if not codemap.exists() and not gotchas_file.exists():
-        sys.exit(0)
-
     try:
         rel = os.path.relpath(file_path, cwd).replace("\\", "/")
     except ValueError:
-        rel = file_path
-    name = Path(file_path).name
+        sys.exit(0)
+    # Gate : fichier de code DU PROJET (chemin relatif — un projet rangé sous un dossier
+    # parent nommé « src/ » ne doit pas tout matcher), hors méthode (.claude/) et docs/config.
+    if rel.startswith("../") or rel == ".." or rel.startswith(".claude/") \
+            or file_path.lower().endswith(NON_CODE_EXT):
+        sys.exit(0)
+
+    docs = cwd / ".claude" / "docs"
+    gotchas_file = docs / "code-map-gotchas.md"
+    codemap = docs / "code-map.md"
+    try:
+        if gotchas_file.is_file():
+            gsrc = gotchas_file.read_text(encoding="utf-8")
+        elif codemap.is_file():  # projet < 1.4 : gotchas encore dans code-map.md
+            gsrc = extract_section(codemap.read_text(encoding="utf-8"), "Gotchas")
+        else:
+            sys.exit(0)
+    except OSError:
+        sys.exit(0)
+
     session_id = re.sub(r"[^\w.-]", "_", str(data.get("session_id", "nosession")))
     marker_path = cwd / ".claude" / ".cache" / f"codemap-injected-{session_id}.json"
     marker = load_marker(marker_path)
+    if rel in marker["files"]:
+        sys.exit(0)  # déjà injecté pour ce fichier dans cette session
 
-    blocks = []
-    try:
-        codemap_text = codemap.read_text(encoding="utf-8") if codemap.exists() else ""
-    except Exception:
-        codemap_text = ""
-
-    # 1. Couplage + intention : une fois par session (ré-armé après compaction)
-    if not marker["coupling"] and codemap_text:
-        coupling = "\n\n".join(s for s in (extract_section(codemap_text, t) for t in COUPLING_TITLES) if s)
-        if coupling:
-            blocks.append(coupling[: MAX_CHARS - MAX_GOTCHA_CHARS])
-            marker["coupling"] = True
-
-    # 2. Gotchas ciblés : une fois par (session, fichier)
-    if rel not in marker["files"]:
-        try:
-            gsrc = gotchas_file.read_text(encoding="utf-8") if gotchas_file.exists() \
-                else extract_section(codemap_text, "Gotchas")
-        except Exception:
-            gsrc = ""
-        g = targeted_gotchas(gsrc, rel, name) if gsrc else ""
-        if g:
-            blocks.append("## Gotchas ciblant ce fichier\n\n" + g[:MAX_GOTCHA_CHARS])
-        marker["files"].append(rel)
-
+    gotchas = targeted_gotchas(gsrc, rel, Path(file_path).name) if gsrc else ""
+    marker["files"].append(rel)
     try:
         marker_path.parent.mkdir(parents=True, exist_ok=True)
         marker_path.write_text(json.dumps(marker), encoding="utf-8")
     except Exception:
         pass
 
-    if not blocks:
+    if not gotchas.strip():
         sys.exit(0)
 
-    context = f"""## 🗺️  Code Map — contraintes à respecter pour ce fichier
+    context = f"""## ⚠️ Gotchas ciblant `{rel}` (code-map-gotchas.md)
 
-Tu vas éditer `{rel}`. Ce que la code-map impose et que tu ne peux PAS deviner en lisant le code :
+{gotchas[:MAX_CHARS]}
 
-{chr(10).join(blocks)[:MAX_CHARS]}
-
-⚠️  Respecte les **règles de couplage**. Le rôle du fichier, ses imports et ses tests :
-retrouve-les directement dans le code (grep/lecture). (Injecté une fois par session — budget contexte.)"""
+→ Pièges déjà payés sur ce fichier/cette zone : vérifie que ton édition les respecte, corrige
+dans la foulée sinon. (Injecté une fois par session et par fichier — budget contexte.)"""
 
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
                                               "additionalContext": context}}))
