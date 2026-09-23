@@ -193,7 +193,7 @@ with tempfile.TemporaryDirectory() as td:
        and "@.claude/docs/HANDOFF.md" in cl and "@.claude/docs/code-map.md" in cl and "seuls les 2 docs" in cl)
     ok("fichiers v1.4 copiés depuis le template (hook + rule courte), ancienne rule sauvegardée",
        (p / ".claude/hooks/pretooluse-inject-codemap.py").read_bytes() == (ROOT / ".claude/hooks/pretooluse-inject-codemap.py").read_bytes()
-       and (p / ".claude/rules/agent-teams.md").read_bytes() == (ROOT / ".claude/rules/agent-teams.md").read_bytes()
+       and (p / ".claude/rules/agent-teams.md").read_bytes() == (ROOT / "plugins/agent-teams/skills/team/agent-teams-rule.md").read_bytes()
        and (p / ".claude/.cache/agent-teams.md.pre-1.4").is_file()
        and (p / ".claude/skills/doc-health/scripts/context-budget.py").is_file())
     rc2, j2 = budget(p)
@@ -219,9 +219,20 @@ with tempfile.TemporaryDirectory() as td:
        r.returncode == 0 and "## Status" in ho and "HANDOFF-journal.md" in ho and not (q / ".claude/docs/HANDOFF-journal.md").exists())
     ok("code-map déjà migrée → non touchée", "⏭ 3." in r.stdout)
 
-    print("\n== 6. Template vierge : sous le seuil CI ==")
-    r = run(BUDGET, "--root", str(ROOT), "--no-user", "--max", "12000")
-    ok("context-budget --max 12000 sur le template → exit 0", r.returncode == 0)
+    print("\n== 5b. Listing skills : nom + description seulement, hors disable-model-invocation ==")
+    k = tmp / "skills-listing"
+    write(k / "CLAUDE.md", "# P\n")
+    write(k / ".claude/skills/a/SKILL.md", "---\nname: a\ndescription: " + "d" * 400 + "\n"
+          "allowed-tools: " + "Bash(x:*), " * 60 + "\n---\n# A\n")
+    write(k / ".claude/skills/b/SKILL.md", "---\nname: b\ndescription: " + "e" * 400 + "\n"
+          "disable-model-invocation: true\n---\n# B\n")
+    rc, jk = budget(k)
+    ok("allowed-tools non compté, skill manuel (disable-model-invocation) exclu",
+       jk["skills_frontmatter_tok"] == len("name: a\ndescription: " + "d" * 400) // 2)
+
+    print("\n== 6. Template vierge : sous le seuil CI (v1.5.0 : ~6,5k — garde anti-régression) ==")
+    r = run(BUDGET, "--root", str(ROOT), "--no-user", "--max", "8000")
+    ok("context-budget --max 8000 sur le template → exit 0", r.returncode == 0)
     rc, j = budget(ROOT)
     files = {f["path"]: f for f in j["files"]}
     ok("template : aucune rule scopée importée en @", not any(f["scoped_import"] for f in j["files"]))

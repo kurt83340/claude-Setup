@@ -390,7 +390,7 @@ def _fix_core_count(text: str) -> str:
 
 
 def prune_dead_inventory(root: Path, profile: dict) -> None:
-    """Purge des index shippés (inventaire `.claude/CLAUDE.md`, tables des rules/USAGE,
+    """Purge des index shippés (inventaire `.claude/skills/README.md`, `.claude/CLAUDE.md`, tables des rules/USAGE,
     reminders du CLAUDE.md racine) les lignes — bullets et rangées de table — qui
     référencent un skill ABSENT : bootstrap (init/adopt, retirés pour tous les types)
     + skills supprimés par le profil (ex. script-jetable). Replie les sections
@@ -404,7 +404,7 @@ def prune_dead_inventory(root: Path, profile: dict) -> None:
     # Forme d'invocation UNIQUEMENT (backtick + slash : `/nom`) — jamais les chemins
     # (`.claude/docs/adr/` contient « /adr » mais n'est pas une réf de skill).
     pat = re.compile("`/(?:%s)(?![\\w-])" % "|".join(re.escape(n) for n in names))
-    for rel in ("CLAUDE.md", ".claude/CLAUDE.md",
+    for rel in ("CLAUDE.md", ".claude/CLAUDE.md", ".claude/skills/README.md",
                 ".claude/rules/template-maintenance.md", ".claude/USAGE.md"):
         p = root / rel
         if not p.exists():
@@ -420,6 +420,8 @@ def prune_dead_inventory(root: Path, profile: dict) -> None:
                 new = _drop_section(new, "## Agent perso")
             if not (root / ".claude" / "skills" / "feature").exists():
                 new = _drop_section(new, "## 🔁 Pipelines récurrents")
+            new = _fix_core_count(_drop_empty_sections(new))
+        if rel == ".claude/skills/README.md":  # inventaire canonique (v1.5.0) : compte recalé
             new = _fix_core_count(_drop_empty_sections(new))
         if rel == ".claude/rules/template-maintenance.md":
             if not (root / ".claude" / "agents").exists():
@@ -448,7 +450,7 @@ def prune_dead_nav_links(root: Path) -> None:
     les liens morts sont retirés (séparateurs « · » recousus).
     Greenfield uniquement (en brownfield, ces fichiers appartiennent à l'utilisateur)."""
     link_re = re.compile(r"\[[^\]]*\]\(([^)\s#]+)\)")
-    for rel in ("CLAUDE.md", ".claude/docs/cadrage/README.md",
+    for rel in ("CLAUDE.md", ".claude/CLAUDE.md", ".claude/docs/cadrage/README.md",
                 ".claude/rules/template-maintenance.md"):
         p = root / rel
         if not p.exists():

@@ -250,17 +250,20 @@ def step_roadmap(root: Path) -> None:
 
 
 # ── Étape 5 : fichiers v1.4 depuis le template ─────────────────────────────────────────────
+# (chemin dans le projet, chemin dans le template) — v1.5.0 : la rule d'équipe vit dans le plugin
+# agent-teams (copiée par son activation) ; mise à jour ici seulement si le projet l'a déjà.
 TEMPLATE_FILES = [
-    ".claude/rules/agent-teams.md",
-    ".claude/hooks/pretooluse-inject-codemap.py",
-    ".claude/hooks/sessionstart-inject-handoff.py",
-    ".claude/skills/doc-health/scripts/context-budget.py",
+    (".claude/rules/agent-teams.md", "plugins/agent-teams/skills/team/agent-teams-rule.md"),
+    (".claude/hooks/pretooluse-inject-codemap.py", ".claude/hooks/pretooluse-inject-codemap.py"),
+    (".claude/hooks/sessionstart-inject-handoff.py", ".claude/hooks/sessionstart-inject-handoff.py"),
+    (".claude/hooks/snapshot_common.py", ".claude/hooks/snapshot_common.py"),
+    (".claude/skills/doc-health/scripts/context-budget.py", ".claude/skills/doc-health/scripts/context-budget.py"),
 ]
 
 
 def step_template_files(root: Path, template: Path) -> None:
-    for rel in TEMPLATE_FILES:
-        src, dst = template / rel, root / rel
+    for rel, src_rel in TEMPLATE_FILES:
+        src, dst = template / src_rel, root / rel
         if not src.is_file():
             log(f"⏭ 5. {rel} : absent du template ({template})")
             continue

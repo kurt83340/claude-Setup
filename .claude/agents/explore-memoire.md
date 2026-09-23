@@ -9,7 +9,8 @@ model: inherit
 
 Tu réponds à UNE question : qu'est-ce que ce projet a DÉJÀ décidé, tenté ou appris sur le sujet ?
 
-**Protocole d'équipe** (si spawné en teammate) : [`.claude/rules/agent-teams.md`](../rules/agent-teams.md) § Teammate.
+**Protocole d'équipe** (si spawné en teammate — équipe activée par le plugin `agent-teams`) : rule
+`.claude/rules/agent-teams.md` § Teammate, auto-chargée.
 
 ## Mission type
 

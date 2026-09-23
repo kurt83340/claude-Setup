@@ -1,6 +1,39 @@
-# `.claude/skills/` — Organisation
+# `.claude/skills/` — Inventaire et organisation
 
-> Skills perso et importés depuis d'autres sources, **à plat** dans ce dossier.
+> 🗂️ **Inventaire canonique** (**16 skills cœur**) — source de vérité des skills du template, vérifiée
+> par la CI (chaque dossier `.claude/skills/*` y figure ; compte déclaré = dossiers réels). Claude
+> Code liste déjà nativement nom + description de chaque skill : cet inventaire sert aux humains et
+> à la CI. Un skill ajouté au projet s'y recense.
+
+## Skills du template
+
+### Session & feature
+
+- `/handoff` — réécrit HANDOFF.md en fin de session (< 30 lignes) + 1 ligne au journal
+- `/spec "<titre>"` — scaffold d'une feature (4 fichiers) + ligne ROADMAP
+- `/conception <spec-id|macro>` — explore (subagents code/docs/mémoire) → 2-3 options → décision → plan vérifiable + revue adverse
+- `/feature "<titre>" [pipeline]` — déroule un pipeline complet (standard/tdd/n8n), gate utilisateur entre chaque étape
+- `/feature-done <spec-id>` — livraison : ROADMAP, CHANGELOG, HANDOFF, ADR proposés, PR
+- `/debug "<symptôme>"` — reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → leçon
+- `/pivot "<raison>"` — pivot client orchestré (9 étapes, validation à chaque étape)
+- `/archive-projet ["raison"]` — fin de vie : bilan, marquage archivé, commande de move (+ `restore`, `status`)
+
+### Cycle de vie des artefacts (capture / promote / discard / archive)
+
+- `/lecon [mode] <args>` — leçons : `<scope> "<titre>"` · `promote <date>` · `discard <date>` · `archive`
+- `/adr [mode] <args>` — décisions immuables : `<scope> "<titre>"` · `supersede <NN>` · `deprecate <NN>` · `list`
+- `/idee [mode] <args>` — idées internes : `"<titre>"` · `promote <date>` · `discard <date>` · `archive`
+
+### Audit & technique
+
+- `/doc-health` — audit hebdo (fraîcheur, ADR manquants, drift code-map, budget de contexte)
+- `/codemap` — met à jour code-map.md (vue macro + couplage) et détecte les violations
+- `/scaffold skill|agent|pipeline "<nom>"` — composant conforme aux conventions + référencement
+
+### Bootstrap (usage unique — retirés du projet après usage)
+
+- `/init-from-template` — initialise un projet depuis le template (from scratch)
+- `/adopt-template` — greffe le template sur un projet EXISTANT (brownfield, merges non destructifs)
 
 ## Convention
 
@@ -60,22 +93,7 @@ EOF
 
 Les plugins ont leur propre namespace automatiquement (`plugin-name:skill-name`). Pas besoin de copier dans `.claude/skills/` — l'invocation devient `/<plugin>:<skill>`.
 
-## Skills du template (à plat)
-
-| Skill                 | Quoi                                            |
-| --------------------- | ----------------------------------------------- |
-| `/handoff`            | Snapshot .claude/docs/HANDOFF.md fin de session |
-| `/spec`               | Scaffold nouvelle feature                       |
-| `/feature-done`       | Marque feature comme livrée                     |
-| `/pivot`              | Workflow pivot client 9 étapes                  |
-| `/lecon`              | Cycle de vie leçons                             |
-| `/adr`                | Cycle de vie ADR                                |
-| `/idee`               | Cycle de vie idées                              |
-| `/doc-health`         | Audit hebdo doc                                 |
-| `/codemap`            | Régénère .claude/docs/code-map.md               |
-| `/init-from-template` | Init projet depuis ce template (UNE FOIS)       |
-
-## Skills stack-spécifiques = PLUGINS (marketplace `claude-setup`, dossier `plugins/`)
+## Skills stack et options = PLUGINS (marketplace `claude-setup`, dossier `plugins/` du repo template)
 
 Pas livrés dans `.claude/skills/` — packagés en **plugins** installés par projet via `/plugin`
 (auto-découverts, aucun inventaire à maintenir). Recensés ici pour visibilité.
@@ -84,6 +102,7 @@ Pas livrés dans `.claude/skills/` — packagés en **plugins** installés par p
 | --------------- | ---------------------- | --------------------------------------------------------------- |
 | `n8n-mcp-skills` (**officiel**, [czlonkowski/n8n-skills](https://github.com/czlonkowski/n8n-skills)) | 14 skills n8n + hooks | `automation-n8n` → check-first `claude plugin list` (souvent déjà en user-scope) ; sinon marketplace add + install `--scope user` |
 | `db-migration`  | `db-migration`         | `bdd-migration` → `/plugin install db-migration@claude-setup`   |
+| `agent-teams`   | `/agent-teams:team` + rôles worker/front-end/back-end/tester | toute stack, **opt-in** → `/plugin install agent-teams@claude-setup`, puis `/agent-teams:team` (1er lancement = activation) |
 
 ## Skills built-in Claude Code (hors `.claude/skills/`)
 

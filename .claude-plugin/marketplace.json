@@ -3,7 +3,9 @@
   "name": "claude-setup",
   "description": "Plugins stack du template claude-Setup — composants optionnels installables par projet (les skills cœur restent standalone dans .claude/).",
   "version": "1.0.0",
-  "owner": { "name": "Julien Leroy" },
+  "owner": {
+    "name": "Julien Leroy"
+  },
   "plugins": [
     {
       "name": "db-migration",
@@ -12,7 +14,7 @@
     },
     {
       "name": "agent-teams",
-      "description": "Exécution d'équipe : skill /team (orchestration tmux, worktrees, task list, débrief mémoire) + rôles worker/front-end/back-end/tester + hook de trace team-progress.",
+      "description": "Exécution d'équipe (opt-in) : skill /team — activation au 1er lancement, orchestration tmux/in-process, worktrees, task list, débrief mémoire — + rôles worker/front-end/back-end/tester + hook de trace team-progress.",
       "source": "./plugins/agent-teams"
     }
   ]

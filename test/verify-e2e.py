@@ -69,10 +69,17 @@ def main():
            1 <= len(imps) <= 2 and not broken)
         if broken:
             print(f"     → morts : {broken}")
-    inv = root / ".claude" / "CLAUDE.md"
-    if inv.is_file():
-        t = inv.read_text(encoding="utf-8")
-        ok("inventaire sans réf bootstrap", "/init-from-template" not in t and "/adopt-template" not in t)
+    for inv in (root / ".claude" / "CLAUDE.md", root / ".claude" / "skills" / "README.md"):
+        if inv.is_file():
+            t = inv.read_text(encoding="utf-8")
+            ok(f"{inv.relative_to(root)} : sans réf bootstrap",
+               "/init-from-template" not in t and "/adopt-template" not in t)
+    readme = root / ".claude" / "skills" / "README.md"
+    if readme.is_file() and (root / ".claude" / "skills").is_dir():
+        m = re.search(r"\*\*(\d+) skills cœur\*\*", readme.read_text(encoding="utf-8"))
+        n_dirs = len([d for d in (root / ".claude" / "skills").iterdir() if d.is_dir()])
+        ok(f"skills/README.md : compte déclaré = dossiers ({m.group(1) if m else '?'} vs {n_dirs})",
+           bool(m) and int(m.group(1)) == n_dirs)
 
     # ── settings.json ────────────────────────────────────────────────────────
     print("\n== settings ==")

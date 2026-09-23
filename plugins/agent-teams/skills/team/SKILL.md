@@ -1,14 +1,14 @@
 ---
 name: team
-description: Délègue une feature ou une mission à une équipe de teammates visibles en tmux — plan d'équipe validé par l'utilisateur (rôles, topologie de communication), worktree par codeur, task list native, suivi, merge, débrief mémoire, clôture propre. À invoquer quand l'utilisateur veut paralléliser une spec sur plusieurs agents (« lance une équipe », « délègue à des agents »). Requiert les agent teams (câblés dans settings.json du template).
+description: Délègue une feature ou une mission à une équipe de teammates visibles en tmux — plan d'équipe validé par l'utilisateur (rôles, topologie de communication), worktree par codeur, task list native, suivi, merge, débrief mémoire, clôture propre. À invoquer quand l'utilisateur veut paralléliser une spec sur plusieurs agents (« lance une équipe », « délègue à des agents »). Opt-in : le 1er lancement ACTIVE les agent teams dans le projet (flag + mode d'affichage + rule d'équipe, relance requise).
 allowed-tools: Read, Write, Edit, Grep, Glob, Agent, SendMessage, TaskCreate, TaskUpdate, TaskList, Skill, Bash(git worktree:*), Bash(git branch:*), Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git merge:*), Bash(tmux -V), Bash(grep:*)
 disable-model-invocation: false
 ---
 
 # /team — Orchestrer une équipe de teammates sur une feature
 
-Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead) = la rule **`agent-teams.md`** du
-template (`.claude/rules/`, auto-chargée dans chaque session, courte). Le **protocole complet**
+Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead) = la rule **`agent-teams.md`**
+(`.claude/rules/`, posée par l'activation — Étape 0 —, auto-chargée par le lead ET chaque teammate). Le **protocole complet**
 (politique teammate vs subagent, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh,
 worktrees, spawn, suivi, débrief mémoire) = **`protocole.md`, dans le dossier de ce skill** — lis-le
 en Étape 0 s'il n'est pas déjà dans ton contexte. Ce skill = la **séquence opératoire**.
@@ -17,20 +17,43 @@ en Étape 0 s'il n'est pas déjà dans ton contexte. Ce skill = la **séquence o
 `/agent-teams:team "<mission libre>"`. Les rôles d'exécution (`worker`, `front-end`,
 `back-end`, `tester`) sont fournis par CE plugin ; `reviewer` + `explore-*` par le cœur.
 
-## Étape 0 — Préflight
+## Étape 0 — Activation (1re fois dans le projet), puis préflight
+
+Les agent teams sont **opt-in** (v1.5.0) : rien n'est câblé dans le cœur du template — le flag
+expérimental monte une équipe à CHAQUE session et laisse Claude proposer des teammates de lui-même,
+inutile pour un projet solo.
 
 ```bash
-grep -q 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS' .claude/settings.json && echo "✅ teams câblées" || echo "❌ flag absent de settings.json"
-tmux -V || echo "⚠️ tmux absent → teammateMode retombera en in-process (agents dans TON terminal, pas en panes)"
-[ -n "$TMUX" ] && echo "✅ session lancée DANS tmux → panes visibles ici" || echo "⚠️ hors tmux : les teammates iront dans une session tmux SÉPARÉE (invisibles sans tmux attach)"
+grep -qs '"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"' .claude/settings.json .claude/settings.local.json && echo "✅ flag présent" || echo "⚙️ flag absent → activation"
+diff -q .claude/rules/agent-teams.md "${CLAUDE_SKILL_DIR}/agent-teams-rule.md" >/dev/null 2>&1 && echo "✅ rule d'équipe à jour" || echo "⚙️ rule absente ou périmée → activation"
+```
+
+**Activation** (demander l'accord, puis) :
+
+1. Rule d'équipe : copie `${CLAUDE_SKILL_DIR}/agent-teams-rule.md` → `.claude/rules/agent-teams.md`
+   (auto-chargée par le lead ET par chaque teammate, y compris ad-hoc).
+2. Flag + affichage, fusionnés dans `.claude/settings.json` (partagé via git) — ou
+   `.claude/settings.local.json` (perso) si l'utilisateur préfère :
+   `{"env": {"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"}, "teammateMode": "auto"}`.
+   `auto` = un pane par teammate si la session tourne DANS tmux, sinon teammates dans ce terminal
+   (panneau d'agents : ↑/↓ + Entrée). `"tmux"` forcerait une session tmux séparée — invisible sans
+   `tmux attach`.
+3. **Relance requise** (flag lu au démarrage) : l'utilisateur quitte, relance (`claude --continue`,
+   idéalement dans `tmux new -s <projet>` pour les panes), puis rappelle `/agent-teams:team <id>`.
+   Arrête-toi là.
+
+**Préflight** (flag actif) :
+
+```bash
+tmux -V || echo "ℹ️ tmux absent → teammates in-process (dans CE terminal)"
+[ -n "$TMUX" ] && echo "✅ session DANS tmux → un pane par teammate" || echo "ℹ️ hors tmux → teammates in-process (panneau d'agents)"
 git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un repo git (worktrees impossibles)"
 ```
 
 - Spec fournie ? Vérifie que `.claude/docs/specs/<id>/tasks.md` existe (sinon propose `/spec` d'abord).
-- ⚠️ **Hors tmux** : `teammateMode: "tmux"` fonctionne quand même (Claude crée la session tmux
-  automatiquement — doc officielle, pas besoin d'être dedans), mais l'utilisateur **ne verra
-  rien** sans `tmux attach`. Si l'observabilité est le but (défaut de ce template), propose-lui
-  de relancer depuis tmux (`tmux new -s <projet>` puis `claude --resume`) AVANT de spawner.
+- Mode panes (tmux) : d'après la doc Claude Code, le corps d'une définition d'agent **remplace** le
+  system prompt par défaut du teammate (en in-process il s'y **ajoute**) — les rôles de ce plugin
+  portent donc un « Cadre de travail » autonome ; un teammate ad-hoc reçoit ce cadre dans son prompt.
 - Un point ne passe pas → le dire à l'utilisateur et demander AVANT de continuer en mode
   dégradé (subagents séquentiels, invisibles).
 
@@ -91,7 +114,9 @@ mission contient :
   `SendMessage`, AVANT de passer idle ;
 - la **topologie** décidée en Étape 1 : « tout passe par moi » OU « échange direct avec <X>
   sur <sujet> uniquement ; le reste passe par moi » ;
-- claim tes tasks (owner) et fais-les vivre (`in_progress` → `completed`).
+- claim tes tasks (owner) et fais-les vivre (`in_progress` → `completed`) ;
+- **teammate ad-hoc uniquement** : recopier le « Cadre de travail » d'un rôle du plugin
+  (ex. `agents/worker.md`) — en mode panes, son prompt est tout ce qu'il a comme cadre.
 
 ## Étape 5 — Suivi
 

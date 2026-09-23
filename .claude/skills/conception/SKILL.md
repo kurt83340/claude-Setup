@@ -1,6 +1,6 @@
 ---
 name: conception
-description: Workflow de planification arrêté — explore en parallèle le code, les docs/bonnes pratiques et la mémoire projet (ADR/leçons/code-map) via subagents, fait émerger 2-3 options avec trade-offs, fait trancher l'utilisateur, rédige plan.md + tasks.md (partitionnés pour /team), puis fait relire le plan par un agent adverse à contexte frais. À invoquer après /spec (micro, par feature) ou en mode macro (ARCHITECTURE projet). Ne produit JAMAIS de code.
+description: Planifie une feature (ou l'architecture en mode macro) AVANT de coder : exploration parallèle code/docs/mémoire par subagents, 2-3 options avec trade-offs, décision de l'utilisateur, plan.md + tasks.md vérifiables, revue adverse à contexte frais. À invoquer après /spec. Ne produit jamais de code.
 allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, WebFetch, WebSearch, mcp__context7, Bash(git log:*), Bash(git diff:*), Bash(grep:*), Bash(find:*)
 disable-model-invocation: false
 ---

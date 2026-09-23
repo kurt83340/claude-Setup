@@ -140,7 +140,15 @@ def collect(root: Path, with_user: bool):
     if skills_dir.is_dir():
         for s in skills_dir.glob("*/SKILL.md"):
             m = re.match(r"---\n(.*?)\n---", read(s), re.S)
-            skills_tok += est(len(m.group(1))) if m else 0
+            if not m:
+                continue
+            fm = m.group(1)
+            # Doc skills : seuls nom + description (+ when_to_use) sont listés ; un skill en
+            # `disable-model-invocation: true` n'a PAS sa description en contexte.
+            if re.search(r"^disable-model-invocation:\s*true\s*$", fm, re.M):
+                continue
+            listed = [l for l in fm.split("\n") if re.match(r"(name|description|when_to_use)\s*:", l)]
+            skills_tok += est(len("\n".join(listed)))
 
     user_rows = []
     if with_user:
@@ -194,7 +202,7 @@ def main() -> int:
             print(f"   {r['tok']:>7} tok  {r['path']}  (user, hors projet)")
         print(f"   + user/mémoire : {user_total} tok")
     if skills_tok:
-        print(f"   + listing skills (frontmatter) : ~{skills_tok} tok")
+        print(f"   + listing skills (nom + description, hors disable-model-invocation) : ~{skills_tok} tok")
     if on_demand:
         print("\n   À la demande (rules scopées `paths:` — NON chargées au démarrage) :")
         for r in on_demand:

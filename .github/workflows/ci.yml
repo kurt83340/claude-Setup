@@ -42,8 +42,8 @@ jobs:
           echo "@-imports: $n"
           test "$n" -eq 2
 
-      - name: Budget contexte auto-charge du template vierge (< 12k tokens est.)
-        run: python3 .claude/skills/doc-health/scripts/context-budget.py --root . --max 12000 --no-user
+      - name: Budget contexte auto-charge du template vierge (< 8k tokens est. — v1.5.0 : 6,5k)
+        run: python3 .claude/skills/doc-health/scripts/context-budget.py --root . --max 8000 --no-user
 
       - name: Tests context-budget + slim-context
         run: python3 test/test_context_budget.py
@@ -55,14 +55,14 @@ jobs:
       - name: Tous les hooks Python compilent
         run: python3 -m py_compile .claude/hooks/*.py
 
-      - name: Inventaire skills synchro avec .claude/CLAUDE.md
+      - name: Inventaire skills synchro avec .claude/skills/README.md
         run: |
           rc=0
           for d in .claude/skills/*/; do
             name=$(basename "$d")
-            grep -q "/$name" .claude/CLAUDE.md || { echo "❌ Skill '$name' absent de l'inventaire .claude/CLAUDE.md"; rc=1; }
+            grep -q "\`/$name" .claude/skills/README.md || { echo "❌ Skill '$name' absent de l'inventaire .claude/skills/README.md"; rc=1; }
           done
-          declared=$(grep -oE '\*\*[0-9]+ skills cœur\*\*' .claude/CLAUDE.md | grep -oE '[0-9]+' | head -1)
+          declared=$(grep -oE '\*\*[0-9]+ skills cœur\*\*' .claude/skills/README.md | grep -oE '[0-9]+' | head -1)
           actual=$(ls -d .claude/skills/*/ | wc -l)
           if [ "$declared" != "$actual" ]; then echo "❌ Compte déclaré ($declared) ≠ dossiers skills ($actual)"; rc=1; fi
           if [ "$rc" -ne 0 ]; then exit 1; fi

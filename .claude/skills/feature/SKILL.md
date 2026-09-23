@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Orchestrateur de pipeline — déroule une feature de bout en bout en enchaînant les maillons EXISTANTS (spec → conception → exécution → tests → review adverse → vérif → feature-done) selon un pipeline nommé (standard, tdd, ou custom déposé dans pipelines/). Gate de validation utilisateur entre chaque étape - /feature "<titre>" [pipeline]. À invoquer quand l'utilisateur veut le pipeline complet d'une traite.
+description: Déroule une feature de bout en bout en enchaînant les skills existants (spec → conception → code → tests → review adverse → vérif → feature-done) selon un pipeline nommé (standard, tdd, n8n ou custom de pipelines/), avec validation utilisateur entre chaque étape - /feature "<titre>" [pipeline].
 allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, Bash(ls:*), Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(pytest:*), Bash(npm test:*)
 disable-model-invocation: false
 ---

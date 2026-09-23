@@ -2,7 +2,7 @@
 name: adopt-template
 description: Greffe le template sur un projet EXISTANT (brownfield) — jamais d'overwrite - état des lieux (stack/structure/outillage détectés), merges diff-par-diff des collisions (CLAUDE.md, settings.json, .gitignore existants), questions CORE pré-remplies depuis l'existant, puis RÉTRO-REMPLISSAGE de la doc depuis le projet (stack.md ← manifests, code-map ← /codemap, HANDOFF ← git log, ADRs rétroactifs optionnels). Réutilise render.py + cleanup-for-type.py (mêmes scripts que /init-from-template). À exécuter UNE FOIS, après le rsync --ignore-existing.
 allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Skill, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(find:*), Bash(grep:*), Bash(cat:*), Bash(python3 .claude/skills/init-from-template/scripts/render.py:*), Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)
-disable-model-invocation: false
+disable-model-invocation: true
 ---
 
 # /adopt-template — Greffer le template sur un projet existant

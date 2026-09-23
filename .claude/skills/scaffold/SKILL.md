@@ -1,6 +1,6 @@
 ---
 name: scaffold
-description: Générateur de composants conformes au template — crée un skill, un agent ou un pipeline /feature en encodant les conventions (name = dossier, SendMessage pour les teammates, context7 si libs externes, grammaire pipeline, maillons existants) ET fait le référencement exigé (inventaire .claude/CLAUDE.md, agents/README) - /scaffold skill|agent|pipeline "<nom>". Vérifie d'abord qu'un composant existant ne couvre pas déjà le besoin.
+description: Crée un skill, un agent ou un pipeline /feature conforme aux conventions du template (frontmatter, SendMessage pour les teammates, grammaire des pipelines, maillons existants) et le référence dans l'inventaire (skills/README.md, agents/README.md). Vérifie d'abord qu'un composant existant ne couvre pas déjà le besoin - /scaffold skill|agent|pipeline "<nom>".
 allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Bash(ls:*), Bash(grep:*), Bash(find:*)
 disable-model-invocation: false
 ---
@@ -38,8 +38,8 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
    - `> **Quand ne PAS utiliser** : <cas> → \`/skill-voisin\` · <cas> → \`/autre\`.` — nomme
      **1-2 skills voisins existants** (c'est ce qui évite le mauvais routage, pas la description) ;
    - `> **Réversibilité** : 🟢|🟠|🔴 <ce que ça écrit> — undo : <commande littérale>.`
-4. **Référence (exigé par la CI)** : ajoute la ligne `- /<nom> — <1 ligne>` dans l'inventaire
-   de [`.claude/CLAUDE.md`](../../CLAUDE.md), dans la section adaptée.
+4. **Référence (exigé par la CI)** : ajoute la ligne `- \`/<nom>\` — <1 ligne>` dans l'inventaire
+   de [`.claude/skills/README.md`](../README.md), dans la section adaptée.
 5. Rappels : fichiers de support possibles (`templates/`, `scripts/`) ; pris en compte à chaud
    (ou `/reload-skills`) ; **sur le repo template**, un scénario benchmark
    `test/benchmarks/<nom>/<cas>.md` est bienvenu (format : `test/benchmarks/README.md`).
@@ -54,7 +54,7 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
    - libs externes → `mcp__context7` (rule `doc-lookup`)
    - invoque des skills → `Skill`
 3. Crée `.claude/agents/<nom>.md` — frontmatter `name`/`description`/`tools`/`model: inherit`,
-   body = **sa spécialité uniquement** (le protocole d'équipe vit dans la rule `agent-teams.md`,
+   body = **sa spécialité uniquement** (le protocole d'équipe vit dans la rule `agent-teams.md` du plugin `agent-teams`,
    ne pas dupliquer).
 4. **Référence** : ligne dans la table de [`.claude/agents/README.md`](../../agents/README.md).
 5. Rappel : rôle d'**exécution d'équipe** générique ? → il a peut-être sa place dans le plugin
@@ -85,7 +85,7 @@ Dans les deux cas, à la fin :
 
 ## Fin de run — rappels selon le contexte
 
-- **Repo template** : bump le compte « N skills cœur » dans `.claude/CLAUDE.md` (SEUL endroit
+- **Repo template** : bump le compte « N skills cœur » dans `.claude/skills/README.md` (SEUL endroit
   chiffré — la CI vérifie compte = dossiers) + entrée CHANGELOG + bump `.claude/template-version` ;
   composant dans un plugin maison → **bump la `version` de son `plugin.json`** (sinon les projets
   ne voient pas la MAJ) ; overkill pour un 1-shot → l'ajouter à `SCRIPT_JETABLE` (cleanup-for-type.py).

@@ -6,7 +6,7 @@
 
 ## Documentation projet
 
-> 🪶 **Chargement just-in-time** : seuls les **2** docs d'état vivant ci-dessous sont auto-chargés (`@`) à chaque session ; le reste = **liens simples** que Claude lit **à la demande**. Tout charger en `@` dégrade la qualité quand le contexte gonfle ([context engineering, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)). Mesuré (v1.4.0) : un projet d'un mois démarrait à **144k tokens** au 1er tour, dont 86k pour 3 docs auto-chargées sans borne → **59,8k** après régime. **Budget** : `python3 .claude/skills/doc-health/scripts/context-budget.py` (seuil 25k ; `/doc-health` Étape 0).
+> 🪶 **Chargement just-in-time** : seuls les **2** docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = **liens simples** lus à la demande (un `@` recharge le fichier à CHAQUE appel). Budget : `python3 .claude/skills/doc-health/scripts/context-budget.py` (seuil 25k).
 
 ### 🔄 Auto-chargés (`@` — état vivant, toujours en contexte)
 

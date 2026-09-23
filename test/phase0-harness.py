@@ -6,7 +6,7 @@ git init/commit → render --vars (fixture « caisse ») → --check → cleanup
 traçabilité version stack.md → verify-e2e.py + 3 scans :
   S1. blocs anti-mauvais-routage des SKILL.md survivants : chaque `/ref` = skill survivant,
       builtin ou plugin namespacé (vérifie prune_dead_skill_blocks — c'est lui qui a attrapé F6)
-  S2. nav (CLAUDE.md, .claude/CLAUDE.md, template-maintenance, USAGE) : aucune ligne
+  S2. nav (CLAUDE.md, .claude/CLAUDE.md, skills/README, template-maintenance, USAGE) : aucune ligne
       bullet/table ne référence un skill supprimé (vérifie prune_dead_inventory)
   S3. contrats v0.19 post-init : Continuation State (HANDOFF), DoD typée + circuit breakers
       + frontmatter status (templates de /spec, si le profil garde /spec)
@@ -32,7 +32,7 @@ VARS = {
 }
 BUILTINS = {"plugin", "resume", "compact", "clear", "doctor", "init",
             "security-review", "code-review", "loop", "reload-skills"}
-NAV = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude/rules/template-maintenance.md", ".claude/USAGE.md"]
+NAV = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude/skills/README.md", ".claude/rules/template-maintenance.md", ".claude/USAGE.md"]
 EXCLUDES = ("EXAMPLES/", "test/", ".github/", ".git/", "plugins/", ".claude-plugin/")
 
 

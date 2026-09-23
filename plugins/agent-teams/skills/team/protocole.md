@@ -1,7 +1,8 @@
 # Agent teams — protocole complet (source unique)
 
-> Déplacé ici depuis `.claude/rules/agent-teams.md` en v1.4.0 (budget contexte) : la rule
-> auto-chargée ne garde que les **invariants** (§ Teammate 6 règles, § Lead 5 invariants).
+> Déplacé ici depuis la rule `agent-teams.md` en v1.4.0 (budget contexte) : la rule ne garde que
+> les **invariants** (§ Teammate 6 règles, § Lead 5 invariants) — v1.5.0 : elle vit à côté
+> (`agent-teams-rule.md`) et n'est copiée dans `.claude/rules/` du projet qu'à l'activation.
 > Ce fichier = la version longue (politique teammate vs subagent, cycle de vie, topologie,
 > worktrees, spawn, suivi, débrief, mémoire, hooks). Lu par `/agent-teams:team` (Étape 0) ;
 > un teammate n'en a pas besoin : la rule courte lui suffit et lui est auto-chargée.

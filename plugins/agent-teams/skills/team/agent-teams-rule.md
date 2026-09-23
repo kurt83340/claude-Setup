@@ -1,11 +1,13 @@
 # Agent teams — invariants d'équipe (auto-chargés)
 
-> Rule volontairement **courte** (budget contexte v1.4 : chargée dans CHAQUE session, teammates
-> compris — ex-version longue : ~5k tokens/session). Le **protocole complet** (politique teammate
-> vs subagent, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh, worktrees, spawn,
-> suivi, débrief mémoire, hooks) vit dans le plugin `agent-teams` : `skills/team/protocole.md`,
-> lu par `/agent-teams:team`. Câblage : `settings.json` → `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`
-> + `teammateMode: "tmux"`. Rôles lecture seule du cœur (`reviewer`, `explore-*`) : [`agents/`](../agents/README.md).
+> Installée dans `.claude/rules/agent-teams.md` par l'**activation** du plugin `agent-teams`
+> (1er `/agent-teams:team`) — jamais présente dans un projet qui n'utilise pas d'équipe (v1.5.0 :
+> sortie du cœur, elle pesait ~1,8k tokens sur CHAQUE session). Rule volontairement **courte** :
+> chargée dans chaque session du projet, teammates compris. Le **protocole complet** (politique
+> teammate vs subagent, cycle de vie, topologie, worktrees, spawn, suivi, débrief, hooks) =
+> `skills/team/protocole.md` du plugin, lu par `/agent-teams:team`. Câblage posé par l'activation :
+> `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "auto"`. Rôles lecture seule du
+> cœur (`reviewer`, `explore-*`) : `.claude/agents/`.
 
 ## Identifie ton rôle
 

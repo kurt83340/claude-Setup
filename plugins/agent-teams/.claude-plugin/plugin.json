@@ -1,9 +1,17 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "agent-teams",
-  "description": "Exécution d'équipe pour le template claude-Setup : skill /team (orchestration tmux — plan validé, worktrees, task list native, TDD opt-in, merge, débrief mémoire), rôles d'exécution worker/front-end/back-end/tester, hook de trace team-progress.",
-  "version": "1.0.0",
-  "author": { "name": "Julien Leroy" },
+  "description": "Exécution d'équipe pour le template claude-Setup (opt-in) : skill /team (activation au 1er lancement — flag + mode d'affichage + rule d'équipe —, plan validé, worktrees, task list native, TDD opt-in, merge, débrief mémoire), rôles d'exécution worker/front-end/back-end/tester, hook de trace team-progress.",
+  "version": "1.1.0",
+  "author": {
+    "name": "Julien Leroy"
+  },
   "repository": "https://github.com/kurt83340/claude-Setup",
-  "keywords": ["agent-teams", "teammates", "orchestration", "tmux", "worktrees"]
+  "keywords": [
+    "agent-teams",
+    "teammates",
+    "orchestration",
+    "tmux",
+    "worktrees"
+  ]
 }

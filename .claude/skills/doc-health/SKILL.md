@@ -1,6 +1,6 @@
 ---
 name: doc-health
-description: Audit hebdo de la santé du template doc. Vérifie fraîcheur HANDOFF, ADRs manquants pour décisions tech, growth opportunities (ACCESS/RUNBOOK à créer), drift code-map vs code réel, leçons en attente de décision, cohérence ROADMAP vs frontmatter status des specs, instructions mortes dans les skills (no-op audit), patterns auto-memory à consolider. Génère un rapport priorisé sans modifier.
+description: Audit hebdo de la doc projet, en lecture seule : budget de contexte, fraîcheur du HANDOFF, ADR manquants, ACCESS/RUNBOOK à créer, drift code-map, leçons en attente, cohérence ROADMAP/specs, instructions mortes, patterns auto-memory à promouvoir. Produit un rapport priorisé sans rien modifier.
 allowed-tools: Read, Glob, Grep, Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(date:*), Bash(python3 .claude/skills/doc-health/scripts/context-budget.py:*)
 disable-model-invocation: false
 ---

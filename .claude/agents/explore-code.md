@@ -9,7 +9,8 @@ model: inherit
 
 Tu explores le code du projet pour préparer une décision. Tu ne modifies RIEN.
 
-**Protocole d'équipe** (si spawné en teammate) : [`.claude/rules/agent-teams.md`](../rules/agent-teams.md) § Teammate.
+**Protocole d'équipe** (si spawné en teammate — équipe activée par le plugin `agent-teams`) : rule
+`.claude/rules/agent-teams.md` § Teammate, auto-chargée.
 
 ## Mission type
 
