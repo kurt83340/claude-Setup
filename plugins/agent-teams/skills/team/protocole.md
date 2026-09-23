@@ -9,7 +9,8 @@
 
 > Protocole multi-agent du template (lead + teammates). Auto-chargée dans **chaque** session
 > du repo — y compris les teammates (qui sont des sessions Claude Code complètes).
-> Câblage : `settings.json` → `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "tmux"`.
+> Câblage (posé par l'activation, `/agent-teams:team` Étape 0) : `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`
+> + `teammateMode: "auto"` dans les settings du projet (ou `settings.local.json`).
 > Orchestration d'une feature : **`/agent-teams:team`** — plugin `agent-teams` (rôles d'exécution
 > `worker`/`front-end`/`back-end`/`tester` + hook de trace ; `/plugin install agent-teams@claude-setup`).
 > Rôles lecture seule du cœur (`reviewer`, `explore-*`) : [`agents/`](../agents/README.md).
@@ -61,7 +62,7 @@ reste disponible (pas de shutdown sauf demande du lead).
 
 **Politique de délégation — teammate vs subagent :**
 
-| Critère           | Teammate (session visible tmux)               | Subagent (Task tool, invisible)             |
+| Critère           | Teammate (session visible — pane ou panneau)  | Subagent (Task tool, invisible)             |
 | ----------------- | --------------------------------------------- | ------------------------------------------- |
 | Durée / autonomie | Longue, multi-tours, doit être observable     | Courte, one-shot                            |
 | Écrit du code     | ✅ — dans SON worktree                        | À éviter (pas d'isolation worktree)         |
@@ -122,7 +123,8 @@ miroir de `specs/00X/tasks.md`) + trace `.claude/.cache/team-progress.log` (hook
 ⚠️ `/resume` ne restaure PAS les teammates → débriefe et merge **avant** de fermer la session.
 Les **prompts de permission** des teammates remontent chez TOI (un teammate ne peut pas
 s'auto-approuver) — c'est toi qui approuves, dans ta session.
-⚠️ **Teammate silencieux ≠ teammate mort.** Avant de respawner : `tmux capture-pane -p -t <pane>`
+⚠️ **Teammate silencieux ≠ teammate mort.** Avant de respawner (mode panes ; en in-process : ouvrir le
+teammate dans le panneau d'agents) : `tmux capture-pane -p -t <pane>`
 — un dialogue interactif de démarrage (imports CLAUDE.md, trust) fige tout sans émettre aucun
 signal, et un respawn re-bloquera pareil (+ travail perdu). Déblocage : `tmux -L <socket>
 send-keys -t <pane> Enter` (« Yes » est présélectionné ; socket trouvable via `ls /tmp/tmux-$UID/`).

@@ -65,10 +65,14 @@ Rien à merger : le rsync a tout posé, passe directement à l'Étape 3.
   just-in-time du template (2 `@-import` : HANDOFF/code-map — ROADMAP en lien simple — + liens à la demande).
   ⚠️ Max 2 `@-import` au total — si l'existant en a déjà, arbitrer avec l'utilisateur.
 - **`.claude/settings.json` existant** : merge JSON proposé en diff — unions des
-  `permissions.allow/ask/deny`, append des hooks du template (sans doublon), ajout
-  `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` + `teammateMode` + `autoMemoryEnabled`.
+  `permissions.allow/ask/deny` (dont les deny de secrets `Read(.env)`, `Read(.env.*)` + exceptions
+  `!.env.example`…), append des hooks du template (sans doublon). Pas de flag d'équipe : les agent
+  teams sont opt-in (activées par `/agent-teams:team` si le plugin est installé).
 - **`.gitignore`** : append des lignes template manquantes (`.claude/.cache/`,
-  `.claude/settings.local.json`, `.claude/.growth-suggestions.md`, `.env`…).
+  `.claude/settings.local.json`, `.claude/.growth-suggestions.md`, `.env`, `.env.*` +
+  `!.env.example`, `secrets.*`…).
+- **`.pre-commit-config.yaml` existant** : proposer d'y ajouter le hook gitleaks du template
+  (sinon le fichier du template a été posé par le rsync).
 - **Skills/commands maison en collision de nom** : les siens gagnent ; proposer un préfixe
   pour la variante template.
 
@@ -114,8 +118,10 @@ existant n'en contiennent pas.)
 
 ## Étape 5 — Vérifs + commit
 
-1. `render.py --check` → 0 CORE restant.
-2. Hooks exécutables ; suggérer `/doctor` au prochain démarrage.
+1. `render.py --check` → 0 CORE restant ; `.claude/template-lock.json` écrit (mode `brownfield` —
+   base de `/upgrade-template` pour les futures mises à jour).
+2. Garde-fou secrets : `pre-commit install` si pre-commit est disponible ; suggérer `/doctor` au
+   prochain démarrage.
 3. Commit : `chore: adoption template claude-Setup` (lister les merges dans le corps).
 4. Next : remplir `cadrage/README.md` si lacunaire → première feature via `/spec` + `/conception`.
 5. Proposer de retirer `/adopt-template` + `/init-from-template` (usage unique tous les deux).
