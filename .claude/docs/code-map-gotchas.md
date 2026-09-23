@@ -1,7 +1,7 @@
 # Gotchas — pièges non évidents (injectés à la demande)
 
 > **Non auto-chargé** (budget contexte v1.4). Le hook `pretooluse-inject-codemap.py` injecte,
-> avant une édition de code, UNIQUEMENT les entrées qui **ciblent le fichier édité** — une fois
+> à l'édition d'un fichier de code, UNIQUEMENT les entrées qui **le ciblent** — une fois
 > par session et par fichier. Une entrée cible un fichier en citant en backticks un chemin, un
 > nom de fichier ou un dossier : `` `src/sync/notion.py` ``, `` `notion.py` ``, `` `src/sync/` ``
 > (un heading `### src/sync/` cible toutes ses entrées). Une entrée sans chemin cité n'est

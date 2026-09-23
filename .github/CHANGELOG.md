@@ -3,6 +3,10 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [1.5.0] — 2026-09-23
+
+_(entrée détaillée en cours de rédaction)_
+
 ## [1.4.1] — 2026-09-16
 
 ### Fixed — le HANDOFF ne peut plus redevenir un journal empilé

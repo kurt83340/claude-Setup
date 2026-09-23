@@ -24,6 +24,7 @@ import json
 import re
 import shutil
 import sys
+from datetime import date
 from pathlib import Path
 
 # ============================================================================
@@ -263,8 +264,28 @@ def cleanup(root: Path, profile_name: str, dry_run: bool, brownfield: bool = Fal
             if vj.is_file() and "PROJECT_NAME" in vj.read_text(encoding="utf-8"):
                 vj.unlink()
                 print("🔧 vars.json d'init supprimé (matériau temporaire, contient des PII)")
+        write_lock(root, profile_name, brownfield)
 
     return 0
+
+
+def write_lock(root: Path, profile_name: str, brownfield: bool) -> None:
+    """`.claude/template-lock.json` : version + profil + source du template, relus par
+    /upgrade-template (v1.5.0) pour rejouer l'init d'origine. Aucune variable d'init (PII)."""
+    tv = root / ".claude" / "template-version"
+    if not tv.is_file():
+        return
+    lock = {
+        "template": "claude-Setup",
+        "version": tv.read_text(encoding="utf-8").strip(),
+        "profile": profile_name,
+        "mode": "brownfield" if brownfield else "greenfield",
+        "initialized": date.today().isoformat(),
+        "source": "https://github.com/kurt83340/claude-Setup",
+    }
+    (root / ".claude" / "template-lock.json").write_text(
+        json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"🔒 .claude/template-lock.json : v{lock['version']} · profil {profile_name} (base de /upgrade-template)")
 
 
 def strip_template_maintenance(root: Path, dry_run: bool) -> int:

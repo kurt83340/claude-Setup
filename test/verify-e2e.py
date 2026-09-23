@@ -59,6 +59,16 @@ def main():
        and not (root / ".claude/skills/adopt-template").exists())
     tcl = root / ".claude" / "template-version"
     ok(".claude/template-version présent", tcl.is_file())
+    lk = root / ".claude" / "template-lock.json"
+    if lk.is_file():  # v1.5.0+ : base de /upgrade-template
+        try:
+            lock = json.loads(lk.read_text(encoding="utf-8"))
+        except ValueError:
+            lock = {}
+        ok("template-lock.json : version = template-version, profil connu, sans variables d'init",
+           tcl.is_file() and lock.get("version") == tcl.read_text(encoding="utf-8").strip()
+           and lock.get("profile") in ("script-jetable", "automation-n8n", "python-app", "web-app",
+                                       "bdd-migration", "other") and "vars" not in lock)
     claude_md = root / "CLAUDE.md"
     if claude_md.is_file():
         # 2 @-imports en profil complet (HANDOFF + code-map — v1.4 : ROADMAP en lien simple) ;

@@ -60,13 +60,14 @@ def has_paths_frontmatter(text: str) -> bool:
     return bool(m and re.search(r"^paths\s*:", m.group(1), re.M))
 
 
-def split_section(text: str, title_prefix: str):
-    """(avant, section, après) pour le 1er heading `## <title_prefix>…` HORS bloc fencé ;
-    la section court jusqu'au prochain `## ` (même niveau ou supérieur) hors fence."""
+def split_section(text: str, title_prefix: str, skip_prefix: str = None):
+    """(avant, section, après) pour le 1er heading `## <title_prefix>…` HORS bloc fencé (et ne
+    commençant pas par `skip_prefix`) ; la section court jusqu'au prochain `## ` hors fence."""
     lines = text.split("\n")
     mask = fenced_mask(lines)
     start = next((i for i, l in enumerate(lines)
-                  if not mask[i] and re.match(rf"##\s+{re.escape(title_prefix)}", l)), None)
+                  if not mask[i] and re.match(rf"##\s+{re.escape(title_prefix)}", l)
+                  and not (skip_prefix and l.startswith(skip_prefix))), None)
     if start is None:
         return None
     end = next((i for i in range(start + 1, len(lines))
@@ -148,7 +149,7 @@ def step_handoff_journal(root: Path) -> None:
 GOTCHAS_HEADER = """# Gotchas — pièges non évidents (injectés à la demande)
 
 > **Non auto-chargé** (budget contexte v1.4). Le hook `pretooluse-inject-codemap.py` injecte,
-> avant une édition de code, UNIQUEMENT les entrées qui **ciblent le fichier édité** — une fois
+> à l'édition d'un fichier de code, UNIQUEMENT les entrées qui **le ciblent** — une fois
 > par session et par fichier. Une entrée cible un fichier en citant en backticks un chemin, un
 > nom de fichier ou un dossier : `` `src/sync/notion.py` ``, `` `notion.py` ``, `` `src/sync/` ``.
 > Une entrée sans chemin cité n'est injectée que sous un heading « Globaux » (rare et court).
@@ -166,24 +167,37 @@ la vue macro, le couplage et l'intention — ce fichier est auto-chargé à chaq
 
 
 def step_codemap_gotchas(root: Path) -> None:
+    """Déplace TOUTES les sections `## Gotchas…` (hors pointeur) de code-map.md vers
+    code-map-gotchas.md — un projet a pu en empiler plusieurs (v1.5.0 : avant, seule la 1re
+    était migrée, les suivantes restaient auto-chargées)."""
     cm = root / ".claude" / "docs" / "code-map.md"
     gf = root / ".claude" / "docs" / "code-map-gotchas.md"
     if not cm.is_file():
         log("⏭ 3. code-map.md absent")
         return
     text = cm.read_text(encoding="utf-8")
-    parts = split_section(text, "Gotchas")
-    if parts is None or parts[1].startswith("## Gotchas →"):
+    bodies, moved_chars = [], 0
+    while True:
+        parts = split_section(text, "Gotchas", skip_prefix="## Gotchas →")
+        if parts is None:
+            break
+        before, section, after = parts
+        moved_chars += len(section)
+        body = entries_of(section)
+        if body.strip():
+            bodies.append(body)
+        pointer = "" if "## Gotchas →" in text else GOTCHAS_POINTER + "\n\n"
+        text = (before.rstrip("\n") + "\n\n" + pointer + after.lstrip("\n")).rstrip("\n") + "\n"
+    if not moved_chars:
         log("⏭ 3. code-map.md : gotchas déjà externalisés")
         return
-    before, section, after = parts
-    body = entries_of(section)
+    body = "\n\n".join(bodies)
     if gf.is_file():
         write(gf, gf.read_text(encoding="utf-8").rstrip("\n") + "\n\n## Migrés depuis code-map.md\n\n" + body + "\n")
     else:
         write(gf, GOTCHAS_HEADER + body + "\n")
-    write(cm, (before.rstrip("\n") + "\n\n" + GOTCHAS_POINTER + "\n\n" + after.lstrip("\n")).rstrip("\n") + "\n")
-    log(f"✅ 3. code-map.md : § Gotchas ({len(section)} chars) → code-map-gotchas.md + pointeur")
+    write(cm, text)
+    log(f"✅ 3. code-map.md : § Gotchas ({moved_chars} chars) → code-map-gotchas.md + pointeur")
     step_codemap_update_section(root)
 
 

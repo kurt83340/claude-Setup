@@ -1,6 +1,6 @@
 # `.claude/skills/` — Inventaire et organisation
 
-> 🗂️ **Inventaire canonique** (**16 skills cœur**) — source de vérité des skills du template, vérifiée
+> 🗂️ **Inventaire canonique** (**17 skills cœur**) — source de vérité des skills du template, vérifiée
 > par la CI (chaque dossier `.claude/skills/*` y figure ; compte déclaré = dossiers réels). Claude
 > Code liste déjà nativement nom + description de chaque skill : cet inventaire sert aux humains et
 > à la CI. Un skill ajouté au projet s'y recense.
@@ -17,6 +17,7 @@
 - `/debug "<symptôme>"` — reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → leçon
 - `/pivot "<raison>"` — pivot client orchestré (9 étapes, validation à chaque étape)
 - `/archive-projet ["raison"]` — fin de vie : bilan, marquage archivé, commande de move (+ `restore`, `status`)
+- `/upgrade-template [vX.Y.Z]` — met à jour la méthode du projet vers la dernière version du template (merge 3 voies, conflits signalés)
 
 ### Cycle de vie des artefacts (capture / promote / discard / archive)
 
