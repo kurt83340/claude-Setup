@@ -17,15 +17,17 @@ rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude
 # 2. Aller dedans
 cd /chemin/vers/mon-nouveau-projet/
 
-# 3. ⚠️ CRITIQUE — Hooks exécutables (sinon ils bloquent au 1er run)
-chmod +x .claude/hooks/*.py .claude/hooks/*.sh
-
-# 4. Git init pour rollback possible
+# 3. Git init pour rollback possible
 git init && git add . && git commit -m "chore: snapshot pre-init"
+
+# 4. (Recommandé, une fois par machine) pre-commit — l'init active le garde-fou secrets (gitleaks)
+pipx install pre-commit            # ou : uv tool install pre-commit
 
 # 5. Lancer Claude Code
 claude
 ```
+
+> ℹ️ **Plus de `chmod +x`** (v1.5) : `settings.json` lance les hooks via `python3 …` / `bash …`.
 
 > 🔌 **Prérequis recommandé : MCP `context7` connecté en user-level** (installé une fois,
 > dispo dans toutes les sessions). La rule [`doc-lookup`](rules/doc-lookup.md) du
@@ -40,25 +42,30 @@ Dans la session Claude :
 
 Claude va :
 
-1. **Vérifier les prérequis** (chmod hooks, git initialisé, python3 dispo)
+1. **Vérifier les prérequis** (git initialisé, python3 dispo)
 2. **Poser 10 questions** via AskUserQuestion (3 batches) :
    - Batch 1 : `PROJECT_NAME`, `PROJECT_FOLDER`, **type de projet**
    - Batch 2 : `CLIENT_NAME`, `NOM_DECIDEUR`, `EMAIL_DECIDEUR`, `TON_NOM`, `TON_EMAIL`
    - Batch 3 : `COMMANDE_INSTALL`, `COMMANDE_TESTS`, `COMMANDE_RUN`
 3. **Substituer les CORE placeholders** auto (10 substitutions sur ~370 placeholders — le reste est CONTENT à remplir au fil de l'eau)
-4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée**
+4. **Lancer `cleanup-for-type.py`** selon le type : adapte le template **et retire les artefacts de maintenance DU template** (`.github/` self-CI, `test/`, `EXAMPLES/`, skills bootstrap `init-from-template`/`adopt-template`) → le projet généré démarre **propre, sans CI héritée** ; écrit `.claude/template-lock.json` (version + profil + source — **aucune** de tes réponses : base de `/upgrade-template`)
 5. **Plugin stack** si pertinent — type `automation-n8n` : **check-first** `claude plugin list` (plugin **officiel** `n8n-mcp-skills` souvent déjà en user-scope → confirmation en 1 ligne, rien à cloner) ; sinon proposer l'install user-scope (`claude plugin marketplace add czlonkowski/n8n-skills` + install `--scope user`). Type `bdd-migration` → `db-migration@claude-setup`
-6. **Te proposer le commit initial** : `feat: init projet <nom> depuis template`
+6. **Activer le garde-fou secrets** : `pre-commit install` si pre-commit est dispo (sinon te le signale en 1 ligne)
+7. **Te proposer le commit initial** (après relecture de `git status --short` : aucun `.env*` ni secret) : `feat: init projet <nom> depuis template`
 
-### Les 5 types de projet (impact sur cleanup)
+### Les 6 types de projet (impact sur cleanup)
 
-| Type             | Impact   | Skills installés                              | Use case                         |
-| ---------------- | -------- | --------------------------------------------- | -------------------------------- |
-| `script-jetable` | **-80%** | minimum vital (handoff, lecon)                | 1-shot Python, < 1 jour          |
-| `python-app`     | léger    | cœur (post-init)                              | App Python (FastAPI, scripts...) |
-| `web-app`        | léger    | cœur (post-init)                              | Next.js, React, etc.             |
-| `automation-n8n` | léger    | cœur + plugin officiel `n8n-mcp-skills`       | Workflow n8n + helpers Python    |
-| `bdd-migration`  | léger    | cœur + plugin `db-migration`                  | Migration BDD avec Alembic       |
+| Type             | Impact   | Skills installés                                                 | Rules de code gardées | Use case                                         |
+| ---------------- | -------- | ---------------------------------------------------------------- | --------------------- | ------------------------------------------------ |
+| `script-jetable` | **-80%** | minimum vital (handoff, lecon, archive-projet, upgrade-template) | Python + web          | 1-shot Python, < 1 jour                          |
+| `python-app`     | moyen    | cœur (post-init)                                                 | Python                | App Python (FastAPI, scripts...)                 |
+| `web-app`        | moyen    | cœur (post-init)                                                 | web (TS/JS)           | Next.js, React, etc.                             |
+| `automation-n8n` | léger    | cœur + plugin officiel `n8n-mcp-skills`                          | Python                | Workflow n8n + helpers Python                    |
+| `bdd-migration`  | léger    | cœur + plugin `db-migration`                                     | Python                | Migration BDD avec Alembic                       |
+| `other`          | aucun    | cœur (rien n'est retiré)                                         | Python + web          | Hors cases (Go, Rust, data…) — ajuster à la main |
+
+> Les rules de code sont scopées `paths:` : une rule Python ne se charge que quand Claude lit un `.py` —
+> celle de l'autre langage reste inerte ; le profil la retire quand la stack est claire.
 
 ### Vérification post-init
 
@@ -70,7 +77,8 @@ Claude va :
 #    les templates bundlés de /spec ({{SPEC_*}}) et STRUCTURE/USAGE gardent leurs {{...}} d'exemple — normal.
 grep -rEn '\{\{[A-Z]{2,}_[A-Z][A-Z0-9_]+\}\}' CLAUDE.md README.md .env.example .claude/CLAUDE.md .claude/docs/ .claude/rules/ 2>/dev/null && echo "❌ CORE restants" || echo "✅ aucun CORE restant"
 
-# 2. Premier commit du projet rempli
+# 2. Premier commit du projet rempli (relire d'abord : aucun .env* ni secret dans la liste)
+git status --short
 git add -A
 git commit -m "feat: init projet <nom> depuis template"
 ```
@@ -94,7 +102,6 @@ rsync -av --ignore-existing \
   --exclude='plugins/' --exclude='.claude-plugin/' \
   --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
   /chemin/vers/template/ .
-chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 # (Recommandé) Dépose MAINTENANT tes matériaux — le skill les ingère :
 #   docs client → .claude/docs/cadrage/documents/   tickets → cadrage/tickets/
 #   transcriptions → cadrage/reunions/
@@ -103,24 +110,59 @@ claude   # puis : /adopt-template
 
 `--ignore-existing` = **l'existant gagne toujours** (tes CLAUDE.md / settings.json /
 .gitignore ne sont pas touchés). Le skill propose ensuite : merges des collisions **en diff**
-(jamais d'overwrite), questions CORE **pré-remplies** depuis tes manifests, et
+(jamais d'overwrite — dont les lignes secrets `.env*` du `.gitignore` et les deny de
+`settings.json`), questions CORE **pré-remplies** depuis tes manifests, et
 **rétro-remplissage** de la doc depuis le projet (stack.md ← manifests, code-map ←
 `/codemap`, cadrage ← README existant, HANDOFF ← git log, ADRs rétroactifs optionnels).
 
 ### Troubleshooting init
 
-- **`chmod: No such file or directory`** → tu es au mauvais endroit, vérifie `cd`
+- **Hook en erreur `python3: command not found`** → Python 3 absent du PATH (les hooks sont lancés via `python3`)
 - **`render.py: 0 fichiers à scanner`** → le rsync n'a rien copié (vérifie source)
 - **`/init-from-template` pas trouvé** → relance `claude` (skills scannés au démarrage)
 - **CORE manquants après render** → ajoute-les au vars.json et relance
 
+## 🔄 Mettre à jour un projet existant (`/upgrade-template`)
+
+Projet généré avec une version plus ancienne du template → `/upgrade-template [vX.Y.Z]` met à jour ses
+**fichiers de méthode** (hooks, skills, agents, rules, `settings.json`, les deux `CLAUDE.md`, USAGE/STRUCTURE,
+`.gitignore`, `.pre-commit-config.yaml`) par **merge 3 voies** :
+
+- **base** = l'init de TA version rejouée depuis le tag git du template (même profil) · **cible** = l'init de la
+  nouvelle version · **nous** = ton projet. Profil, mode et source lus dans `.claude/template-lock.json` (écrit à
+  l'init, sans aucune variable d'init) ; absent (projet < 1.5) → profil et mode déduits, à confirmer.
+- Fichier jamais touché → la cible s'applique · template inchangé → ta personnalisation reste · les deux ont
+  bougé → `git merge-file` (fusion clé par clé pour `settings.json`, règles de permission et hooks compris ;
+  projet adopté : les hooks et règles du template qui lui manquent sont ajoutés).
+- **Jamais touché** : la doc projet `.claude/docs/` (seules des migrations versionnées y écrivent — ex. 1.4.0 :
+  journal HANDOFF et gotchas sortis des fichiers auto-chargés), ton code, `README.md`, `.env.example`,
+  `settings.local.json`. Équipe d'agents activée → flag et `teammateMode` conservés, rule d'équipe mise à jour depuis le plugin.
+- Toujours un `--dry-run` montré et validé d'abord, sur un arbre git propre, en un seul commit (`git revert` pour annuler).
+- **Conflit** (ex. modifié des deux côtés sans fusion propre) → ton fichier est **gardé tel quel** ; la version cible
+  (`<fichier>.template`) et le merge annoté (`<fichier>.merge`) atterrissent dans `.claude/.cache/upgrade-<version>/`
+  avec un `REPORT.md` — Claude propose une fusion, tu valides.
+
+Projet **< 1.5** (le skill n'existe pas encore chez toi) : lancer le moteur du template le plus récent.
+
+```bash
+git clone --quiet https://github.com/kurt83340/claude-Setup /tmp/claude-setup && python3 /tmp/claude-setup/.claude/skills/upgrade-template/scripts/upgrade.py --project . --template /tmp/claude-setup --dry-run
+# plan relu → appliquer (sans re-cloner) — code retour : 0 = OK · 1 = conflits à régler · 2 = erreur, rien écrit
+python3 /tmp/claude-setup/.claude/skills/upgrade-template/scripts/upgrade.py --project . --template /tmp/claude-setup
+```
+
+Après coup : relancer Claude Code (hooks et settings lus au démarrage), `pre-commit install` si le garde-fou est
+nouveau, supprimer `.claude/.cache/upgrade-<version>/` une fois les conflits réglés.
+
 ---
 
-## 🧠 Comprendre AVANT d'utiliser : les 3 layers de mémoire
+## 🧠 Comprendre AVANT d'utiliser : 3 mémoires, 3 usages
 
-Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md` + `.claude/rules/*`), **Patterns** (auto-memory, machine-local) et **État** (`HANDOFF.md`). Ne les confonds pas.
+Au-dessus de tout, les **instructions stables** que tu écris (`CLAUDE.md` racine + `.claude/CLAUDE.md` + `.claude/rules/*`,
+versionnées). Puis 3 mémoires à ne pas confondre : **`.claude/docs/`** (état, décisions, specs, leçons — partagé,
+versionné, `HANDOFF.md` en tête), **auto-memory** (patterns techniques — cache machine-local, écrit par Claude) et
+**`/resume`** (transcript : reprise exacte d'UNE session).
 
-→ **Détail canonique** (qui écrit quoi / survit à quoi / versionné) : [.claude/rules/template-maintenance.md § Les 3 layers de mémoire](rules/template-maintenance.md). Source unique — évite le drift.
+→ Table canonique (contenu / qui écrit / versionné) : [rules/template-maintenance.md § 3 mémoires, 3 usages](rules/template-maintenance.md) — la rule que Claude charge dès qu'il lit `.claude/docs/`.
 
 **`/resume` vs HANDOFF.md** : `/resume` (built-in) garde 100 % du contexte de la session précédente (reprise même journée) ; `HANDOFF.md` sert quand tu changes de machine, clones ailleurs, partages, ou démarres à froid après plusieurs jours. **Complémentaires.**
 
@@ -129,14 +171,15 @@ Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md`
 ### Démarrer une session
 
 1. Lance Claude Code : `claude` (ou `claude --resume` si reprise même journée)
-2. Claude charge automatiquement :
-   - `CLAUDE.md` (racine — index projet) **+** `.claude/CLAUDE.md` (template/skills) — les deux via @-imports
-   - `.claude/docs/HANDOFF.md` (où tu en étais)
-   - `.claude/docs/ROADMAP.md` (vue d'avion)
-   - Toutes les autres docs référencées
+2. Claude charge automatiquement (≈ 6,5k tokens sur un template vierge) :
+   - `CLAUDE.md` (racine — index projet) **+** `.claude/CLAUDE.md` (index méthode) — chargés nativement, sans `@`
+   - via les **2 seuls `@`** du CLAUDE.md racine : `.claude/docs/HANDOFF.md` (où tu en étais) + `.claude/docs/code-map.md` (couplage + intention)
+   - les rules `.claude/rules/*.md` non scopées (les scopées `paths:` attendent qu'un fichier concerné soit lu)
+   - hook SessionStart : filet fin-de-session (si la dernière session s'est fermée sans `/handoff` après avoir touché au dépôt) + alerte si le contexte auto-chargé dépasse 25k tokens
+   - ROADMAP, PRD, ADR… = **liens lus à la demande**, pas auto-chargés
 3. **Workflow manuel recommandé** (5 étapes) :
    ```
-   1. Lire HANDOFF.md      → reprendre où on en est
+   1. HANDOFF.md (déjà en contexte) → reprendre où on en est
    2. Lire ROADMAP.md       → vue d'avion du projet
    3. Lire la spec en cours (lien dans HANDOFF)
    4. git status + git log -5 → ce qui s'est passé
@@ -147,9 +190,9 @@ Claude Code a 3 couches de mémoire complémentaires — **Stable** (`CLAUDE.md`
 
 **Automatique (hooks)** :
 
-- 📖 **PreToolUse** : avant une édition de fichier dans `src/`, `tests/`, `lib/`, `app/` → Claude reçoit les **règles de couplage + intention** de code-map.md (**une fois par session**, ré-armé après compaction) et les **gotchas de `code-map-gotchas.md` qui citent ce fichier** (une fois par fichier) — **tu ne fais RIEN**. (v1.4 : avant, tout était réinjecté à chaque édition — ~2k tokens × N, cumulés dans la session.)
+- 📖 **PreToolUse** : à l'édition d'un fichier de code → Claude reçoit les **gotchas de `code-map-gotchas.md` qui ciblent ce fichier** (1×/fichier/session, juste après l'édition) — **tu ne fais RIEN** (détail : § Comprendre les hooks automatiques)
 - 🔍 **PostToolUse** : si tu écris du code mentionnant `API_KEY`, `deploy`, `RGPD`, `OAuth`, etc. → flag automatique dans `.claude/.growth-suggestions.md`
-- 💾 **Auto-memory** : Claude apprend tes patterns (machine-local, dans `~/.claude/projects/.../memory/`)
+- 💾 **Auto-memory** (natif, actif par défaut) : Claude apprend tes patterns (machine-local, dans `~/.claude/projects/.../memory/`)
 
 **Manuel (si besoin)** :
 
@@ -169,19 +212,24 @@ Claude va :
 
 1. Lire git status + log + diff + tests
 2. Lire HANDOFF.md actuel
-3. Te proposer un nouveau HANDOFF (status / échecs / blockers / next steps + **Continuation
-   State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
-4. Te demander confirmation avant d'écrire
+3. Te proposer un nouveau HANDOFF **réécrit** (< 30 lignes, jamais empilé : status / échecs / blockers / next steps
+   + **Continuation State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
+4. Te demander confirmation avant d'écrire, puis ajouter 1 ligne à `HANDOFF-journal.md` (non auto-chargé)
 
-**Si tu oublies** : hook `Stop` te le rappelle si HANDOFF > 24h avec changements git pending.
+Toujours **dans la session qui a travaillé** : elle seule a la conversation (échecs tentés, blockers) — jamais
+délégué à un subagent comme `doc-maintainer`.
+
+**Si tu oublies** : le hook `Stop` te le rappelle (1×/session) si HANDOFF > 24h avec changements git pending ;
+si tu fermes quand même sans `/handoff` après avoir touché au dépôt, le filet `SessionEnd` capture l'état et
+le réinjecte au démarrage suivant.
 
 ### Si Claude compacte le contexte (auto ~90% ou via `/compact`)
 
 Tu ne fais RIEN. Les hooks gèrent :
 
-1. `PreCompact` → snapshot (timestamp + git state) écrit dans `.claude/.cache/` (non-versionné) + marker dans `/tmp/`
+1. `PreCompact` → snapshot (git state + derniers messages humains) écrit dans `.claude/.cache/` (non-versionné) + marker dans `/tmp/`
 2. Claude compacte
-3. `SessionStart(matcher: compact)` → re-inject le snapshot
+3. `SessionStart` (source `compact`) → re-inject le snapshot et ré-arme l'injection des gotchas
 4. Tu continues comme si rien ne s'était passé
 
 ## ✅ Livraison d'une feature
@@ -192,7 +240,7 @@ Quand tous les tasks de `specs/00X-feature/tasks.md` sont cochés :
 /feature-done 001-erp-connector
 ```
 
-Claude va (8 étapes) :
+Claude va :
 
 1. Vérifier que tous les tasks sont `[x]` + DoD rempli (sinon demande confirmation)
 2. Scanner `plan.md` pour détecter les **décisions tech à promouvoir en ADR** (mots-clés : choisi, retenu, vs, plutôt que)
@@ -202,9 +250,9 @@ Claude va (8 étapes) :
 5. **Update ROADMAP.md** : `[~]` → `[x] livré YYYY-MM-DD`
 6. **Append CHANGELOG.md** : entry Keep a Changelog (Added/Decided/Fixed)
 7. **Update HANDOFF.md** : status feature livrée + next
-8. **Update code-map.md** : suggère sections à ajouter si nouveaux modules
+8. **Update code-map** (seulement le non-déductible) : règle de couplage → `code-map.md`, gotcha → `code-map-gotchas.md`
 9. **Archiver l'idée source** (si la feature vient d'une `idees/YYYY-MM-DD.md`) : status `💡 Backlog` → `✅ Promu en spec 00X`
-10. **Suggère commit + tag git** : `v$(date +%Y.%m.%d-%H%M)`
+10. **Suggère commit (chemins explicites) + PR + tag git** : `v$(date +%Y.%m.%d-%H%M)`
 
 ## 🩺 Audit hebdomadaire (~5 min)
 
@@ -216,6 +264,7 @@ Audit complet qui scanne sans modifier :
 
 | Check                                                   | Seuil                          | Priorité |
 | ------------------------------------------------------- | ------------------------------ | -------- |
+| Budget de contexte auto-chargé (`context-budget.py`)    | > 25k tokens                   | 🔴       |
 | Fraîcheur HANDOFF                                       | > 7j                           | 🔴       |
 | Growth triggers (API_KEY → ACCESS.md, deploy → RUNBOOK) | > 5 hits                       | 🟢       |
 | ADRs manquants (décisions dans plan.md sans ADR)        | ratio > 5                      | 🟢       |
@@ -239,6 +288,7 @@ Rapport généré → tu suis les actions par priorité.
 | ------------------------------------------ | ----------------------------------------------------------------------------- |
 | Nouveau projet                             | `/init-from-template`                                                         |
 | Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)   |
+| Mettre à jour la méthode (template récent) | `/upgrade-template [vX.Y.Z]` — merge 3 voies, conflits signalés, doc intacte  |
 | Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                             |
 | Dérouler le pipeline complet (avec gates)  | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done                             |
 | Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse) |
@@ -253,8 +303,8 @@ Rapport généré → tu suis les actions par priorité.
 | Créer un skill / agent / pipeline conforme | `/scaffold skill·agent·pipeline "<nom>"` — conventions + référencement auto  |
 | Audit hebdo                                | `/doc-health`                                                                 |
 | BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
-| Workflow batch (HANDOFF + ROADMAP + ADRs)  | Task `doc-maintainer` (agent)                                                 |
-| Déléguer une feature à une équipe (tmux)   | `/agent-teams:team <spec-id>` (plugin) — teammates + worktrees + débrief mémoire                   |
+| Doc en lot (livraisons, audit + actions)   | agent `doc-maintainer` (Task) — jamais le HANDOFF                             |
+| Déléguer une feature à une équipe          | `/agent-teams:team <spec-id>` (plugin, opt-in — le 1er lancement active l'équipe) |
 | Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
 | Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                       |
 | Promotion idée → spec                      | `/idee promote <date>`                                                        |
@@ -265,7 +315,7 @@ Rapport généré → tu suis les actions par priorité.
 | Reprendre un projet archivé                | `/archive-projet restore`                                                     |
 | Reprendre exactement où on en était        | `/resume` (built-in Claude)                                                   |
 | Compaction context (auto)                  | RIEN — hooks gèrent                                                           |
-| Édition fichier code (auto)                | RIEN — hook injecte code-map context                                          |
+| Édition fichier code (auto)                | RIEN — hook injecte les gotchas qui ciblent ce fichier                        |
 | Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                                      |
 
 ## 🔁 Workflow type pour une feature complète
@@ -282,7 +332,7 @@ Rapport généré → tu suis les actions par priorité.
    → plan.md (points de vérification + circuit breakers) + tasks.md (DoD typée
      command_passes/file_exists/manual, phases ~35 min, partitionné) + revue adverse
        ↓
-4. CODE → hooks auto pour contexte code-map + growth detection
+4. CODE → hooks auto : gotchas du fichier édité + growth detection
        ↓
 5. Cocher les tasks au fur et à mesure dans tasks.md
        ↓
@@ -351,13 +401,13 @@ Demande client reçue
 9. /handoff (snapshot HANDOFF.md : nouvelle direction + next steps)
 ```
 
-→ Tu peux déléguer ce workflow complet à l'agent `doc-maintainer` (Task tool).
+→ `/pivot "<raison>"` orchestre ces 9 étapes avec validation à chaque étape (l'agent `doc-maintainer` peut le pré-remplir depuis le compte-rendu de réunion).
 
 ## 📜 Quand créer un ADR (cf section `/adr` plus bas pour comment)
 
 **Règle courte** : décision **cross-feature** OU qui **survit à la feature** → ADR global (`/adr <scope> "<titre>"`). Décision **locale à une feature** → section `## Décisions` dans `specs/00X/plan.md` (pas d'ADR).
 
-→ **Critères détaillés (OUI/NON), 5 scopes, naming** = source unique dans [.claude/rules/template-maintenance.md § Convention ADR](rules/template-maintenance.md). Le « comment » (capture / supersede / deprecate / list) → section `/adr` ci-dessous.
+→ **Convention (ADR vs `plan.md`, naming, 5 scopes, frontmatter, statuts)** : [STRUCTURE.md § ADR](STRUCTURE.md#adr--architecture-decision-record). Le « comment » (capture / supersede / deprecate / list) → section `/adr` ci-dessous.
 
 ## 📝 Workflow leçons (`/lecon`)
 
@@ -474,31 +524,31 @@ Un ADR est **immuable**. Si décision change :
 - **supersede** : décision remplacée par une autre (avec lien)
 - **deprecate** : décision encore là mais on n'élargit plus l'usage (pas de remplaçant)
 
-```
-
-→ Tu peux déléguer à l'agent `doc-maintainer` (Task tool).
+→ Promotions d'ADR en lot (plusieurs décisions mûres d'un coup) : agent `doc-maintainer` (Task tool).
 
 ## 🤖 Agent doc-maintainer
 
-L'agent `doc-maintainer` est le **cerveau** invocable via Task tool. Il fait ce que les skills font, mais en **mode batch** + **scan auto** + **propose tous les diffs en une fois**.
+L'agent `doc-maintainer` (Task tool) fait la **maintenance doc EN LOT, hors conversation** : il scanne l'état
+global, séquence les skills doc (`/feature-done`, `/adr`, `/lecon`, `/idee`, `/codemap`) et **propose tous les
+diffs en une fois** — sans ré-implémenter leur logique. Il **n'écrit jamais le HANDOFF** : un subagent démarre à
+contexte vide (ni échecs tentés, ni blockers) et ne peut pas obtenir ta validation → `/handoff` dans le fil principal.
 
 ### Quand préférer l'agent vs un skill
 
-| Tu veux                                              | Préfère                  |
-| ---------------------------------------------------- | ------------------------ |
-| 1 action ciblée rapide (< 1 min)                     | Skill (`/handoff`, etc.) |
-| Workflow complet (HANDOFF + ROADMAP + ADRs en batch) | Agent `doc-maintainer`   |
-| Pivot client (9 étapes synchronisées)                | Agent                    |
-| Audit + actions (vs juste audit)                     | Agent                    |
-| Promotion multiple lecons → ADRs en une passe        | Agent                    |
+| Tu veux                                                 | Préfère                                  |
+| ------------------------------------------------------- | ---------------------------------------- |
+| 1 action ciblée rapide (< 1 min)                        | Skill (`/adr`, `/lecon`, etc.)           |
+| Fin de session (HANDOFF)                                | `/handoff` — toujours dans le fil principal |
+| Plusieurs specs livrées d'un coup (ROADMAP + CHANGELOG) | Agent `doc-maintainer`                   |
+| Pivot client (9 étapes)                                 | `/pivot` (l'agent peut le pré-remplir)   |
+| Audit + actions (vs juste audit)                        | Agent                                    |
+| Promotion multiple leçons → ADRs en une passe           | Agent                                    |
 
 ### Comment l'invoquer
 
 ```
-
 Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer toutes les MAJ.
-
-````
+```
 
 (Claude utilisera le Task tool automatiquement)
 
@@ -509,20 +559,25 @@ Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer to
 - **Dates ISO** (YYYY-MM-DD)
 - **Préserve les sections custom** de l'user (heuristique : non-templated → ne pas toucher)
 
-## 🧑‍🤝‍🧑 Agent teams — déléguer à une équipe visible (tmux)
+## 🧑‍🤝‍🧑 Agent teams — déléguer à une équipe (opt-in)
 
-Le template est **câblé** pour les agent teams natifs : `settings.json` porte le flag
-(`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`) et `teammateMode: "tmux"` (chaque teammate
-dans son pane). Le skill `/agent-teams:team`, les rôles d'exécution (`worker`/`front-end`/
-`back-end`/`tester`) et le hook de trace viennent du **plugin `agent-teams`**
-(`/plugin install agent-teams@claude-setup`). Prérequis : `tmux` dans le PATH. ⚠️ Split panes non supportés dans le terminal
-VS Code / Windows Terminal — lance `claude` depuis un vrai terminal, ou passe
-`teammateMode: "in-process"` pour tout garder dans le terminal courant (moins visible).
+**Rien n'est câblé dans le cœur** (v1.5) : le flag expérimental monte une équipe à chaque session et la rule
+d'équipe pesait sur chaque session, même solo. Le skill `/agent-teams:team`, les rôles d'exécution
+(`worker`/`front-end`/`back-end`/`tester`) et le hook de trace viennent du **plugin `agent-teams`** ;
+`reviewer` et les `explore-*` restent dans le cœur (utilisables en subagents sans équipe).
 
 ```
 /plugin install agent-teams@claude-setup   # une fois (marketplace kurt83340/claude-Setup)
-/agent-teams:team 001-erp-connector
+/agent-teams:team 001-erp-connector       # 1er lancement = ACTIVATION, puis relance de Claude Code
 ```
+
+**Activation** (1er lancement, avec ton accord) : copie la rule d'équipe du plugin dans `.claude/rules/agent-teams.md`
+(invariants lead/teammate, auto-chargée), pose `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "auto"`
+dans `settings.json` (ou `settings.local.json` si tu ne veux pas le partager), puis demande une **relance** (flag lu au
+démarrage) — rappelle ensuite `/agent-teams:team <id>`. `auto` = un pane tmux par teammate si la session tourne
+**dans** tmux (`tmux new -s <projet>` avant `claude`), sinon teammates in-process dans le terminal courant.
+⚠️ En mode panes, le corps d'une définition d'agent **remplace** le system prompt par défaut du teammate (en
+in-process il s'y ajoute) : chaque rôle du plugin porte donc son propre « Cadre de travail ».
 
 Le lead propose un **plan d'équipe** (rôles préconfigurés `worker`/`front-end`/`back-end`/
 `tester`/`reviewer` ou agents ad-hoc, 1 worktree par codeur, topologie de communication),
@@ -542,46 +597,33 @@ dans `.claude/settings.local.json` (non versionné) :
 `.env`…) restent appliquées. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
 mode normal (les `allow`/`ask` du template existent pour ça).
 
-→ Protocole complet (source unique) : [.claude/rules/agent-teams.md](rules/agent-teams.md).
+→ Invariants : `.claude/rules/agent-teams.md` (posée par l'activation) · protocole complet : `skills/team/protocole.md` du plugin (lu par `/agent-teams:team`).
 
 ## 🤖 Comprendre les hooks automatiques
 
 | Hook                       | Quand ça se déclenche         | Ce que ça fait                            |
 | -------------------------- | ----------------------------- | ----------------------------------------- |
-| `PreCompact`               | Avant compaction du contexte  | Snapshot dans `.claude/.cache/` (non-versionné) + marker `/tmp/`      |
-| `SessionStart(compact)`    | Reprise après compaction      | Re-inject le snapshot                     |
-| `SessionEnd`               | À CHAQUE fin de session       | Filet « n'oublie rien » : snapshot d'état dans `.claude/.cache/` |
-| `SessionStart(startup)`    | Nouveau démarrage             | Injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme ; **filet budget** (v1.4.1) : surface auto-chargée > 25k tokens → coupables + remède injectés (`CLAUDE_CONTEXT_BUDGET_MAX`, 0 = off) |
-| `PreToolUse(Edit\|Write)`  | Avant Edit/Write fichier code | Couplage + intention **1×/session** (ré-armé après compaction) + gotchas **ciblant le fichier** (v1.4) |
+| `PreCompact`               | Avant compaction du contexte  | Snapshot (git + derniers messages humains) dans `.claude/.cache/` (non-versionné) + marker `/tmp/` |
+| `SessionStart` (compact)   | Reprise après compaction      | Re-inject le snapshot + ré-arme l'injection des gotchas |
+| `SessionEnd`               | Fin de session **sans `/handoff`** ayant laissé une trace git (commit ou arbre modifié) | Filet « n'oublie rien » : snapshot (git + derniers messages humains) dans `.claude/.cache/`. Rien après un `/handoff` ni après une session sans trace (v1.5 : fini la fausse alerte à chaque démarrage) |
+| `SessionStart` (startup)   | Nouveau démarrage             | Marqueur de début de session (heure + empreinte git) ; purge du cache par-session > 7 j ; injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme ; **filet budget** : surface auto-chargée > 25k tokens → coupables + remède injectés (`CLAUDE_CONTEXT_BUDGET_MAX`, 0 = off) |
+| `SessionStart` (resume · clear) | `claude --resume`, `/clear` | Marqueur de début de session (base du filet `SessionEnd`) |
+| `PreToolUse(Edit\|Write)`  | Édition d'un fichier de code du projet (hors `.claude/`, docs, config) | Gotchas de `code-map-gotchas.md` qui **ciblent ce fichier**, 1×/fichier/session (ré-armé après compaction) — arrivent avec le résultat de l'outil, juste après l'édition. Couplage + intention : déjà en contexte via `code-map.md` |
 | `PostToolUse(Edit\|Write)` | Après Edit/Write fichier      | Détecte API_KEY/deploy/RGPD → flag growth |
-| `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h ; **garde-fou taille** (v1.4.1) : HANDOFF > 12 Ko → rappel 1×/session (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off) |
+| `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h + changements git — **1×/session** ; **garde-fou taille** : HANDOFF > 12 Ko → rappel 1×/session (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off) |
 | `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (plugin `agent-teams`) | Trace JSON dans `.claude/.cache/team-progress.log` |
 
-**Tous non-bloquants** : si un hook échoue, Claude continue.
+**Tous non-bloquants** : si un hook échoue, Claude continue. Lancés via `python3 …` / `bash …` depuis
+`settings.json` — pas de `chmod +x` à faire.
 
 **Debug** : `claude --debug` pour voir les hooks en action.
 
-## 📊 Matrice "Quand créer un nouveau fichier ?"
+## 📐 Conventions (source unique : STRUCTURE.md)
 
-**Règle d'or** : crée à la demande, JAMAIS préventivement.
-
-→ **Matrice complète (trigger → fichier)** = source unique dans [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](rules/template-maintenance.md). Couvre ACCESS, RUNBOOK, ADR vs `plan.md`, GLOSSARY, specs, idées, leçons, code-map, stack, cadrage (documents / réunions / tickets) et diagrammes.
-
-## 🎨 Convention diagrammes (3 formats)
-
-→ **Source unique** (ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export ») : [.claude/rules/template-maintenance.md § Convention diagrammes](rules/template-maintenance.md).
-
-**Où placer** : simple → inline dans le .md (PRD, ARCHITECTURE, spec.md, plan.md) ; gros / éditable → dossier `diagrams/` local (`cadrage/diagrams/`, `conception/diagrams/`, `specs/00X/diagrams/`).
-
-## 📛 Conventions de naming
-
-→ **Source unique** (specs `00X`, ADR `00XX-<scope>-<titre>`, réunions/sources/idées datées ISO, leçons, tags git) : [.claude/rules/template-maintenance.md § Conventions de naming](rules/template-maintenance.md).
-
-## 🚦 Conventions de statut
-
-- **ROADMAP** (`[ ]` / `[~]` / `[x]`) → [.claude/rules/template-maintenance.md § Conventions de statut](rules/template-maintenance.md).
-- **ADR** (`proposed` / `accepted` / `deprecated` / `superseded`) → [§ Convention ADR](rules/template-maintenance.md) (frontmatter YAML).
-- **Leçons** / **Idées** : statuts définis dans leurs workflows ci-dessus (§ Workflow leçons `/lecon`, § Workflow idées `/idee`) — source unique.
+- **Quand créer un fichier** (à la demande, JAMAIS préventivement) → [STRUCTURE.md § À créer quand ?](STRUCTURE.md#à-créer-quand-)
+- **Naming** (specs, ADR, réunions, docs reçus, idées, leçons, tags git) → [STRUCTURE.md § Conventions de naming](STRUCTURE.md#conventions-de-naming)
+- **Diagrammes** (3 formats, où les placer) → [STRUCTURE.md § Convention diagrammes](STRUCTURE.md#convention-diagrammes)
+- **Statuts** : ROADMAP `[ ]`/`[~]`/`[x]` ↔ `status:` des specs → [STRUCTURE.md § ROADMAP](STRUCTURE.md#roadmapmd-vivant--exemple) · ADR → [§ ADR](STRUCTURE.md#adr--architecture-decision-record) · leçons / idées → leurs workflows ci-dessus
 
 ## 🔐 Permissions (`settings.json`)
 
@@ -595,67 +637,36 @@ mode normal (les `allow`/`ask` du template existent pour ça).
     "deny": [...]     // refus systématique
   }
 }
-````
+```
 
 **Defaults du template** :
 
-- `allow` : pytest, ruff, mypy, alembic, git status/log/diff/add/commit/tag, uv, npm, find, grep, Read/Edit/Write dans `.claude/docs/` et `src/`
-- `ask` : `git push`, `git reset`, `alembic downgrade`, `./scripts/deploy`, `Read(./.env.*)` — **filet fail-closed** : tout `.env.*` non listé en deny (`.env.prod`, `.env.dev`…) déclenche un prompt au lieu d'être lisible en silence ; `.env.example` reste lisible après 1 confirmation
-- `deny` : `rm -rf`, `.env` / `.env.local` / `.env.*.local` / `.env.{development,staging,production,test}`, `secrets.*` — `ACCESS.md` n'est **plus** en deny (v1.3.1) : y référencer les accès par NOM (où trouver quoi), jamais les valeurs
+- `allow` : pytest, ruff, mypy, alembic, uv, npm, `git add/commit/tag/branch`, `git worktree add/list/prune`, `git init`, `cp`, `date`, scripts du template (render, cleanup, archive-projet), `Edit(./**)` — les lectures (Read, `git status/log/diff`, grep…) sont déjà autorisées nativement : plus listées (v1.5)
+- `ask` : `git push`, `git reset`, `git merge`, `git branch -d/-D`, `git tag -d`, `git worktree remove`, `alembic downgrade`, `./scripts/deploy`
+- `deny` : `rm -rf`, `Read(.env)` + `Read(.env.*)` **à toute profondeur** avec exceptions pour les gabarits (`Read(!.env.example)`, `!.env.sample`, `!.env.template`), `secrets.*`, `*.pem`, `*.key` — `ACCESS.md` n'est **pas** en deny : y référencer les accès par NOM (où trouver quoi), jamais les valeurs
 
-**Customiser par projet** : édite `.claude/settings.json` pour ajouter tes commandes spécifiques (ex: `n8n:*`, `docker compose:*`).
+**Secrets — 3 filets** (v1.5) : `.gitignore` ignore **tous** les `.env*` sauf les gabarits (`.env.example/.sample/.template`),
+ainsi que `secrets.*`, `*.key`, `*.pem`, `credentials.json` · deny `Read` ci-dessus · **gitleaks** au commit (`.pre-commit-config.yaml`,
+activé par `pre-commit install` — proposé à l'init ; scan complet : `pre-commit run --all-files`). Les skills committent
+par chemins explicites (`git add <chemins>`), jamais `git add -A` à l'aveugle.
+
+> ⚠️ **Le deny `Read(...)` n'est qu'une première barrière** : d'après la doc officielle des permissions, il couvre les outils
+> fichiers intégrés et les commandes fichier que Claude Code reconnaît dans Bash (`cat`, `head`, `tail`, `sed`, `tee`, redirections)
+> — **pas** un `grep -r` lancé depuis le dossier, ni un script Python/Node qui ouvre le fichier. Barrière au niveau de l'OS →
+> activer le [sandbox](https://code.claude.com/docs/en/sandboxing).
+
+**Customiser par projet** : édite `.claude/settings.json` pour ajouter tes commandes spécifiques (ex: `n8n:*`, `docker compose:*`) ; réglages perso non partagés → `.claude/settings.local.json` (gitignoré).
 
 ## 📁 Organisation skills / agents
 
-Skills/agents sont **à plat** dans leur dossier respectif. Claude Code scanne `.claude/skills/<nom>/SKILL.md` à **1 niveau seulement** (cf. [issue #18192](https://github.com/anthropics/claude-code/issues/18192) — feature request OPEN pour discovery récursive).
+Skills et agents sont **à plat** : `.claude/skills/<nom>/SKILL.md`, `.claude/agents/<nom>.md` — Claude Code ne scanne
+qu'**1 niveau** ([issue #18192](https://github.com/anthropics/claude-code/issues/18192)). Plus de dossier `commands/` : les
+custom commands ont fusionné avec les skills ([doc officielle](https://code.claude.com/docs/en/skills) : « Skills are recommended »).
 
-> ℹ️ **Plus de dossier `commands/`** : les custom commands ont fusionné avec les skills (même moteur,
-> doc officielle : "Skills are recommended"). Le template n'utilise plus que le format skill.
-> Source : [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills).
-
-```
-.claude/
-├── skills/
-│   ├── handoff/SKILL.md         → /handoff
-│   ├── spec/SKILL.md            → /spec
-│   ├── feature-done/SKILL.md
-│   ├── adr/SKILL.md
-│   ├── deploy/SKILL.md          → /deploy (skill projet ; stacks n8n/BDD = plugins)
-│   ├── ...
-│   └── README.md
-│
-└── agents/
-    ├── doc-maintainer.md        → invocable via Task tool
-    └── README.md
-```
-
-### Règle clé : invocation = **nom du dossier**
-
-```yaml
-# .claude/skills/handoff/SKILL.md   ← le dossier "handoff" détermine /handoff
----
-name: handoff # ← label d'affichage uniquement (ne change PAS l'invocation)
-description: ...
----
-```
-
-→ C'est le **nom du dossier** qui fait le `/nom`. Convention : faire matcher dossier et `name:`
-pour la lisibilité. (Exception : SKILL.md à la racine d'un plugin, où `name:` compte.)
-
-### Pour grouper des skills par thème
-
-Pas de namespace par sous-dossier en 2026. **2 vraies options** :
-
-| Approche    | Exemple                              | Quand                                                                 |
-| ----------- | ------------------------------------ | --------------------------------------------------------------------- |
-| **Préfixe** | `n8n-deploy`, `n8n-test`, `n8n-lint` | Usage perso, pas de distribution                                      |
-| **Plugin**  | `<plugin>/skills/<skill>/SKILL.md`   | Tu veux distribuer/partager, namespacing officiel `/<plugin>:<skill>` |
-
-### Conflits de noms
-
-Tous les skills sont dans le même espace de noms (`.claude/skills/`, `~/.claude/skills/`, plugins). Si collision → Claude en utilise UN (ordre alphabétique). Solution : renomme le dossier + `name:` du moins prioritaire.
-
-Docs : voir `.claude/skills/README.md` et `.claude/agents/README.md`.
+- **Invocation = nom du dossier** (`.claude/skills/handoff/` → `/handoff`) ; `name:` du frontmatter identique par convention (exception : SKILL.md à la racine d'un plugin, où `name:` compte). Un agent s'invoque via le Task tool, jamais en `/nom`.
+- **Grouper par thème** : préfixe (`n8n-deploy`, `n8n-test` — usage perso) ou plugin (`/<plugin>:<skill>` — distribution, namespacing officiel). Pas de sous-dossier.
+- **Conflits de noms** : un seul espace (`.claude/skills/`, `~/.claude/skills/`, plugins) — Claude n'en garde qu'un → renomme dossier + `name:` du moins prioritaire.
+- Inventaire canonique des skills (compte CI-vérifié), import depuis GitHub / MCP / plugin : [skills/README.md](skills/README.md) · agents : [agents/README.md](agents/README.md).
 
 ## 🛠️ Customisation
 
@@ -674,8 +685,8 @@ Docs : voir `.claude/skills/README.md` et `.claude/agents/README.md`.
 ### Ajouter un nouveau skill (custom)
 
 > 🏗️ **Le plus simple : `/scaffold skill "<nom>"`** — il pose les bonnes questions (sensible ?
-> outils ?), crée le fichier conforme ET fait le référencement dans l'inventaire. La procédure
-> manuelle ci-dessous reste valable.
+> outils ?), crée le fichier conforme ET l'ajoute à l'inventaire `skills/README.md`. La procédure
+> manuelle ci-dessous reste valable (penser à recenser le skill dans l'inventaire).
 
 ```bash
 mkdir -p .claude/skills/mon-skill
@@ -694,29 +705,25 @@ EOF
 
 ### Ajouter des skills depuis ailleurs (GitHub, MCP, autres repos)
 
-Copie chaque skill directement dans `.claude/skills/<nom>/`. **Pas de sous-dossier de regroupement** (Claude Code ne scanne pas récursivement). Pour identifier la provenance sans sous-dossier : préfixe le nom (ex: `n8n-deploy`, `n8n-test`).
-
-⚠️ **Conflits de noms** : tout est dans le même espace de noms (`.claude/skills/`, `~/.claude/skills/`, plugins). Si collision → Claude en utilise un (alphabétique). Rename le dossier + `name:` du moins prioritaire.
+Copie à plat dans `.claude/skills/<nom>/` (préfixe de provenance si besoin) — pas-à-pas : [skills/README.md § Importer un skill externe](skills/README.md#importer-un-skill-externe).
 
 ### Désactiver un skill (sans le supprimer)
 
 Frontmatter : `disable-model-invocation: true` (Claude ne le suggérera plus, mais `/skill-name` manuel marche encore).
 
-### Ajouter une slash command projet
+### Ajouter une slash command projet (ex. `/deploy`)
 
-Les « custom commands » (`.claude/commands/*.md`) ont **fusionné avec les skills** — même moteur,
-même invocation, et la doc officielle recommande le format skill. Pour ajouter un `/deploy` :
-voir « Ajouter un nouveau skill (custom) » ci-dessus (`mkdir -p .claude/skills/deploy` + SKILL.md).
-
-⚠️ Pour une action sensible (deploy, push prod), ajoute `disable-model-invocation: true` au
-frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par Claude tout seul.
+= un skill (« Ajouter un nouveau skill » ci-dessus : `mkdir -p .claude/skills/deploy` + SKILL.md). ⚠️ Action sensible
+(deploy, push prod) → `disable-model-invocation: true` au frontmatter : invocation **uniquement** via `/deploy`,
+jamais déclenchée par Claude tout seul.
 
 ## ❌ Anti-patterns à éviter
 
 - ❌ Créer un fichier "au cas où" (= ça pourrit)
 - ❌ Mélanger `cadrage/` (input externe) et `idees/` (input interne)
 - ❌ **Modifier un ADR passé** (créer un nouveau qui le supersede)
-- ❌ Mettre des credentials dans le repo (`.env` est gitignored, valeurs ailleurs)
+- ❌ Mettre des credentials dans le repo (tous les `.env*` sont gitignorés sauf les gabarits, gitleaks bloque au commit — valeurs ailleurs)
+- ❌ `git add -A` sans relire `git status --short` (un fichier sensible non ignoré part au commit)
 - ❌ Bug log séparé (tout va dans CHANGELOG)
 - ❌ Skip le `/handoff` en fin de session (= perte de contexte garantie)
 - ❌ Créer RUNBOOK avant la première mise en prod (= ça pourrit)
@@ -724,17 +731,18 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 - ❌ Cocher tasks `[x]` sans vérifier le DoD
 - ❌ Promouvoir trop d'ADRs (décision locale = `## Décisions` dans plan.md, pas ADR)
 - ❌ ADR sans frontmatter YAML (illisible machine, rate les audits doc-health)
-- ❌ Skip `chmod +x .claude/hooks/*` au setup (= hooks bloquent)
+- ❌ Ajouter un `@` dans CLAUDE.md (rule ou doc) : rechargé à CHAQUE appel — lien simple à la place
+- ❌ Déléguer le HANDOFF à un subagent (il n'a pas la conversation) — `/handoff` dans le fil principal
 
 ## ✅ Bonnes pratiques
 
-- ✅ Lire HANDOFF.md au démarrage de chaque session
+- ✅ Partir du HANDOFF au démarrage de chaque session (déjà en contexte via `@`)
 - ✅ `/handoff` à la fin de chaque session
 - ✅ Numéroter spec/ADR continûment (jamais de reset)
 - ✅ Dater les fichiers de `idees/`, `cadrage/reunions/`, `cadrage/documents/`
 - ✅ Référencer les ADRs depuis les specs concernées
 - ✅ MAJ ROADMAP **à chaque** changement d'état de feature
-- ✅ Garder le `CLAUDE.md` racine court & centré projet (< 60 lignes) ; template & skills → `.claude/CLAUDE.md` ; détail → `@.claude/rules/*.md`
+- ✅ Garder le `CLAUDE.md` racine court & centré projet (< 60 lignes, 2 `@` max) ; méthode → `.claude/CLAUDE.md` (index mince) ; conventions → `.claude/rules/*.md` (auto-chargées, jamais en `@`)
 - ✅ Préférer un ADR à un long commit message pour les décisions structurantes
 - ✅ Diff par diff (l'agent doc-maintainer le fait par défaut)
 
@@ -751,25 +759,32 @@ frontmatter → invocation **uniquement** via `/deploy`, jamais déclenchée par
 ### Un hook ne se déclenche pas
 
 - Vérifier le chemin du script dans `settings.json` (utiliser `"${CLAUDE_PROJECT_DIR}"` — **quoté**, sinon ça casse dès que le chemin du projet contient un espace)
-- Vérifier que le script est **exécutable** : `chmod +x .claude/hooks/*.py *.sh`
+- Vérifier que `python3` (et `bash` pour `Stop`) est dans le PATH — les hooks sont lancés via `python3 …` / `bash …`, pas besoin de `chmod`
+- Relancer Claude Code après une modif de `settings.json` (hooks lus au démarrage)
 - Vérifier le `matcher` (regex `Edit|Write` est correct, pas `Edit\\|Write`)
 - Lancer `claude --debug` et regarder les logs
 
 ### Le hook code-map injecte rien
 
-- Vérifier que `.claude/docs/code-map.md` existe et contient au moins une des sections
-  `## Règles de couplage`, `## Intention & décisions locales`, `## Gotchas`
-- Le hook ne fonctionne que pour fichiers dans `/src/`, `/tests/`, `/lib/`, `/app/`
+- Normal s'il n'y a aucun gotcha pour ce fichier : le hook n'injecte QUE les entrées de `code-map-gotchas.md` qui
+  le ciblent (chemin, nom de fichier ou dossier cité en backticks, ou heading `###` ; section « Globaux » = toute
+  édition de code) — 1×/fichier/session. Projet < 1.4 sans `code-map-gotchas.md` → § Gotchas de `code-map.md`
+- Rien pour `.claude/`, les docs et la config (`.md`, `.json`, `.yaml`…) ; tout autre fichier du projet compte (plus
+  de liste fixe `src/`/`tests/`/`lib/`/`app/`)
+- L'injection arrive **avec le résultat** de l'Edit/Write (juste après l'édition), pas avant
 
 ### Le contexte est déjà à 15-20 % au premier prompt
 
 Le projet a grossi et les docs **auto-chargées** avec lui (HANDOFF avec son journal, code-map avec
-tous ses gotchas, ROADMAP…) — mesuré v1.4 : 144k tokens au 1er tour sur un projet d'un mois.
+tous ses gotchas, ROADMAP…) — mesuré v1.4 : 144k tokens au 1er tour sur un projet d'un mois. Repère v1.5 :
+template vierge ≈ 6,5k tokens auto-chargés (11k en v1.4.1) + ≈ 2,2k pour la liste des skills (nom + description).
 
 ```bash
 python3 .claude/skills/doc-health/scripts/context-budget.py          # qui pèse quoi (tokens ≈ chars/2)
 python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root . --dry-run   # projet < v1.4
 ```
+
+Projet < v1.4 : `/upgrade-template` applique cette migration (1.4.0) tout seul.
 
 Remèdes : journal → `HANDOFF-journal.md`, gotchas → `code-map-gotchas.md`, ROADMAP en lien simple,
 jamais de `@` sur une rule scopée `paths:`. Le socle hors projet (`~/.claude/CLAUDE.md`, hooks de
@@ -782,7 +797,7 @@ plugins, MCP) se voit aussi dans le rapport (`user, hors projet`).
 
 ### Auto-memory ne sauvegarde pas
 
-- Vérifier `settings.json` : `"autoMemoryEnabled": true`
+- Natif et actif par défaut — le template ne le règle plus (v1.5) : vérifier qu'il n'a pas été coupé (`/memory`, ou `"autoMemoryEnabled": false` dans tes settings)
 - Vérifier que `~/.claude/projects/<encoded-path>/memory/` est créé
 - Auto-memory ne sauvegarde que tous les ~5-10 messages (pas chaque turn)
 
@@ -809,14 +824,15 @@ plugins, MCP) se voit aussi dans le rapport (`user, hors projet`).
 
 | Fichier                                                                        | Pour quoi                                                       |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| [STRUCTURE.md](STRUCTURE.md)                                                   | Convention 2026 complète (arborescence, naming, patterns)       |
-| [CLAUDE.md](CLAUDE.md)                                                         | Index **projet** : résumé + nav doc + conventions               |
-| [.claude/CLAUDE.md](CLAUDE.md)                                         | Index **template** : skills, workflow, agent                    |
-| [.claude/rules/template-maintenance.md](rules/template-maintenance.md) | Méta-doc : 3 layers mémoire, fichiers vivants, conventions      |
+| [STRUCTURE.md](STRUCTURE.md)                                                   | **Référence** : arborescence + conventions (naming, ADR, statuts, diagrammes, quand créer) |
+| [CLAUDE.md](../CLAUDE.md)                                                      | Index **projet** : résumé + nav doc + conventions               |
+| [.claude/CLAUDE.md](CLAUDE.md)                                         | Index **méthode** (mince) : où est quoi, pipelines, agents, plugins, version |
+| [.claude/skills/README.md](skills/README.md)                           | Inventaire canonique des skills (CI-vérifié) + conventions      |
+| [.claude/rules/template-maintenance.md](rules/template-maintenance.md) | Invariants d'écriture de la doc (chargée quand Claude lit `.claude/docs/`) |
 | [.claude/docs/adr/README.md](docs/adr/README.md)                       | Convention ADRs détaillée                                       |
 | [.claude/docs/conception/README.md](docs/conception/README.md)         | Pattern mirror macro/micro                                      |
 | [.claude/docs/cadrage/README.md](docs/cadrage/README.md)               | Template cadrage initial                                        |
-| [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/)     | Exemple rempli (repo template ; exclu de ton projet par l'init) |
+| `EXAMPLES/acme-sync-erp-notion-docs/`                                          | Exemple rempli (repo template ; exclu de ton projet par l'init) |
 
 ## 🎯 Philosophie
 
@@ -824,10 +840,10 @@ plugins, MCP) se voit aussi dans le rapport (`user, hors projet`).
 
 1. **Documenter au fur et à mesure**, pas à la fin (sinon tu oublies)
 2. **Laisser les skills faire le boulot répétitif** (handoff, feature-done, doc-health, adr)
-3. **Faire confiance aux hooks** pour ce qui doit toujours se passer (snapshot, code-map injection, growth detection)
+3. **Faire confiance aux hooks** pour ce qui doit toujours se passer (snapshots, gotchas ciblés, growth detection)
 
 **Anti-pattern** : essayer de tout faire manuellement → tu vas te démotiver. Le template existe pour automatiser l'ennuyeux.
 
-**Rappel** : le but du template c'est qu'**en 30 secondes**, n'importe quelle session démarre avec tout le contexte projet auto-chargé. **HANDOFF.md** est la clé de voûte.
+**Rappel** : le but du template c'est qu'**en 30 secondes**, n'importe quelle session démarre avec l'essentiel auto-chargé (HANDOFF + code-map) et le reste à un lien de distance. **HANDOFF.md** est la clé de voûte.
 
-**3 layers** = redondance saine. Si auto-memory perd un truc, HANDOFF rattrape. Si HANDOFF est stale, le code parle. Si le code est obscur, CLAUDE.md + rules cadrent.
+**Mémoires complémentaires** = redondance saine. Si auto-memory perd un truc, HANDOFF rattrape. Si HANDOFF est stale, le code parle. Si le code est obscur, CLAUDE.md + rules cadrent.

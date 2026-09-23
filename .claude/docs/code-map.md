@@ -57,7 +57,6 @@ la vue macro, le couplage et l'intention — ce fichier est auto-chargé à chaq
 - ❌ **NE PAS** ajouter de description fichier-par-fichier ni de liste de dépendances : Claude les retrouve seul, et elles drifteraient.
 
 > 🔁 **Entretien** : le skill `/codemap` régénère la vue macro et **détecte les violations
-> de couplage** (par grep des imports). Le hook `pretooluse-inject-codemap.py` réinjecte
-> **couplage + intention une fois par session** (ré-armé après compaction) et les **gotchas qui
-> ciblent le fichier édité** — pas une carte structurelle (déductible et périssable), pas un
-> rappel à chaque édition (mesuré v1.4 : ~2k tokens × N éditions, cumulés dans la session).
+> de couplage** (par grep des imports). Ce fichier est déjà en contexte (`@`) : le hook
+> `pretooluse-inject-codemap.py` n'injecte que les **gotchas qui ciblent le fichier édité**
+> (1×/fichier/session) — pas une carte structurelle (déductible et périssable).

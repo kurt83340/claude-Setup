@@ -47,7 +47,7 @@ Convention diagrammes détaillée : voir [diagrams/README.md](diagrams/README.md
 
 Tu apprends UN pattern, tu l'appliques à 2 niveaux : macro ici (`conception/`) ↔ micro par feature (`specs/00X-feature/`) — `research`↔`research`, `PRD`↔`spec`, `ARCHITECTURE`↔`plan`, `tasks`↔`tasks`.
 
-> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[template-maintenance.md § La structure en 30 secondes](../../rules/template-maintenance.md#la-structure-en-30-secondes)** _(source unique — ne pas recopier ici pour éviter le drift)_.
+> 📋 **Table canonique** (correspondance ligne à ligne + colonne « question ») → **[STRUCTURE.md § Les 4 buckets dans docs/](../../STRUCTURE.md#les-4-buckets-dans-docs)** _(source unique — ne pas recopier ici pour éviter le drift)_.
 
 → `../ROADMAP.md` (racine) = **dashboard vivant** qui agrège le status (sync depuis `specs/00X/tasks.md`).
 

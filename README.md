@@ -25,10 +25,13 @@ cd {{PROJECT_FOLDER}}
 cp .env.example .env
 # Remplir les valeurs (voir .claude/docs/ACCESS.md pour les obtenir)
 
-# 3. Tests
+# 3. Garde-fou secrets (une fois par clone) — gitleaks en pre-commit
+pre-commit install   # prérequis : pipx install pre-commit (ou uv tool install pre-commit)
+
+# 4. Tests
 {{COMMANDE_TESTS}}  # pytest | npm test | etc.
 
-# 4. Lancer en local
+# 5. Lancer en local
 {{COMMANDE_RUN}}  # python src/main.py | npm run dev | etc.
 ```
 

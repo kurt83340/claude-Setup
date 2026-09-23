@@ -1,7 +1,9 @@
 # Protocole E2E — tester le template sur un projet jetable
 
 > **Ce que les suites mécaniques ne couvrent pas.** `test_*.py` + la CI gardent les scripts,
-> hooks et manifests. CE protocole teste l'**agentique** : une session Claude qui suit les
+> hooks et manifests — dont, depuis v1.5, `test_upgrade.py` (`/upgrade-template` : chaque version
+> taguée → version courante, merge 3 voies, conflits, migrations) et `sim-growth.py` (projets qui
+> grossissent session après session : budget, filet, upgrade à mi-vie). CE protocole teste l'**agentique** : une session Claude qui suit les
 > skills produit-elle les bons artefacts, et les garde-fous refusent-ils ce qu'ils doivent
 > refuser ? À rejouer **à chaque version majeure** (successeur méthodologique de
 > `TEST-REPORT.md` — la boucle qui avait produit les fixes F1→F10).
@@ -62,30 +64,32 @@ vérifier que l'adoption **ne détruit rien**.
 
 ---
 
-## Phase 0 — Greenfield : init complet (× 5 types)
+## Phase 0 — Greenfield : init complet (× 6 types)
 
-**Actions** : rsync documenté (USAGE §Setup) → `chmod +x hooks` → `git init` + snapshot →
+**Actions** : rsync documenté (USAGE §Setup) → `git init` + snapshot (pas de `chmod` : hooks lancés via `python3`/`bash`) →
 `vars.json` (10 CORE, **HORS du projet** — ex. `/tmp` ; filet : cleanup supprime un vars.json
 racine oublié, il contient des PII) → `render.py --vars` → `--check` → `cleanup-for-type.py --type <t>` →
 traçabilité version dans `stack.md` (si conservé par le profil) → commit init.
 ⚠️ **Rejouer pour CHAQUE `--type`** (`script-jetable`, `automation-n8n`, `python-app`,
-`web-app`, `bdd-migration`) — cette étape est purement mécanique, un harnais scripté suffit
-(boucle rsync→render→cleanup→verify-e2e ; le déroulé agentique complet reste sur UN type).
+`web-app`, `bdd-migration`, `other`) — cette étape est purement mécanique, un harnais scripté suffit
+(`test/phase0-harness.py` : boucle rsync→render→cleanup→verify-e2e ; le déroulé agentique complet reste sur UN type).
 
 **PASS si** : 0 CORE restant (grep du périmètre substitué) · skills bootstrap absents ·
 inventaires SANS skill mort (bootstrap + skills supprimés par le profil ; compte « N skills
 cœur » recalé) · nav sans lien mort (pointeurs create-on-demand ACCESS/GLOSSARY/RUNBOOK
 conservés) · allow-rules mortes purgées · `.claude/template-version` présent · ligne
 `Template claude-Setup vX.Y.Z` dans `stack.md` (**sauf** `script-jetable` qui supprime
-stack.md — la trace = `template-version` seul) · @-imports CLAUDE.md tous vivants (3 ;
-1 en `script-jetable`, ROADMAP/code-map supprimés par le profil) · hooks exécutables.
+stack.md — la trace = `template-version` seul) · `.claude/template-lock.json` cohérent (version =
+`template-version`, profil connu, **aucune** variable d'init) · @-imports CLAUDE.md tous vivants (2 :
+HANDOFF + code-map ; 1 en `script-jetable`, code-map supprimé par le profil) · rules de code de
+l'autre langage retirées (sauf `other` / `script-jetable`) · aucune `.claude/rules/agent-teams.md` (opt-in).
 
 ## Phase 0bis — Brownfield : adoption
 
 **Actions** : sur la fixture brownfield, rsync `--ignore-existing` (excludes documentés) →
 render → `--check` → `cleanup --type python-app --brownfield` → étapes agentiques : merge
-CLAUDE.md existant (≤2 @-imports au total), rétro-remplissage `stack.md` (+ version) et
-`HANDOFF` (← git log).
+CLAUDE.md existant (≤2 @-imports au total), merges en diff de `settings.json` / `.gitignore`
+(deny + lignes secrets `.env*`), rétro-remplissage `stack.md` (+ version) et `HANDOFF` (← git log).
 
 **PASS si** : fichiers USER **intacts** (README, CLAUDE.md à lui, `.github/` à lui, code) ·
 scaffold `.claude/` posé · **aucun strip** · permissions non purgées · skills bootstrap
@@ -152,7 +156,7 @@ CORE=0, specs stalled…) et **ne modifie rien**.
 ## Phase 9 — `/scaffold`
 
 **Actions** : créer 1 skill projet bidon (mode skill).
-**PASS si** : `name:` = dossier · ligne d'inventaire ajoutée dans `.claude/CLAUDE.md` ·
+**PASS si** : `name:` = dossier · ligne d'inventaire ajoutée dans `.claude/skills/README.md` (compte « N skills cœur » recalé) ·
 (si agent teammate testé : `SendMessage` dans tools).
 
 ## Phase 10 — `/handoff`
@@ -189,16 +193,16 @@ travaillerait sur un dossier déplacé. Alternative sûre : s'arrêter au `--dry
 | E2 | Déposer une idée perso dans `cadrage/` | Redirection vers `idees/` |
 | E3 | Pipeline référençant un maillon absent | `/feature` le signale + propose l'alternative (pas d'échec silencieux) |
 | E4 | `/feature-done` avec tasks non cochées | Demande de confirmation explicite |
-| E5 | Committer HANDOFF « depuis un worktree teammate » | Refus (règle agent-teams) |
+| E5 | Committer HANDOFF « depuis un worktree teammate » | Refus (invariant 9 de `template-maintenance` ; + rule d'équipe si activée) |
 
 ## Phase M — Manuel assisté (session interactive requise, N-T en headless)
 
 | # | Quoi | Procédure |
 |---|---|---|
 | M1 | Auto-invocation par description | Dire « j'ai eu une idée : … » sans slash → `/idee` doit se déclencher |
-| M2 | Hooks réels | éditer `src/` → injection code-map visible ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder |
-| M3 | Permissions | `rm -rf` → deny · `Read .env` → deny · `.env.example` → prompt ask |
-| M4 | Plugins | `/plugin marketplace add` + install `agent-teams` → `/agent-teams:team` sur spec 002 (tmux) |
+| M2 | Hooks réels | éditer un fichier de code cité dans `code-map-gotchas.md` → gotcha injecté avec le résultat de l'édition (1×/fichier) ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder **une seule fois** dans la session ; fermer sans `/handoff` après un commit → filet réinjecté au démarrage suivant, rien après une session sans trace git — rejouable sans humain : `python3 test/live-hooks-check.py` (4 vraies sessions `claude -p`, hors CI) |
+| M3 | Permissions | `rm -rf` → deny · `Read .env` / `config/.env.prod` → deny (toute profondeur) · `.env.example` → lisible (exception `!`) · `git branch -D` → prompt ask |
+| M4 | Plugins | `/plugin marketplace add` + install `agent-teams` → 1er `/agent-teams:team` = activation (rule copiée, flag + `teammateMode: "auto"`, relance demandée) → après relance, `/agent-teams:team` sur spec 002 (panes si lancé dans tmux, sinon in-process) |
 | M5 | Compaction | `/compact` → snapshot réinjecté (SessionStart compact) |
 
 ## Vérification finale scriptée

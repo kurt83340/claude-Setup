@@ -59,7 +59,7 @@ Stack résumé des choix **structurants** avec ADR liés.
 
 Décris ici le **découpage macro en sous-systèmes** (qui fait quoi, à gros grain) — voir aussi la vue d'ensemble §1. **Pas** de détail fichier-par-fichier (rôle, méthodes, liste de tests) : ça se retrouve en lisant le code (`grep`/lecture) et ça drifte.
 
-> ⚠️ Ce qui **n'est PAS déductible du code** — règles de couplage, intention, gotchas — vit dans **[../code-map.md](../code-map.md)** (auto-chargé + réinjecté par hook avant chaque édition). Ne pas le dupliquer ici.
+> ⚠️ Ce qui **n'est PAS déductible du code** — règles de couplage, intention, gotchas — vit dans **[../code-map.md](../code-map.md)** (auto-chargé ; ses gotchas, dans `code-map-gotchas.md`, sont injectés par hook à l'édition du fichier ciblé). Ne pas le dupliquer ici.
 
 ## 4. Flux de données
 

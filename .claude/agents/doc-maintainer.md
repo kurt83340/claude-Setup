@@ -72,7 +72,9 @@ Quand plusieurs sessions Claude tournent en parallèle sur le même repo, les fi
 mono-fichier (`HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md`, `code-map.md`, `adr/README.md`) sont
 des **points de contention** (le dernier write gagne, pas de lock). Convention :
 
-- **Tu es le doc-owner désigné** : c'est toi (ou le lead) qui écris ces fichiers partagés.
+- **Doc-owner désigné** : le lead — ou toi, **en lot et à sa demande**, pour ROADMAP, CHANGELOG,
+  `adr/README.md`, code-map. **Jamais HANDOFF.md** : il se rédige dans le fil principal (`/handoff`),
+  seul à avoir la conversation.
 - Les **workers** n'écrivent QUE dans leurs fichiers de spec (`specs/00X/*`) ; ils te **remontent** les changements doc à intégrer.
 - La numérotation `max+1` de `/spec` et `/adr` n'est **pas concurrent-safe** → **toi / le lead seul** alloue les numéros `00X` / `00XX`.
 

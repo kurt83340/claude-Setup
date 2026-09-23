@@ -2,35 +2,42 @@
 
 Automatisation n8n + Python pour synchroniser les commandes SAP B1 → Notion DB ACME.
 
-> ⚠️ **Exemple de référence** — montre à quoi ressemble un projet rempli. **Peut drifter** : non maintenu en lockstep avec le template (un check CI vérifie seulement la règle des 3 `@`-imports ci-dessous). Pour les conventions à jour, fie-toi au template, pas à cet exemple.
+> ⚠️ **Exemple de référence** — montre à quoi ressemble un projet rempli. **Peut drifter** : non maintenu en lockstep avec le template (un check CI vérifie seulement la règle des 2 `@`-imports ci-dessous). Pour les conventions à jour, fie-toi au template, pas à cet exemple.
 
 > 🧭 **Comment marche & vit ce template** (skills, structure, workflow, agent) → [.claude/CLAUDE.md](.claude/CLAUDE.md)
 
 ## Documentation projet
 
-> 🪶 **Chargement just-in-time** : seuls les 2 docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = liens lus à la demande (mesuré : ~1,5k vs ~14,6k tokens si on charge tout).
+> 🪶 **Chargement just-in-time** : seuls les **2** docs d'état vivant ci-dessous sont auto-chargés (`@`) ; le reste = **liens simples** lus à la demande (un `@` recharge le fichier à CHAQUE appel — mesuré : ~1,5k vs ~14,6k tokens si on charge tout).
 
-### 🔄 Auto-chargés (`@` — état vivant)
+### 🔄 Auto-chargés (`@` — état vivant, toujours en contexte)
 
-- Reprise session : @.claude/docs/HANDOFF.md ⭐
-- Roadmap (dashboard) : [ROADMAP.md](.claude/docs/ROADMAP.md) — lu à la demande par les skills
-- **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + couplage + intention — gotchas dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook)
+- Reprise session : @.claude/docs/HANDOFF.md ⭐ (< 30 lignes — journal append-only dans [HANDOFF-journal.md](.claude/docs/HANDOFF-journal.md), lu à la demande)
+- **Code map** : @.claude/docs/code-map.md ⭐ (vue macro + couplage + intention, < 3k tokens — gotchas dans [code-map-gotchas.md](.claude/docs/code-map-gotchas.md), injectés par le hook pour le seul fichier édité)
 
 ### 📂 Lus à la demande (liens — pas auto-chargés)
 
+- 🗺️ **Roadmap** (dashboard) : [ROADMAP.md](.claude/docs/ROADMAP.md) — lu par `/spec`, `/conception`, `/feature-done`, `/doc-health`
 - 📥 **Cadrage** : [cadrage/README.md](.claude/docs/cadrage/README.md)
 - 🎨 **Conception** : [research](.claude/docs/conception/research.md) · [PRD](.claude/docs/conception/PRD.md) · [ARCHITECTURE](.claude/docs/conception/ARCHITECTURE.md) · [tasks](.claude/docs/conception/tasks.md) · specs → `.claude/docs/specs/`
 - 🔄 **Suivi** : [ACCESS](.claude/docs/ACCESS.md) · [CHANGELOG](.claude/docs/CHANGELOG.md) · [leçons](.claude/docs/lecons.md) · [stack](.claude/docs/stack.md)
 - 📚 **Transversaux** : [ADR](.claude/docs/adr/) · [GLOSSARY](.claude/docs/GLOSSARY.md) · [RUNBOOK](.claude/docs/RUNBOOK.md)
 
+## Conventions techniques
+
+> Les règles dans `.claude/rules/*.md` sont **déjà auto-chargées** par Claude Code — pas de `@-import` ici (double chargement). Profil `automation-n8n` : rules Python seules (les rules web ont été retirées à l'init).
+
+- [code-style Python](.claude/rules/code-style.md) · [testing Python](.claude/rules/testing.md) · [git-workflow](.claude/rules/git-workflow.md) · [doc-lookup](.claude/rules/doc-lookup.md)
+
 ## Skills projet (stack n8n)
 
 - Plugin officiel **`n8n-mcp-skills`** (14 skills n8n + hooks — installé en **user-scope** : `claude plugin list` pour vérifier)
 - `/deploy` (skill projet maison, push prod — `disable-model-invocation: true`)
-- Skills cœur (`/handoff`, `/spec`, `/feature-done`, …) → inventaire dans [.claude/CLAUDE.md](.claude/CLAUDE.md)
+- Skills cœur (`/handoff`, `/spec`, `/feature-done`, …) → inventaire dans [.claude/skills/README.md](.claude/skills/README.md)
 
 ## Reminders critiques
 
 - Credentials **JAMAIS** dans le repo (stockage : `.claude/docs/ACCESS.md`)
 - `.claude/docs/HANDOFF.md` à update **à chaque fin de session** (via `/handoff`)
-- Décision tech structurante → créer un ADR (immuable : on ne modifie pas, on supersede)
+- Décision tech structurante → créer un ADR (via `/adr`)
+- ADR **immuable** : on ne modifie jamais, on crée un nouveau qui supersede

@@ -12,8 +12,9 @@
    - Petit script Python jetable → tu utiliseras peut-être 30% (cadrage + spec rapide + HANDOFF)
    - Projet client moyen → 70-80% (tout sauf RUNBOOK si pas encore prod)
    - Gros projet enterprise → 100% + tu rajoutes STAKEHOLDERS.md
-4. **Voir [EXAMPLES/acme-sync-erp-notion-docs/](../EXAMPLES/acme-sync-erp-notion-docs/)** = exemple complet rempli (dans le **repo template** ; exclu de ton projet par l'init). Référence quand tu doutes « comment je remplis cette section ? ».
+4. **Voir `EXAMPLES/acme-sync-erp-notion-docs/`** = exemple complet rempli (dans le **repo template** ; exclu de ton projet par l'init). Référence quand tu doutes « comment je remplis cette section ? ».
 5. **Automatique** : lance `/init-from-template` (skill bundled) qui pose 10 questions (CORE placeholders : nom projet, client, décideur, commandes stack…), substitue auto + lance `cleanup-for-type.py` adapté au type de projet. Cf [USAGE.md](USAGE.md) section "Setup nouveau projet" pour la procédure complète.
+6. **Projet déjà généré, template plus récent** → `/upgrade-template` : merge 3 voies des fichiers de méthode, doc projet intacte. Cf [USAGE.md](USAGE.md) section "Mettre à jour un projet existant".
 
 ## Arborescence complète
 
@@ -22,28 +23,35 @@
 
 ```
 mon-projet/
-├── CLAUDE.md                       # index PROJET — résumé + nav doc + conventions (≤ 60 lignes ; template & skills → .claude/CLAUDE.md)
+├── CLAUDE.md                       # index PROJET — résumé + nav doc + conventions (≤ 60 lignes, 2 `@` : HANDOFF + code-map ; méthode → .claude/CLAUDE.md)
 ├── README.md                       # setup local du projet (humain dev, comment lancer/tester/déployer)
 ├── .env.example                    # template des variables d'env (sans valeurs — vraies valeurs en .env gitignored)
-├── .gitignore                      # exclusions Git (.env, secrets, build, cache, etc.)
+├── .gitignore                      # exclusions Git : TOUS les .env* (sauf gabarits .env.example/.sample/.template), secrets.*, *.key/*.pem, build, cache…
+├── .pre-commit-config.yaml         # garde-fou secrets au commit (gitleaks) — `pre-commit install` proposé par l'init
 ├── workflows/                      # livrables n8n exportés en JSON (versionnés pour history + rollback)
 │   └── sync-erp.json               # 1 fichier par workflow, nom = fonction métier
 │
-└── .claude/                        # TOUTE la matière première (doc, specs, agents, skills) — donné à Claude comme contexte
+└── .claude/                        # TOUTE la matière première (méthode + doc) — Claude y lit à la demande
     │
-    ├── CLAUDE.md                   # index TEMPLATE — comment il vit, tous les skills, agent (chargé EN PLUS du CLAUDE.md racine)
+    ├── CLAUDE.md                   # index MÉTHODE mince (~2,5 Ko) : où est quoi, pipelines, agents, plugins, version (chargé EN PLUS du CLAUDE.md racine)
     │                               # (les anciennes "commands/" ont fusionné avec les skills → tout vit dans skills/)
+    ├── USAGE.md                    # guide humain : setup, workflows, hooks, mise à jour (lu à la demande)
+    ├── STRUCTURE.md                # CE fichier : arborescence + conventions (naming, ADR, statuts, diagrammes, quand créer)
+    ├── template-version            # version du template qui a généré / mis à jour le projet (ex. 1.5.0)
+    ├── template-lock.json          # écrit à l'init : version + profil + mode + source (JAMAIS les variables d'init) — base de /upgrade-template
     │
-    ├── rules/                      # règles modulaires chargées via @-import depuis CLAUDE.md (séparation par thème)
-    │   ├── code-style.md           # outils + conventions code (ruff, eslint, naming, longueur ligne, etc.)
-    │   ├── testing.md              # framework + structure tests + coverage minimum + lancement
+    ├── rules/                      # règles modulaires AUTO-chargées par Claude Code — jamais en `@` ; scopées `paths:` = chargées quand un fichier concerné est lu
+    │   ├── code-style.md           # Python : outils + conventions (scopée *.py) — retirée par le profil web-app
+    │   ├── testing.md              # Python : framework, structure des tests, coverage (scopée *.py) — retirée par web-app
+    │   ├── code-style-web.md       # TS/JS : outils + conventions (scopée *.ts/*.js…) — retirée par les profils Python
+    │   ├── testing-web.md          # TS/JS : framework, structure des tests (scopée) — retirée par les profils Python
     │   ├── git-workflow.md         # convention commits (Conventional Commits), branches, PRs, tags
     │   ├── doc-lookup.md           # recherche de doc externe : context7 (MCP) → MCP docs → web — SOURCE UNIQUE
-    │   ├── agent-teams.md          # protocole agent-teams (lead/teammate, cycle de vie, topologie) — SOURCE UNIQUE
-    │   └── template-maintenance.md # méta-doc : comment vivre avec ce template (workflows, skills, agents)
+    │   ├── template-maintenance.md # invariants d'écriture de la doc (scopée `paths: .claude/docs/**`) — formats → skills, conventions → CE fichier
+    │   └── (agent-teams.md)        # OPT-IN — posée par le 1er `/agent-teams:team` (plugin) : invariants lead/teammate ; absente du cœur
     │
     ├── skills/                     # skills perso — À PLAT (Claude Code scanne 1 niveau, cf issue #18192)
-    │   ├── README.md               # convention skills + comment ajouter (préfixe pour grouper)
+    │   ├── README.md               # INVENTAIRE canonique des skills cœur (compte CI-vérifié) + conventions (préfixe, plugins, import)
     │   ├── handoff/SKILL.md        # /handoff
     │   ├── spec/SKILL.md           # /spec (scaffold feature)
     │   ├── conception/SKILL.md     # /conception — explore → options → plan arrêté + revue adverse
@@ -56,15 +64,17 @@ mon-projet/
     │   ├── doc-health/SKILL.md
     │   ├── codemap/SKILL.md
     │   ├── pivot/SKILL.md          # workflow 9 étapes
+    │   ├── archive-projet/SKILL.md # /archive-projet — fin de vie : bilan, marquage archivé, move vers _archives/ (+ restore)
     │   ├── scaffold/SKILL.md       # /scaffold — générateur de composants conformes (skill/agent/pipeline)
-    │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (brownfield, merges non-destructifs)
-    │   └── init-from-template/SKILL.md
+    │   ├── upgrade-template/       # /upgrade-template — MAJ de la méthode par merge 3 voies (SKILL.md + scripts/upgrade.py)
+    │   ├── adopt-template/SKILL.md # /adopt-template — greffe sur projet EXISTANT (bootstrap, retiré après usage)
+    │   └── init-from-template/     # /init-from-template — bootstrap (SKILL.md + scripts/ render, cleanup-for-type), retiré après l'init
     │   # db-migration + agent-teams = PLUGINS maison (marketplace claude-setup) ; stack n8n = plugin OFFICIEL czlonkowski/n8n-skills → /plugin install, rien de copié
     │   # Pour grouper des skills : préfixe le nom, ou package en plugin (cf. plugins/ + .claude-plugin/marketplace.json)
     │
     ├── agents/                     # custom agents — à plat aussi (subagents ET rôles teammate)
     │   ├── README.md
-    │   ├── doc-maintainer.md       # agent qui maintient HANDOFF/ROADMAP/CHANGELOG (subagent)
+    │   ├── doc-maintainer.md       # maintenance doc EN LOT (livraisons groupées, audit + actions, promotions) — subagent, jamais le HANDOFF
     │   ├── reviewer.md             # review lecture seule — revue adverse (/conception) + diffs d'équipe
     │   │                           # rôles d'exécution (worker/front-end/back-end/tester) + /team → plugin agent-teams
     │   └── explore-code.md / explore-docs.md / explore-memoire.md # explorateurs lecture seule réutilisables (/conception + investigations)
@@ -72,8 +82,18 @@ mon-projet/
     │   # ⚠️ Invocation skills/agents = via le `name:` du frontmatter (qui DOIT matcher le dossier/fichier).
     │   # Ex : `.claude/skills/handoff/SKILL.md` avec `name: handoff` → invoque `/handoff`.
     │
-
-    ├── settings.json               # permissions (allow/ask/deny) + hooks (PreCompact, SessionStart…) + auto-memory
+    ├── settings.json               # permissions (allow/ask/deny — secrets en deny à toute profondeur) + hooks
+    ├── settings.local.json         # réglages perso, gitignoré — jamais touché par /upgrade-template
+    ├── hooks/                      # scripts lancés par settings.json via `python3 …` / `bash …` (pas de chmod) — rôle : USAGE.md § hooks
+    │   ├── sessionstart-inject-handoff.py  # startup|resume|clear|compact : marqueur de session, filets, ré-injection
+    │   ├── sessionend-snapshot.py          # filet si session fermée SANS /handoff avec trace git
+    │   ├── precompact-snapshot-handoff.py  # snapshot avant compaction
+    │   ├── pretooluse-inject-codemap.py    # gotchas qui ciblent le fichier de code édité
+    │   ├── posttooluse-growth-detection.py # API_KEY / deploy / RGPD → .growth-suggestions.md
+    │   ├── stop-handoff-reminder.sh        # rappel /handoff (HANDOFF > 24h + arbre modifié) — 1×/session
+    │   └── snapshot_common.py              # helpers partagés (snapshot, marqueurs de session)
+    ├── .cache/                     # gitignoré : snapshots, marqueurs de session, conflits de mise à jour (upgrade-<v>/)
+    ├── .growth-suggestions.md      # gitignoré : flags du hook PostToolUse, relus par /doc-health
     │
     ├── docs/                       # TOUTE la doc projet (vivante + stable + transversale)
     │   │
@@ -103,14 +123,14 @@ mon-projet/
     │   │       ├── tasks.md        # checklist exécutable : tasks atomiques numérotées #1, #2… + DoD TYPÉE (command_passes:/file_exists:/manual:) + phases ~35 min max
     │   │       └── (diagrams/      # optionnel — créer si gros besoin de diagrammes spécifiques à cette feature)
     │   │
-    │   ├── 🔄 HANDOFF.md           # ⭐ état de session — VIVANT (MAJ FIN de chaque session) : status, échecs tentés, next, blockers
+    │   ├── 🔄 HANDOFF.md           # ⭐ état de session — RÉÉCRIT par /handoff à chaque fin de session, < 30 lignes (@-importé) : status, échecs, next, blockers
     │   ├── 🔄 HANDOFF-journal.md   # journal append-only (1 ligne/session via /handoff) — NON auto-chargé (v1.4)
     │   ├── 🔄 ROADMAP.md           # DASHBOARD vivant : status courant des features (synthèse de conception/tasks.md + specs/*/tasks.md)
     │   ├── 🔄 CHANGELOG.md         # historique features livrées + bugs fixés (format Keep a Changelog, versions = tags git)
-    │   ├── 🔄 ACCESS.md            # checklist accès (API keys, comptes, VPN) avec statuts ✅ obtenu / ⏳ en attente / 🔒 stockage
+    │   ├── 🔄 ACCESS.md            # checklist accès (API keys, comptes, VPN) : ✅ obtenu / ⏳ en attente / 🔒 OÙ trouver — jamais la valeur
     │   ├── 🔄 lecons.md            # journal bugs/patterns/observations — sas entre auto-memory et promotion (ADR/rule/discard)
-    │   ├── 🔄 code-map.md          # ⭐ règles de couplage + intention + gotchas (non-déductibles) — PAS de file-by-file
-    │   ├── 🔄 code-map-gotchas.md  # pièges non évidents, entrées citant leur chemin — NON auto-chargé, injectés par le hook (v1.4)
+    │   ├── 🔄 code-map.md          # ⭐ vue macro + règles de couplage + intention (non-déductibles, < 3k tokens, @-importé) — PAS de file-by-file
+    │   ├── 🔄 code-map-gotchas.md  # pièges non évidents, entrées citant leur chemin — NON auto-chargé, injectés par le hook à l'édition du fichier ciblé
     │   ├── 🔄 stack.md             # inventaire technique (libs Python + services tiers + LLM + deploy + auth)
     │   │
     │   ├── 📚 adr/                 # Architecture Decision Records (transversal — décisions tech structurantes, IMMUABLES)
@@ -130,16 +150,24 @@ mon-projet/
 
 ## Convention diagrammes
 
-→ **Convention canonique** (3 formats : ASCII inline / Excalidraw+SVG / PNG, + règle « commit source ET export », + piège `![](path)` non auto-suivi) : [.claude/rules/template-maintenance.md § Convention diagrammes](rules/template-maintenance.md).
+| Format                         | Quand                                          | Lisible par Claude ?        |
+| ------------------------------ | ---------------------------------------------- | --------------------------- |
+| **ASCII inline** dans le `.md` | Par défaut — flow, arbre, séquence simple      | ✅ parfait                  |
+| **Excalidraw + export SVG**    | Schéma visuel complexe (> ~50 lignes d'ASCII)  | ⚠️ SVG via Read explicite   |
+| **PNG / JPG**                  | Screenshots, photos uniquement                 | ⚠️ pas fiable               |
+
+**Règle d'or** : commit la **source éditable ET l'export** côte à côte (`flow-X.excalidraw` + `flow-X.svg`).
+
+⚠️ Un `![](path)` dans un `.md` n'est **pas** suivi par Claude : pour qu'il « voie » un schéma image, Read explicite ou version ASCII.
 
 **Où placer les diagrammes ?**
 
-- Simple → **inline** dans le .md pertinent (PRD, ARCHITECTURE, spec.md, plan.md)
-- Gros / éditable → dossier `diagrams/` local à la section (cadrage/diagrams/, conception/diagrams/, specs/00X/diagrams/)
+- Simple → **inline** dans le .md pertinent (business → `cadrage/README.md` ; technique → `ARCHITECTURE.md` ; feature → `plan.md`)
+- Gros / éditable → dossier `diagrams/` local à la section (cadrage/diagrams/, conception/diagrams/, specs/00X/diagrams/ — rare)
 
 ## Pourquoi tout dans `.claude/` ?
 
-- **Un seul dossier à donner à Claude comme contexte** (`@.claude/` charge tout)
+- **Un seul dossier de matière première** — Claude y lit à la demande (jamais tout en `@` : seuls HANDOFF + code-map sont auto-chargés)
 - **Racine propre** : seuls les vrais livrables sont visibles
 - **Convention claire** : `.claude/` = matière première (pour toi + Claude), root = artefacts
 - **Gitignore facile** : tu peux choisir ce qui se commit dans `.claude/` finement
@@ -153,7 +181,7 @@ mon-projet/
 | 🔄 Racine `docs/` (HANDOFF, ROADMAP, CHANGELOG, ACCESS) | Fichiers vivants tracking            | **MAJ tous les jours**                |
 | 📚 Transversaux (adr/, idees/)                          | Spans tous les phases                | À l'occasion                          |
 
-**Pattern mirror macro ↔ micro (les deux niveaux vivent dans `conception/`) :**
+**Pattern mirror macro ↔ micro (macro dans `conception/`, micro dans `specs/` — dossiers frères) :**
 
 | Macro (`conception/`) | Micro (`specs/00X-feature/`) | Question                                |
 | --------------------- | --------------------------------------- | --------------------------------------- |
@@ -162,15 +190,32 @@ mon-projet/
 | `ARCHITECTURE.md`     | `plan.md`                               | Comment on l'implémente ?               |
 | `tasks.md` (plan MVP) | `tasks.md`                              | Quoi exécuter et dans quel ordre ?      |
 
-→ `../ROADMAP.md` (racine) = **dashboard vivant** qui synthétise l'état (status + blockers).
+→ `docs/ROADMAP.md` (racine de `docs/`) = **dashboard vivant** qui synthétise l'état (status + blockers).
 
 ---
 
 ## À créer quand ?
 
-**Règle d'or :** un fichier qu'on ne met pas à jour ment. Crée à la demande, pas préventivement.
+**Règle d'or :** un fichier qu'on ne met pas à jour ment. Crée à la demande, JAMAIS préventivement.
 
-→ **Matrice canonique (trigger → fichier)** : [.claude/rules/template-maintenance.md § Quand créer un nouveau fichier ?](rules/template-maintenance.md). Vue actionnable jour-1 / plus-tard → checklist « Démarrer un nouveau projet » en fin de ce doc.
+| Déclencheur                                                | Fichier (sous `.claude/docs/`)                                                                                 |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1er credential / accès à obtenir                           | `ACCESS.md` — OÙ trouver l'accès, jamais la valeur                                                             |
+| Déploiement prod imminent                                  | `RUNBOOK.md` (modèle ci-dessous)                                                                               |
+| Terme métier récurrent non expliqué (> 3 fois)             | `GLOSSARY.md`                                                                                                  |
+| ≥ 5 interlocuteurs / plusieurs équipes client              | `STAKEHOLDERS.md` (modèle ci-dessous) — sinon § Interlocuteurs de `cadrage/README.md`                          |
+| Démarrage d'une feature                                    | `specs/00X-<slug>/{research,spec,plan,tasks}.md` via `/spec`                                                   |
+| Décision qui survit à la feature OU touche plusieurs specs | ADR via `/adr` (§ ADR ci-dessous)                                                                              |
+| Décision locale à UNE feature                              | `specs/00X/plan.md` § Décisions (pas d'ADR)                                                                    |
+| Idée perso pas mûre                                        | `idees/YYYY-MM-DD-<titre>.md` via `/idee`                                                                      |
+| Bug, piège, observation à décider plus tard                | entrée datée dans `lecons.md` via `/lecon` (statut 🆕 new)                                                     |
+| Piège lié à un fichier / une zone du code                  | bullet dans `code-map-gotchas.md` (chemin cité en backticks)                                                   |
+| Nouvelle règle de couplage / contrainte d'archi            | `code-map.md` (jamais de description fichier par fichier : déductible et ça dérive)                            |
+| Nouvelle lib, service tiers, LLM                           | table de `stack.md`                                                                                            |
+| Doc / ticket / compte-rendu reçus du client                | `cadrage/documents/` · `cadrage/tickets/` · `cadrage/reunions/` (verbatim, daté — cf. § Conventions de naming) |
+| Diagramme                                                  | ASCII inline par défaut — cf. § Convention diagrammes                                                          |
+
+Vue actionnable jour-1 / plus-tard → checklist « Démarrer un nouveau projet » en fin de ce doc.
 
 **❌ À NE PAS créer** : bug log séparé (→ CHANGELOG), backups HANDOFF / archives (git suffit), « notes générales » (→ `idees/` daté).
 
@@ -189,7 +234,24 @@ mon-projet/
 
 `cadrage/` = ce qu'**on te file** (client, Jira, mail — input externe). `idees/` = ce que **toi** brainstormes (input interne). Ne JAMAIS mélanger : tickets/docs reçus ≠ tes notes perso.
 
-→ Détail : [.claude/rules/template-maintenance.md § Distinction cadrage/ vs idees/](rules/template-maintenance.md).
+Test simple : « j'ai eu une idée » → `idees/` ; « voici la doc / le ticket / le compte-rendu » → `cadrage/` (verbatim, daté).
+
+---
+
+## Conventions de naming
+
+| Quoi                   | Format                                                                |
+| ---------------------- | --------------------------------------------------------------------- |
+| Specs                  | `specs/001-<slug>/`, `002-…` — séquentiel, jamais de reset            |
+| ADR                    | `adr/00XX-<scope>-<titre-court>.md` (ex. `0007-mvp-stack-bdd.md`)     |
+| Réunions / pivots      | `cadrage/reunions/YYYY-MM-DD-<titre>.md`                              |
+| Docs reçus du client   | `cadrage/documents/YYYY-MM-DD-<description>.<ext>`                    |
+| Tickets client         | `cadrage/tickets/<ID>-<titre>.md` (ex. `JIRA-1234-export-clients.md`) |
+| Idées perso            | `idees/YYYY-MM-DD-<titre-court>.md`                                   |
+| Leçons                 | entrée `## YYYY-MM-DD — <titre>` dans `lecons.md`                     |
+| Tags git (déploiement) | `vYYYY.MM.DD-HHMM`                                                    |
+
+Dates ISO `YYYY-MM-DD` partout, liens relatifs. Numéros specs/ADR = max + 1, jamais réutilisés (en agent team : alloués par le lead seul).
 
 ---
 
@@ -480,14 +542,14 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 
 ## ✅ v1.0 — Livrée 2026-04-15
 
-- [x] [001-auth](../specs/001-auth/spec.md) — JWT + refresh
-- [x] [002-users-crud](../specs/002-users-crud/spec.md)
-- [x] [003-dashboard](../specs/003-dashboard/spec.md)
+- [x] [001-auth](specs/001-auth/spec.md) — JWT + refresh
+- [x] [002-users-crud](specs/002-users-crud/spec.md)
+- [x] [003-dashboard](specs/003-dashboard/spec.md)
 
 ## 🚧 v1.1 — En cours (cible 2026-06-15)
 
-- [~] [004-export-pdf](../specs/004-export-pdf/spec.md) — **EN COURS**
-- [ ] [005-notifications-email](../specs/005-notifications-email/spec.md)
+- [~] [004-export-pdf](specs/004-export-pdf/spec.md) — **EN COURS**
+- [ ] [005-notifications-email](specs/005-notifications-email/spec.md)
 
 ## 📋 v1.2 — Planifiée
 
@@ -496,15 +558,16 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 
 ## 💡 Backlog (pas encore prio)
 
-- mode-offline (voir [docs/idees/2026-05-22-mode-offline.md](idees/...))
+- mode-offline (voir [idees/2026-05-22-mode-offline.md](idees/2026-05-22-mode-offline.md))
 - intégration Slack
 ```
 
-**Conventions visuelles :**
+**Conventions de statut** (machine à états `[ ]` → `[~]` → `[x]`) :
 
 - `[ ]` = planifié, pas commencé
-- `[~]` = en cours (mettre en **gras**)
-- `[x]` = livré
+- `[~]` = en cours (mettre en **gras** : `**EN COURS**`)
+- `[x]` = livré (`[x] livré YYYY-MM-DD`)
+- Miroir machine-readable : frontmatter `status:` de chaque `specs/00X/spec.md` — `draft`/`validated` ↔ `[ ]` · `in-progress` ↔ `[~]` · `done` ↔ `[x]` · `parked` ; posé par `/spec`, `/conception` (validated) et `/feature-done` (done) ; incohérence ROADMAP ↔ frontmatter flaggée par `/doc-health`
 - Lien vers `.claude/docs/specs/00X/spec.md` dès que la spec existe
 - Lien vers `.claude/docs/idees/...` tant que c'est juste une idée
 
@@ -512,13 +575,33 @@ Utile dès que le client a un vocabulaire spécifique. Évite de re-demander 5 f
 
 ## ADR — Architecture Decision Record
 
-Fichier court (≤ 1 page) qui capture **une décision technique structurante** + contexte + conséquences. Immuable (on supersede), créé via `/adr <scope> "<titre>"`.
+Fichier court (≤ 1 page) qui capture **une décision technique structurante** + contexte + conséquences, créé via `/adr <scope> "<titre>"`.
 
-→ **Convention canonique** (5 scopes, frontmatter, statuts, quand-créer OUI/NON, ADR vs `plan.md`) : [.claude/rules/template-maintenance.md § Convention ADR](rules/template-maintenance.md). Exemple de fichier rempli ci-dessous.
+**ADR ou section `## Décisions` de `plan.md` ?**
 
-### Template d'un ADR
+| Niveau de décision                          | Où l'écrire                                  |
+| ------------------------------------------- | -------------------------------------------- |
+| Cross-feature (impacte > 1 spec)            | ADR global `.claude/docs/adr/`               |
+| Survit à la mort de la feature              | ADR global `.claude/docs/adr/`               |
+| Locale à UNE feature (lib, pattern interne) | Section `## Décisions` de `specs/00X/plan.md` |
+| Devient cross-feature plus tard             | **Promouvoir** depuis `plan.md` → ADR global |
+
+- **Naming** : `00XX-<scope>-<titre-court>.md` — scope dans le nom, séquentiel sans reset.
+- **5 scopes** : `cadrage` (contraintes imposées au départ, souvent par le client) · `mvp` (structurant, projet entier) · `feature-00X` (réutilisable, propre à une feature — rare) · `infra` (hébergement, déploiement, secrets, monitoring) · `operations` (post-prod, incidents, runbook).
+- **Frontmatter YAML obligatoire** (lu par `/adr list` et `/doc-health`) : `status` (`proposed` · `accepted` · `deprecated` · `superseded`), `scope`, `phase`, `supersedes` — cf. exemple ci-dessous.
+- **Immuable** : on ne l'édite jamais. Changement d'avis → nouvel ADR `supersedes: 00XX`, l'ancien passe `status: superseded` (+ `superseded_by:`) via `/adr supersede` ; décision qu'on cesse d'étendre, sans remplaçant → `deprecated` (`/adr deprecate`).
+- Critères OUI / NON détaillés : `.claude/docs/adr/README.md` (index du projet).
+
+### Template d'un ADR (`adr/0002-mvp-auth-jwt.md`)
 
 ```markdown
+---
+status: accepted # proposed | accepted | deprecated | superseded
+scope: mvp # cadrage | mvp | feature-00X | infra | operations
+phase: 2026-Q2
+supersedes: null # ou 0001
+---
+
 # 0002 — Authentification : JWT plutôt que sessions
 
 **Statut :** Accepted
@@ -572,7 +655,7 @@ web et SecureStore côté mobile. Lib : `python-jose`.
 
 ## HANDOFF.md — Reprise de session
 
-Le fichier qui sauve les sessions multi-jours. À mettre à jour **à chaque fin de session**.
+Le fichier qui sauve les sessions multi-jours. **Réécrit** (jamais empilé) par `/handoff` **à chaque fin de session**, < 30 lignes — l'historique part dans `HANDOFF-journal.md` (append-only, non auto-chargé).
 
 ```markdown
 # HANDOFF — 2026-05-24 18h
@@ -598,7 +681,7 @@ Commande de reprise: pytest tests/pdf/ -q
 À placer dans le CLAUDE.md :
 
 ```markdown
-- Reprise de session : @docs/HANDOFF.md
+- Reprise de session : @.claude/docs/HANDOFF.md
 ```
 
 → Claude le charge automatiquement au démarrage.
@@ -643,7 +726,7 @@ Commande de reprise: pytest tests/pdf/ -q
 
 ## CLAUDE.md — Template minimal (split racine / `.claude`)
 
-Deux fichiers, **tous deux chargés** à chaque session. **Racine = le projet** · **`.claude/CLAUDE.md` = le template**.
+Deux fichiers, **tous deux chargés** à chaque session. **Racine = le projet** (résumé, 2 `@`, liens doc, conventions) · **`.claude/CLAUDE.md` = la méthode** — index mince (~2,5 Ko) : Claude Code liste déjà nativement chaque skill (nom + description) ; l'inventaire humain et CI-vérifié vit dans `.claude/skills/README.md`.
 
 ### `CLAUDE.md` (racine — le projet, ≤ 60 lignes)
 
@@ -678,33 +761,34 @@ Automatisation n8n pour synchroniser les commandes SAP B1 → Notion DB.
 - `.claude/docs/HANDOFF.md` à update à chaque fin de session (via /handoff)
 ```
 
-### `.claude/CLAUDE.md` (le template — skills, workflow, agent)
+### `.claude/CLAUDE.md` (la méthode — index mince)
 
 ```markdown
-# Projet ACME — Template, skills & agent
+# Projet ACME — Méthode (template claude-Setup)
 
-> Décrit comment le template vit. Le CLAUDE.md racine décrit le projet.
+> Comment ce projet est outillé pour Claude Code. Le CLAUDE.md racine décrit le projet ; ce fichier reste court.
 
-## 🧭 Comment vivre avec ce template
+## Où est quoi
 
-**Avant d'écrire dans `.claude/docs/`** : [rules/template-maintenance.md](rules/template-maintenance.md) — rule scopée `paths:`, chargée toute seule au bon moment ; ⚠️ **jamais en `@`** (v1.4 : +12k tokens/session)
+- Doc projet : la rule [template-maintenance](rules/template-maintenance.md) se charge seule dès qu'un fichier de `.claude/docs/` est lu (scopée `paths:` — jamais en `@`)
+- Skills : inventaire + conventions → [skills/README.md](skills/README.md) · nouveau composant conforme → `/scaffold`
+- Guides humains : [USAGE.md](USAGE.md) (workflows) · [STRUCTURE.md](STRUCTURE.md) (arborescence, conventions)
 
-## Skills (`.claude/skills/`)
+## 🔁 Pipelines récurrents (orchestrés par `/feature`)
 
-- Skills cœur : /handoff /spec /conception /feature /feature-done /debug /scaffold · /lecon /adr /idee · /doc-health /codemap /pivot /archive-projet (cette liste = source de vérité, compte CI-vérifié)
-- Skills stack = **plugins** auto-découverts (rien à recenser) : `db-migration` + `agent-teams` (marketplace `claude-setup`) ; n8n → plugin **officiel** `n8n-mcp-skills` (czlonkowski/n8n-skills, 14 skills + hooks).
+- `/feature "<titre>" [standard|tdd|n8n]` · bug non trivial → `/debug`
 
-## Workflow features
+## Agent perso (`.claude/agents/`)
 
-1. Demande client → `.claude/docs/cadrage/` (tickets, documents, reunions)
-2. Synthèse cadrage → `.claude/docs/cadrage/README.md`
-3. PRD → ARCHITECTURE → ROADMAP
-4. Feature démarrée → `/spec "<titre>"` (scaffold `.claude/docs/specs/00X-feature/`)
-5. Livrée → `/feature-done` (roadmap [x] + CHANGELOG)
+- `explore-code` · `explore-docs` · `explore-memoire` · `reviewer` · `doc-maintainer` (doc en lot — jamais le HANDOFF)
 
-## Agent & skills projet
+## Plugins (marketplace `claude-setup`)
 
-- Agent `doc-maintainer` (Task tool) · `reviewer` (revue adverse) — rôles d'exécution + `/agent-teams:team` = plugin `agent-teams` · explorateurs `explore-code`/`explore-docs`/`explore-memoire` (`/conception`) — cf `rules/agent-teams.md` · skills projet dans `.claude/skills/` (préfixe `n8n-` pour la stack)
+- n8n → `n8n-mcp-skills` (officiel, souvent déjà en user-scope) · BDD → `db-migration` · équipe (opt-in) → `agent-teams`
+
+## Version du template
+
+`.claude/template-version` · mise à jour de la méthode → `/upgrade-template`
 ```
 
 ---
@@ -740,8 +824,8 @@ La roadmap n'est **jamais finie** — c'est un document vivant.
 
 ## v1.1 — Demandes utilisateurs (en cours)
 
-- [~] [006-export-csv](../specs/006-export-csv/spec.md) — **EN COURS**
-- [ ] [007-recherche-globale](../specs/007-recherche-globale/spec.md)
+- [~] [006-export-csv](specs/006-export-csv/spec.md) — **EN COURS**
+- [ ] [007-recherche-globale](specs/007-recherche-globale/spec.md)
 ```
 
 Le numéro de spec **continue** (006, 007...) — jamais de reset.
@@ -761,6 +845,8 @@ Pour un gros pivot (v2, refonte), 2 options :
 | **Projet moyen**            | Structure complète ci-dessus                                           |
 | **Multi-projets (atelier)** | Monorepo avec `python/`, `n8n/`, `db/` + HANDOFF.md global à la racine |
 
+→ Profils d'init (`script-jetable`, `python-app`, `web-app`, `automation-n8n`, `bdd-migration`, `other`) et ce que chacun retire : [USAGE.md](USAGE.md) § Setup.
+
 ---
 
 ## Adaptations par type de projet
@@ -771,7 +857,7 @@ Pour un gros pivot (v2, refonte), 2 options :
 | **Scripts**          | `spec.md` souvent inutile → juste `README.md` + commentaires en tête                                                                                  |
 | **n8n**              | `.claude/docs/specs/00X/spec.md` = logique métier, `tasks.md` = checklist de nœuds. JSON exporté dans `workflows/`. RUNBOOK indispensable. |
 | **BDD**              | ADRs **obligatoires** pour migrations de schéma. Dossier `db/migrations/` avec scripts numérotés                                                      |
-| **Client/freelance** | BRIEF, INTAKE, ACCESS, STAKEHOLDERS, RUNBOOK = **obligatoires**. Pour projet perso, optionnels.                                                       |
+| **Client/freelance** | Brief (`cadrage/README.md`), ACCESS, STAKEHOLDERS, RUNBOOK = **obligatoires**. Pour projet perso, optionnels.                                         |
 
 ---
 
@@ -796,7 +882,7 @@ Pour un gros pivot (v2, refonte), 2 options :
 - **Un ADR** si la décision impacte plusieurs features OU est dure à défaire
 - **Rien ne se perd** : tout circule de `idees/` → `.claude/docs/specs/00X/research → spec → plan → tasks`
 - **HANDOFF.md ⭐** mis à jour à chaque fin de session — c'est ce qui sauve la continuité (fichier le plus utile)
-- **CLAUDE.md** est un INDEX, pas la doc elle-même (20-30 lignes max)
+- **CLAUDE.md** est un INDEX, pas la doc elle-même (≤ 60 lignes, 2 `@` max) ; les rules sont auto-chargées — jamais en `@`
 - **CHANGELOG.md** est UN SEUL fichier — features ET bug fixes (pas de fichier bugs séparé)
 - **Interlocuteurs dans le BRIEF** — `STAKEHOLDERS.md` séparé seulement si > 4-5 personnes
 - **ACCESS.md** dès le jour 1 — pas après avoir bloqué 2 jours sur un OAuth
@@ -819,7 +905,7 @@ Pour un gros pivot (v2, refonte), 2 options :
 
 ### 🟡 Quand le besoin émerge
 
-6. [ ] `CLAUDE.md` (index, ≤ 80 lignes) — dès que tu commences à coder
+6. [ ] `CLAUDE.md` (index, ≤ 60 lignes) — dès que tu commences à coder
 7. [ ] `README.md` (setup local) — si projet code
 8. [ ] `.env.example` — si variables d'env
 9. [ ] `specify init <NAME>` (via `uv tool install specify-cli`) ou structure perso — quand tu démarres l'archi

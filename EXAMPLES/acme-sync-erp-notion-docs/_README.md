@@ -17,6 +17,7 @@ git clone <repo>
 cd acme-sync-erp-notion
 uv venv && source .venv/bin/activate
 uv pip install -r requirements.txt
+uv tool install pre-commit && pre-commit install   # garde-fou secrets (gitleaks) — une fois par clone
 
 # 2. Variables d'env
 cp .env.example .env
