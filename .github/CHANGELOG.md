@@ -5,7 +5,100 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [1.5.0] — 2026-09-23
 
-_(entrée détaillée en cours de rédaction)_
+Revue complète du template (rapport du 2026-09-23) : tout ce qui était vérifiable a été reproduit —
+sur des projets générés, sur les 17 versions taguées et en sessions `claude -p` réelles — avant d'être
+corrigé. Sur un projet qui a déjà vécu, rien n'était mis à jour : v1.5.0 apporte la mise à jour.
+
+### Added — `/upgrade-template` : les projets générés suivent le template
+
+Jusqu'ici un projet était une copie figée (37 versions en 3 mois ; aucun correctif ne descendait ;
+`slim-context.py` avait dû être écrit pour migrer les projets < 1.4 à la main).
+
+- **Moteur `upgrade.py`** (toujours lancé depuis le template le plus récent) : rejoue l'init de la
+  version du projet (base) et de la cible — `git archive <tag>` → `render.py` + `cleanup-for-type.py`
+  **de cette version**, même profil, variables redéduites des fichiers rendus (jamais stockées : PII) —
+  puis fichier de méthode par fichier : projet = base → cible · template inchangé → projet gardé ·
+  les deux ont bougé → `git merge-file` (fusion JSON 3 voies pour `settings.json` : règles, hooks
+  clés (événement, matcher, commande), clés imbriquées) ; **conflit → fichier du projet gardé**, cible
+  + merge annoté dans `.claude/.cache/upgrade-<v>/` + `REPORT.md`. `.claude/docs/` n'est jamais
+  fusionné : migrations versionnées idempotentes (< 1.4.0 → `slim-context.py` ; 1.5.0 → note
+  multi-agent du gabarit HANDOFF). Arbre git sale refusé, `--dry-run`, `--json`, équipe d'agents
+  active préservée.
+- **Skill `/upgrade-template`** (manuel) : clone, dry-run montré, validation, application, conflits
+  résolus avec l'utilisateur, vérifications, commit. Projets < 1.5 : one-liner dans le README.
+- **`.claude/template-lock.json`** écrit à l'init (version, profil, mode, source).
+- **Tags rétroactifs** v0.16.0 → v1.4.1 + job CI `tag` : chaque version publiée a sa base de merge.
+- `test_upgrade.py` (47 checks) : les 17 versions taguées, non modifiées → **octet pour octet une
+  init fraîche** de 1.5.0, code 0, idempotent ; personnalisations gardées ; conflits gardés ;
+  projet v1.3.3 « grossi » → journal et gotchas migrés sans perte, budget 31k → 7k tokens.
+
+### Fixed — hooks (vérifié en sessions réelles : `test/live-hooks-check.py`)
+
+- **Filet mémoire : fausse alerte à CHAQUE démarrage.** `SessionEnd` passe toujours après `/handoff`
+  → le snapshot était toujours « plus frais » que HANDOFF → « session fermée sans /handoff » injecté
+  à chaque session. Désormais le filet n'est écrit que si la session s'est fermée **sans /handoff ET
+  en laissant une trace git** (marqueur de début posé par `SessionStart` startup|resume|clear —
+  horodatage + empreinte git ; repli : 1re date du transcript). Mesuré avec claude 2.1.280 :
+  **v1.4.1 6/10 → v1.5.0 10/10**.
+- **Snapshots : les « derniers messages user » étaient vides ou du bruit** (44 entrées `user` sur 45
+  sont des `tool_result` ; en fin de session : `caveat / /exit / Goodbye!`). Seuls les messages
+  humains sont gardés.
+- **Rappel `/handoff` (Stop) une fois par session** — il suivait chaque réponse de Claude.
+- **Hook code-map : gotchas ciblés seulement.** Le couplage (déjà en contexte via `code-map.md`
+  @-importé, relu après compaction) n'est plus réinjecté ; plus de liste fixe `src/tests/lib/app`
+  (ratait `packages/`, `backend/`…) ; gate sur chemin relatif. Doc : l'`additionalContext` d'un
+  PreToolUse arrive avec le résultat de l'outil — rattrapage immédiat, pas blocage.
+- Purge au démarrage du cache par-session (> 7 jours) ; matchers `Edit|Write` (`MultiEdit` = legacy).
+
+### Fixed — secrets, dérives, contradictions
+
+- **`.gitignore` n'ignorait que `.env` et `.env.local`** : `.env.production/.staging/.development/.test`
+  pouvaient partir au commit (`git add .` dans `/feature-done`, `-A` dans `/archive-projet`) → `.env*`
+  (hors `.env.example/.sample/.template`) + `secrets.*` ; `git add` sur chemins explicites.
+- **gitleaks cité par la rule git-workflow mais absent** → `.pre-commit-config.yaml` (gitleaks
+  v8.30.1), activation proposée à l'init.
+- `settings.json` : deny secrets à **toute profondeur** avec exceptions `!.env.example` (avant :
+  racine seulement) ; `git branch -d/-D` et `git tag -d` demandent confirmation ; allows redondants
+  (lecture native) et `autoMemoryEnabled` (défaut) retirés.
+- **Gotchas → `code-map-gotchas.md` partout** : `/debug`, `/feature-done` et le protocole d'équipe
+  écrivaient encore dans `code-map.md` (auto-chargé) — le bloat corrigé en v1.4.
+- **`doc-maintainer` ne fait plus le HANDOFF** (subagent : ni conversation, ni validation possible).
+- Rules `code-style`/`testing` : plus d'`AcmeSyncError`/`SapApiError`/`sap_client`, plus de
+  « make lint déjà dans pre-commit » inexistant ; **nouvelles rules web** (TS/JS) — le profil
+  `web-app` n'avait aucune convention.
+- Profil **`other`** (proposé par `/init`, refusé par le script) ; `chmod +x` inutile retiré ;
+  liens cassés ; note « 1 HANDOFF par worker » (contredisait la rule d'équipe) ; `/handoff` sans
+  branche `main` ; `slim-context` migre toutes les sections Gotchas empilées.
+
+### Changed — budget de contexte au démarrage −41 %
+
+Mesuré par `context-budget.py` sur le template vierge : **11 057 → 6 531 tokens** auto-chargés
+(seuil CI 12k → 8k) ; rule `template-maintenance` (chargée à chaque lecture de doc, donc presque
+chaque session) : **15 925 → 2 202**.
+
+- `.claude/CLAUDE.md` 7,9 Ko → 2,5 Ko : il ré-inventoriait les skills que Claude Code liste déjà ;
+  inventaire canonique (compte CI) → `.claude/skills/README.md`.
+- `rules/template-maintenance.md` : 404 → ~70 lignes d'invariants ; formats dans les skills,
+  conventions dans `STRUCTURE.md`.
+- Listing des skills mesuré comme Claude Code le charge (nom + description, hors
+  `disable-model-invocation`) : ~2,2k ; 4 descriptions resserrées ; `/adopt-template` manuel.
+
+### Changed — agent teams réellement opt-in
+
+Le flag `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` n'est pas « inerte sans le plugin » (doc : une équipe
+est montée à chaque session, Claude peut proposer des teammates) et la rule d'équipe pesait ~1,8k
+tokens sur chaque session de chaque projet. La rule vit dans le plugin ; le 1er `/agent-teams:team`
+**active** l'équipe (rule copiée, flag + `teammateMode: "auto"`, relance). Rôles du plugin : « Cadre
+de travail » autonome (en mode panes, le corps d'agent **remplace** le system prompt par défaut).
+Plugin `agent-teams` 1.1.0.
+
+### Tests
+
+`test_hooks` 62 → 87 (séquences réelles startup → travail → SessionEnd → startup, fixture de
+transcript réaliste, purge) · `test_cleanup` 80 → 86 · `test_skills` 148 → 156 ·
+`test_context_budget` 33 → 34 · **`test_upgrade`** (nouveau, 47) · **`sim-growth`** (nouveau :
+projets qui grossissent session après session) · **`live-hooks-check`** (nouveau, manuel : vraies
+sessions `claude -p`) · harnais Phase 0 × 6 profils.
 
 ## [1.4.1] — 2026-09-16
 
