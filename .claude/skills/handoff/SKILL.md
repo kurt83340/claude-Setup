@@ -21,7 +21,7 @@ Lance en parallèle :
 ```bash
 git status
 git log -5 --oneline
-git diff --stat main
+git diff --stat main 2>/dev/null || git diff --stat   # (pas de branche main : changements en cours)
 git branch --show-current
 ```
 

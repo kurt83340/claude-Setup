@@ -20,6 +20,7 @@ Prérequis : les tags vX.Y.Z du dépôt (en CI : checkout avec fetch-depth: 0).
 """
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -109,8 +110,12 @@ def commit(root: Path, msg: str):
 
 
 def upgrade(project: Path, *extra):
-    return sh([sys.executable, str(UPGRADE), "--project", str(project), "--template", str(ROOT),
-               "--to", "WORKTREE", *extra], check=False)
+    # Réglages utilisateur isolés (CLAUDE_CONFIG_DIR) : un plugin agent-teams activé en user-scope
+    # sur la machine du testeur ne doit pas changer le résultat.
+    env = dict(os.environ, CLAUDE_CONFIG_DIR=str(TMP / "claude-config"))
+    r = subprocess.run([sys.executable, str(UPGRADE), "--project", str(project), "--template", str(ROOT),
+                        "--to", "WORKTREE", *extra], capture_output=True, text=True, env=env)
+    return r
 
 
 def upgrade_json(project: Path, *extra):

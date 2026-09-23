@@ -39,6 +39,7 @@ import argparse
 import difflib
 import io
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -250,7 +251,8 @@ def infer_vars(raw_base: Path, project: Path) -> dict:
 def teams_in_use(project: Path, settings: dict) -> bool:
     """Le plugin agent-teams est-il activé pour ce projet (settings projet, local ou user) ?"""
     sources = [settings]
-    for p in (project / ".claude" / "settings.local.json", Path.home() / ".claude" / "settings.json"):
+    user_dir = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    for p in (project / ".claude" / "settings.local.json", user_dir / "settings.json"):
         try:
             sources.append(json.loads(p.read_text(encoding="utf-8")))
         except (OSError, ValueError):
