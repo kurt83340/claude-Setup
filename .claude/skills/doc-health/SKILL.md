@@ -281,4 +281,4 @@ Format type :
 
 ## Note : invocation par agent doc-maintainer
 
-Le skill `/doc-health` est l'invocation manuelle directe. L'agent `doc-maintainer` (Task tool) peut faire le même scan + proposer les diffs (vs juste rapporter). Utilise l'agent pour "scan + agir", utilise le skill pour "juste scanner".
+Le skill `/doc-health` est l'invocation manuelle directe. L'agent `doc-maintainer` (Task tool) peut faire le même scan + proposer les diffs (vs juste rapporter). Utilise l'agent pour "scan + agir", utilise le skill pour "juste scanner". Le HANDOFF stale, lui, se traite par `/handoff` dans le fil principal (l'agent n'a pas la conversation).

@@ -34,7 +34,7 @@ docs(runbook): add rollback procedure
 - 1 spec terminée = 1 PR
 - Squash merge (1 commit par feature dans main)
 - Description PR : lien vers `specs/00X-*/spec.md`
-- CI verte obligatoire (tests + lint + type check)
+- CI verte obligatoire (tests + lint + type check) — si le projet a une CI
 
 ## Tags
 
@@ -46,4 +46,5 @@ docs(runbook): add rollback procedure
 - ❌ Force push sur main (jamais)
 - ❌ Commit direct sur main (toujours PR)
 - ❌ Skip CI hooks (`--no-verify`) — si ça casse, fixer le hook
-- ❌ Credentials commitées (pre-commit hook gitleaks)
+- ❌ Credentials commitées — garde-fou gitleaks en pre-commit (`.pre-commit-config.yaml`,
+  à activer par clone : `pre-commit install`) ; `git add` sur des chemins explicites, jamais `git add .` à l'aveugle

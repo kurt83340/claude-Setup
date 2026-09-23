@@ -48,7 +48,7 @@ toute investigation.
 Chaque rapport, factuel et sourcé → `research.md` § « Explorations » (daté ISO).
 
 Projet **from scratch / première spec** : l'explorateur code n'a rien à lire → il explore à
-la place les conventions cibles (`rules/code-style.md`, `stack.md`) et un exemple proche si
+la place les conventions cibles (`rules/code-style*.md`, `stack.md`) et un exemple proche si
 dispo ; le poids de l'explo se déplace sur docs + cadrage.
 
 ## Étape 2 — Faire émerger 2-3 options (jamais UNE seule)

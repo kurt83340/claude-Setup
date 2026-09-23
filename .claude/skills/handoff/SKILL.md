@@ -169,13 +169,18 @@ Budget contexte (si `/doc-health` est installé sur ce projet) :
 - ❌ Lister TOUS les commits (juste le sens général)
 - ❌ Mentionner des credentials/secrets
 
-## Note : invocation par hook PreCompact
+## Note : filets automatiques (hooks) — complémentaires, pas remplaçants
 
-Ce skill est aussi déclenché **automatiquement** par le hook `PreCompact` (avant compaction du contexte) qui appelle `.claude/hooks/precompact-snapshot-handoff.py`. Le hook fait un snapshot minimal (timestamp + git state + last messages) sans demande de confirmation. Le skill `/handoff` est la version manuelle riche (avec review user).
+Ce skill n'est **jamais** déclenché automatiquement. Deux hooks posent des filets minimaux dans
+`.claude/.cache/` (git state + derniers messages humains, sans confirmation) : `PreCompact`
+(avant compaction) et `SessionEnd` (session fermée SANS /handoff après avoir modifié le dépôt).
+`/handoff` reste la version riche (échecs tentés, blockers, next) validée par l'utilisateur.
 
-## Note : invocation par agent doc-maintainer
+## Note : toujours dans le fil principal
 
-L'agent `doc-maintainer` (Task tool) peut aussi générer le HANDOFF en mode "scan auto + propose tout". Utilise l'agent quand tu veux un workflow complet (HANDOFF + ROADMAP + CHANGELOG synchronisés). Utilise `/handoff` quand tu veux juste mettre à jour HANDOFF rapidement.
+`/handoff` se lance dans la session qui a travaillé : lui seul voit la conversation (échecs
+tentés, goal, blockers). Un subagent (ex. `doc-maintainer`) démarre à contexte vide — il ne peut
+ni remplir ces sections ni obtenir la validation de l'Étape 4. Ne pas lui déléguer le HANDOFF.
 
 ## Note : projets script-jetable
 

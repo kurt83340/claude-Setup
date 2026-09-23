@@ -8,10 +8,12 @@ enterprise c'est insuffisant. Ce script ajuste.
 
 Types supportés :
   - script-jetable : -80% (garde minimum vital pour 1-shot)
-  - automation-n8n : ajustement léger (retire RUNBOOK pas-encore-prod)
-  - python-app    : retire workflows/, garde tout sinon
-  - web-app       : retire workflows/ (pas n8n)
-  - bdd-migration : retire workflows/ (skill db-migration = plugin à installer)
+  - automation-n8n : ajustement léger (retire RUNBOOK pas-encore-prod + rules web)
+  - python-app    : retire workflows/ + rules web, garde tout sinon
+  - web-app       : retire workflows/ + rules Python (pas n8n)
+  - bdd-migration : retire workflows/ + rules web (skill db-migration = plugin à installer)
+  - other         : ne retire rien (projet hors cases — les rules scopées restent inertes
+                    tant qu'aucun fichier de leur langage n'est lu)
 
 Usage:
     python3 cleanup-for-type.py --type script-jetable [--root .] [--dry-run]
@@ -83,12 +85,18 @@ SCRIPT_JETABLE = {
 }
 
 # automation-n8n : ajustement léger (les skills n8n sont un PLUGIN, plus de copie)
+# Rules de code par langage (scopées `paths:` — inertes hors de leur langage, mais retirées quand
+# le profil dit clairement la stack : l'arbo .claude/rules/ reste lisible).
+PY_RULES = [".claude/rules/code-style.md", ".claude/rules/testing.md"]
+WEB_RULES = [".claude/rules/code-style-web.md", ".claude/rules/testing-web.md"]
+
 AUTOMATION_N8N = {
     "delete": [
         # RUNBOOK créé post-prod uniquement
         ".claude/docs/RUNBOOK.md",
+        *WEB_RULES,
     ],
-    "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod). Skills n8n = plugin OFFICIEL "
+    "keep_reason": "n8n full stack — retire RUNBOOK (créé post-prod) + rules web. Skills n8n = plugin OFFICIEL "
                    "'n8n-mcp-skills' (czlonkowski/n8n-skills) — check-first `claude plugin list` : "
                    "déjà en user-scope → rien à faire ; sinon marketplace add + install --scope user. "
                    "Plus de copie.",
@@ -99,8 +107,9 @@ PYTHON_APP = {
     "delete": [
         "workflows/",
         ".claude/docs/RUNBOOK.md",
+        *WEB_RULES,
     ],
-    "keep_reason": "Python app — retire workflows/ (pas n8n)",
+    "keep_reason": "Python app — retire workflows/ (pas n8n) + rules web (TS/JS)",
 }
 
 # web-app : retire workflows/
@@ -108,16 +117,25 @@ WEB_APP = {
     "delete": [
         "workflows/",
         ".claude/docs/RUNBOOK.md",
+        *PY_RULES,
     ],
-    "keep_reason": "Web app — retire workflows/ (pas n8n)",
+    "keep_reason": "Web app — retire workflows/ (pas n8n) + rules Python",
 }
 
 # bdd-migration : retire workflows/ (le skill db-migration est un PLUGIN, plus de copie)
 BDD_MIGRATION = {
     "delete": [
         "workflows/",
+        *WEB_RULES,
     ],
-    "keep_reason": "BDD migration — retire workflows/. Skill db-migration (Alembic) = plugin à installer (/plugin install db-migration@claude-setup), plus de copie.",
+    "keep_reason": "BDD migration — retire workflows/ + rules web. Skill db-migration (Alembic) = plugin à installer (/plugin install db-migration@claude-setup), plus de copie.",
+}
+
+# other : projet hors cases (CLI Go, lib Rust, data…) — rien de retiré ; ajuster à la main.
+OTHER = {
+    "delete": [],
+    "keep_reason": "Projet hors cases — rien de retiré (les rules de code scopées restent inertes "
+                   "tant qu'aucun fichier de leur langage n'est lu). Ajuste à la main si besoin.",
 }
 
 PROFILES = {
@@ -126,6 +144,7 @@ PROFILES = {
     "python-app": PYTHON_APP,
     "web-app": WEB_APP,
     "bdd-migration": BDD_MIGRATION,
+    "other": OTHER,
 }
 
 # ── Artefacts de maintenance DU TEMPLATE (retirés en GREENFIELD uniquement) ────
@@ -464,6 +483,7 @@ def prune_dead_nav_links(root: Path) -> None:
                 line = line[:s] + line[e:]
             line = re.sub(r"(?:\s*·\s*){2,}", " · ", line)  # séparateurs orphelins
             line = re.sub(r":\s*·\s*", ": ", line)
+            line = re.sub(r"^(\s*(?:[-*]|\d+\.)\s+)·\s*", r"\1", line)  # « - · [x] » → « - [x] »
             line = re.sub(r"\s*·\s*$", "", line).rstrip()
             out.append(line)
         if removed:

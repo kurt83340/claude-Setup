@@ -130,7 +130,8 @@ send-keys -t <pane> Enter` (« Yes » est présélectionné ; socket trouvable v
 d'un teammate et la mémoire projet :
 
 1. Échecs tentés / impasses → HANDOFF § « Échecs tentés » (via `/handoff` en fin de session)
-2. Pièges / gotchas non-déductibles → `/lecon` (ou `code-map.md` § Gotchas si couplage)
+2. Pièges / gotchas non-déductibles → `/lecon` (ou `code-map-gotchas.md` si le piège vise un
+   fichier/une zone — jamais dans `code-map.md`, auto-chargé)
 3. Décision structurante prise en délégation → `/adr`
 4. Avancement → cocher `specs/00X/tasks.md` + ROADMAP `X/Y`
 

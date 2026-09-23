@@ -39,7 +39,7 @@ Chaque fichier d'une spec a son équivalent macro dans `conception/` : `research
 
 - **ROADMAP global** : [`../ROADMAP.md`](../ROADMAP.md) agrège le status des features
 - **Plan MVP figé** : [`../tasks.md`](../conception/tasks.md) montre où s'inscrivent les features dans le plan
-- **Promotion ADR** : si une décision dans `plan.md` survit à la feature OU impacte plusieurs specs → créer ADR dans [`../../adr/`](../../adr/)
+- **Promotion ADR** : si une décision dans `plan.md` survit à la feature OU impacte plusieurs specs → créer ADR dans [`../adr/`](../adr/)
 
 ## Démarrer une nouvelle spec
 

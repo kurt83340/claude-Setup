@@ -1,6 +1,10 @@
-# Secrets
+# Secrets — tous les .env* (le gabarit .env.example reste versionné)
 .env
-.env.local
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+secrets.*
 *.key
 *.pem
 credentials.json

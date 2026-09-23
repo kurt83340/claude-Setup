@@ -1,7 +1,7 @@
 ---
 name: archive-projet
 description: Archive un projet en fin de vie (ou le restaure) — bilan final (HANDOFF/ROADMAP/CHANGELOG), marquage archivé lisible par toute session future (bannière CLAUDE.md + marqueur .claude/archived), scan des références de chemin (repo, crontab, ~/.claude.json), migration de l'auto-memory, puis commande de move vers _archives/ remise à l'utilisateur (à lancer après fermeture de session). Modes restore (dé-archiver) et status.
-allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Bash(python3 .claude/skills/archive-projet/scripts/archive-projet.py:*), Bash(git:*), Bash(date:*), Bash(crontab:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Bash(python3 .claude/skills/archive-projet/scripts/archive-projet.py:*), Bash(git status), Bash(git log:*), Bash(git worktree list:*), Bash(git add:*), Bash(git commit:*), Bash(date:*), Bash(crontab -l)
 disable-model-invocation: true
 argument-hint: "[\"raison\"|restore|status] [--dest <dossier>]"
 ---
@@ -86,7 +86,8 @@ peut pas deviner la cible) — toi tu les listes, l'utilisateur tranche.
 ### Étape 6 — Commit final (si repo git)
 
 ```bash
-git add -A && git commit -m "chore(archive): projet archivé — <raison>"
+git status --short     # relire : seuls CLAUDE.md, .claude/ (docs + marqueur) doivent bouger
+git add CLAUDE.md .claude/ && git commit -m "chore(archive): projet archivé — <raison>"
 ```
 
 ### Étape 7 — Remettre la commande finale

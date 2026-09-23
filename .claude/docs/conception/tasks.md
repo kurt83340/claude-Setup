@@ -87,7 +87,7 @@
 - **Status courant :** [../ROADMAP.md](../ROADMAP.md)
 - **PRD source :** [PRD.md](PRD.md)
 - **Architecture :** [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Specs détaillées par feature :** [specs/](specs/)
+- **Specs détaillées par feature :** [specs/](../specs/)
 
 ## En cas de pivot
 

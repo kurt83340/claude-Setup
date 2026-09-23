@@ -1,7 +1,7 @@
 ---
 name: adopt-template
 description: Greffe le template sur un projet EXISTANT (brownfield) — jamais d'overwrite - état des lieux (stack/structure/outillage détectés), merges diff-par-diff des collisions (CLAUDE.md, settings.json, .gitignore existants), questions CORE pré-remplies depuis l'existant, puis RÉTRO-REMPLISSAGE de la doc depuis le projet (stack.md ← manifests, code-map ← /codemap, HANDOFF ← git log, ADRs rétroactifs optionnels). Réutilise render.py + cleanup-for-type.py (mêmes scripts que /init-from-template). À exécuter UNE FOIS, après le rsync --ignore-existing.
-allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Skill, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(chmod:*), Bash(find:*), Bash(grep:*), Bash(cat:*), Bash(python3 .claude/skills/init-from-template/scripts/render.py:*), Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)
+allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Skill, Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(find:*), Bash(grep:*), Bash(cat:*), Bash(python3 .claude/skills/init-from-template/scripts/render.py:*), Bash(python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py:*)
 disable-model-invocation: false
 ---
 
@@ -30,7 +30,6 @@ rsync -av --ignore-existing \
   --exclude='plugins/' --exclude='.claude-plugin/' \
   --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
   /chemin/vers/template/ .
-chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 
 # (Optionnel, recommandé) Déposer les matériaux AVANT de lancer le skill :
 #   docs client → .claude/docs/cadrage/documents/     tickets → .claude/docs/cadrage/tickets/
@@ -41,7 +40,7 @@ chmod +x .claude/hooks/*.py .claude/hooks/*.sh
 
 1. `git status` : working tree PROPRE exigé (sinon → commit/stash d'abord). Puis commit
    snapshot : `chore: snapshot pre-adopt` (rollback garanti).
-2. `python3 --version`, hooks exécutables.
+2. `python3 --version` (les hooks sont appelés via `python3`/`bash` — pas de `chmod` requis).
 
 ## Étape 1 — État des lieux (détecter, pas demander)
 

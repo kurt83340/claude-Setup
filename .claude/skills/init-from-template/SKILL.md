@@ -1,7 +1,7 @@
 ---
 name: init-from-template
 description: Initialise un nouveau projet depuis le template. Pose 10 questions via AskUserQuestion (PROJECT_NAME, type projet, CLIENT_NAME, décideur, commandes stack), substitue les CORE placeholders (UPPER_SNAKE) via render.py, puis lance cleanup-for-type.py adapté au type (script-jetable -80%, etc.). Les stacks (n8n, BDD) sont des plugins installables via /plugin (marketplace claude-setup). À invoquer UNE FOIS après copy du template.
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(find:*), Bash(sed:*), Bash(python3:*), Bash(chmod:*), Bash(git init:*), Bash(git add:*), Bash(git commit:*), AskUserQuestion
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(find:*), Bash(sed:*), Bash(python3:*), Bash(git init:*), Bash(git add:*), Bash(git commit:*), AskUserQuestion
 disable-model-invocation: true
 ---
 
@@ -19,15 +19,14 @@ Ton rôle : transformer ce template (placeholders `{{...}}`) en un projet concre
 Avant toute substitution, vérifier/exécuter :
 
 ```bash
-# 1. Hooks exécutables (sinon settings.json hooks bloquent)
-chmod +x .claude/hooks/*.py .claude/hooks/*.sh
-
-# 2. Git init pour rollback possible si l'init foire
+# 1. Git init pour rollback possible si l'init foire
 [ ! -d .git ] && git init && git add . && git commit -m "chore: snapshot pre-init"
 
-# 3. Vérifier Python 3 dispo (pour les hooks + script render.py)
+# 2. Vérifier Python 3 dispo (pour les hooks + script render.py)
 python3 --version || { echo "❌ Python 3 requis"; exit 1; }
 ```
+
+> Pas de `chmod +x` : settings.json appelle les hooks via `python3 …` / `bash …` explicitement.
 
 Si l'un échoue → STOP, demander au user de fixer.
 
@@ -66,7 +65,7 @@ Pose les questions suivantes (groupées en 2-3 batches AskUserQuestion) :
    - `web-app` (Next.js, React, etc.)
    - `bdd-migration` (migration BDD)
    - `script-jetable` (one-shot, doc minimaliste)
-   - `other` (libre)
+   - `other` (hors cases : rien n'est retiré — ajuster à la main)
 
 ### Batch 2 — Contexte client
 
@@ -131,13 +130,14 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
 ### Profils
 
-| Type             | Impact   | Ce que ça supprime                                                                                                                                                                                                                                    |
-| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `script-jetable` | **-80%** | Toute la conception (PRD/ARCHITECTURE/specs), ADRs, idees, ROADMAP, RUNBOOK, code-map, stack, ACCESS, GLOSSARY, hooks code, agents, skills overkill (adr/codemap/doc-health/feature-done/spec/idee). **Garde** `lecons.md` (cible du `/lecon` vital). |
-| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement)                                                                                                                                                                                                 |
-| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
-| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`                                                                                                                                                                                                               |
-| `bdd-migration`  | léger    | `workflows/`                                                                                                                                                                                                                                          |
+| Type             | Impact   | Ce que ça supprime |
+| ---------------- | -------- | ------------------ |
+| `script-jetable` | **-80%** | Toute la conception (PRD/ARCHITECTURE/specs), ADRs, idees, ROADMAP, RUNBOOK, code-map, stack, ACCESS, GLOSSARY, hooks code, agents, skills overkill (adr/codemap/doc-health/feature-done/spec/idee…). **Garde** `lecons.md` (cible du `/lecon` vital). |
+| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement), rules web |
+| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules web (`code-style-web`, `testing-web`) |
+| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules Python (`code-style`, `testing`) |
+| `bdd-migration`  | léger    | `workflows/`, rules web |
+| `other`          | aucun    | rien — projet hors cases (Go, Rust, data…) : les rules de code scopées restent inertes tant qu'aucun fichier de leur langage n'est lu |
 
 **Skills stack = PLUGINS (plus de copie)** — **vérifier AVANT de proposer** (un plugin déjà en user-scope couvre déjà ce projet — refaire `marketplace add` = re-clone inutile du repo) :
 
@@ -183,9 +183,18 @@ doute, montrer d'abord le `--dry-run` des deux types et faire trancher.
 ⚠️ En `script-jetable`, `stack.md` vient d'être supprimé par le profil → sauter cette ligne
 (la trace vit alors uniquement dans `.claude/template-version`).
 
-Committer le résultat — `git add -A` embarque les suppressions faites par le script :
+Garde-fou secrets : si `pre-commit` est installé, l'activer (sinon le signaler en 1 ligne —
+`pipx install pre-commit` ou `uv tool install pre-commit`) :
 
 ```bash
+command -v pre-commit >/dev/null && pre-commit install
+```
+
+Committer le résultat — `git add -A` embarque les suppressions faites par le script (relire
+`git status --short` avant : aucun `.env*` ni secret ne doit apparaître — ils sont gitignorés) :
+
+```bash
+git status --short
 git add -A
 git commit -m "feat: init projet <nom> depuis template"
 ```

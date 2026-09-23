@@ -2,34 +2,31 @@
 paths: "**/*.py"
 ---
 
-# Testing
+# Testing — Python
 
 ## Outils
 
-- Framework : `pytest`
-- Coverage : `pytest-cov` (objectif **80% minimum**)
+- Framework : `pytest` · Coverage : `pytest-cov` (objectif **80 %** sur le code métier)
 - Fixtures : `tests/fixtures/`
-- Mocks API externes : `respx` (pour httpx), pas `unittest.mock` brut
+- Mocks HTTP : la lib dédiée au client utilisé (ex. `respx` pour httpx, `responses` pour requests), pas `unittest.mock` brut
 
 ## Structure
 
 ```
 tests/
-├── unit/              # tests rapides, sans I/O
-├── integration/       # avec BDD réelle (testcontainers)
-├── e2e/               # workflow complet sync (slow, < 5/jour)
-└── fixtures/
-    ├── sap_responses/
-    └── notion_responses/
+├── unit/          # rapides, sans I/O
+├── integration/   # vraies dépendances (BDD jetable en conteneur, ex. testcontainers)
+├── e2e/           # parcours complet (lents, peu nombreux)
+└── fixtures/      # réponses d'API enregistrées, jeux de données
 ```
 
 ## Règles
 
-- Test = miroir du module (`src/sap_client.py` → `tests/unit/test_sap_client.py`)
-- 1 test = 1 assertion principale (lisibilité)
-- Pas de mocks pour la BDD → testcontainers Postgres
-- Pas de tests qui dépendent d'API externes en CI (utiliser respx)
-- Tous les tests doivent passer avant push (pre-commit hook)
+- Test = miroir du module (`src/<pkg>/client.py` → `tests/unit/test_client.py`)
+- 1 test = 1 comportement (assertion principale lisible)
+- Pas de mock de la BDD en intégration → vraie BDD jetable
+- Pas d'appel réseau réel en CI (mocks HTTP)
+- Suite verte avant push
 
 ## Lancer
 

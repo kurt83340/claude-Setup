@@ -106,14 +106,17 @@ Section "Next" :
 - Suggérer la feature suivante (depuis ROADMAP)
 - Ou suggérer phase suivante
 
-## Étape 6 — Update .claude/docs/code-map.md (si applicable)
+## Étape 6 — Update code-map (si applicable)
 
 ⚠️ Seulement si la feature a introduit du **non-déductible** : nouvelle règle de
 couplage, contrainte d'archi, ou gotcha. Le rôle des fichiers / leurs imports / leurs
 tests ne se documentent PAS ici (Claude les retrouve seul, et ça drifterait).
 
-- Nouvelle **règle de couplage** (ex. « le nouveau module ne doit pas importer X ») ? → l'ajouter
-- Nouveau **gotcha** rencontré pendant la feature ? → le noter (avec pointer `fichier:ligne`)
+- Nouvelle **règle de couplage** (ex. « le nouveau module ne doit pas importer X ») ? →
+  `.claude/docs/code-map.md` (auto-chargé : budget < 3k tokens)
+- Nouveau **gotcha** rencontré pendant la feature ? → `.claude/docs/code-map-gotchas.md`
+  (1 bullet citant le fichier/dossier en backticks + `fichier:ligne` — injecté par le hook
+  à l'édition de ce fichier ; **jamais** dans code-map.md, qui est auto-chargé)
 - Découpage en sous-systèmes changé ? → revoir la vue macro
 - Présenter le diff au user ; si refacto large → `/codemap` (régénère macro + détecte violations)
 
@@ -127,7 +130,8 @@ Si la feature est issue d'une `.claude/docs/idees/YYYY-MM-DD-titre.md` :
 ## Étape 8 — Suggérer commit + PR + tag
 
 ```bash
-git add .
+git status --short                      # relire : aucun fichier sensible / hors périmètre
+git add <fichiers de la feature> .claude/docs/
 git commit -m "feat(<spec-id>): <titre court>"
 ```
 

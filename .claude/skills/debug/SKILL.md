@@ -58,7 +58,8 @@ En parallèle (subagents) :
 
 - Le test de repro **RESTE** dans la suite — c'est le vaccin.
 - Piège non-évident ou > 30 min perdues → `/lecon <scope> "<titre>"` (symptôme verbatim + cause + fix).
-- Couplage / effet de bord découvert → gotcha dans `code-map.md`.
+- Effet de bord / piège lié à un fichier → gotcha dans `code-map-gotchas.md` (1 bullet citant le
+  fichier en backticks — injecté par le hook quand on le réédite) ; règle de couplage → `code-map.md`.
 - User-facing → entry CHANGELOG (`### Fixed`).
 
 ## Anti-patterns

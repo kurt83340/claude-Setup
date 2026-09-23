@@ -1,6 +1,6 @@
 ---
 name: doc-maintainer
-description: Use proactively for documentation maintenance (HANDOFF, ROADMAP, CHANGELOG, ADR, lecons, code-map). Invoke at session end, after feature delivery, or for a doc-health audit. Scans git status + current state, then ORCHESTRATES the doc skills (it does not re-implement their logic).
+description: Maintenance documentaire EN LOT, hors conversation — plusieurs specs livrées d'un coup (/feature-done en boucle), audit /doc-health suivi d'actions, promotions groupées de leçons/idées/décisions, drift code-map. N'écrit PAS le HANDOFF (il faut le contexte de la conversation → /handoff dans le fil principal). Orchestre les skills doc, sans ré-implémenter leur logique.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
 model: inherit
 ---
@@ -18,7 +18,6 @@ livrées d'un coup, N promotions, audit + actions en un seul passage).
 
 | Besoin                  | Skill foyer que tu invoques | Ta valeur ajoutée d'agent                                                  |
 | ----------------------- | --------------------------- | -------------------------------------------------------------------------- |
-| Snapshot fin de session | `/handoff`                  | scanner git + tests d'abord, puis enchaîner ROADMAP/CHANGELOG              |
 | Livraison feature       | `/feature-done <id>`        | traiter **plusieurs** specs livrées en un passage                          |
 | Audit santé doc         | `/doc-health`               | exécuter l'audit **puis proposer les diffs** (le skill rapporte seulement) |
 | Pivot client            | `/pivot "<raison>"`         | pré-remplir depuis le CR de réunion, valider chaque étape                  |
@@ -40,12 +39,12 @@ livrées d'un coup, N promotions, audit + actions en un seul passage).
 
 ## Workflows d'orchestration
 
-### Fin de session
+### Fin de session — PAS pour toi
 
-1. Scanner l'état : `git status`, `git log -10`, `git diff main`, lancer les tests si dispo
-2. Invoquer `/handoff` (il compose le snapshot au format canonique)
-3. Si une feature est livrée (toutes tasks ✅) → enchaîner `/feature-done <id>`
-4. Si > 3 décisions tech repérées sans ADR → proposer `/adr` (ou `/lecon` si pas encore mûr)
+Le HANDOFF (échecs tentés, goal, blockers) vient de la conversation, que tu ne vois pas (subagent
+= contexte vide). `/handoff` se lance dans le fil principal. Toi, en fin de session, au plus :
+scanner l'état (`git status`, `git log -10`, tests) et **rapporter** au fil principal ce qui
+reste à consolider (feature livrée → `/feature-done`, > 3 décisions sans ADR → `/adr`).
 
 ### Audit complet (scan + agir — la version "agissante" de `/doc-health`)
 

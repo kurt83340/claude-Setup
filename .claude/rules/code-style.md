@@ -6,10 +6,8 @@ paths: "**/*.py"
 
 ## Outils
 
-- Formatter : `ruff format`
-- Linter : `ruff check --fix`
-- Type checker : `mypy --strict`
-- Lancer avant commit : `make lint` (déjà dans pre-commit hook)
+- Formatter : `ruff format` · Linter : `ruff check --fix` · Types : `mypy` (`--strict` sur le code neuf)
+- Avant commit : ces 3 commandes (ou leurs hooks, si le projet les a ajoutés à `.pre-commit-config.yaml`)
 
 ## Conventions
 
@@ -28,6 +26,6 @@ paths: "**/*.py"
 
 ## Erreurs
 
-- Lever des exceptions custom (`AcmeSyncError`, `SapApiError`, etc.)
+- Exceptions métier custom nommées par domaine (ex. `PaymentError`, `SyncError`) — jamais `Exception` générique levée
 - JAMAIS de `except Exception:` nu — toujours typer
-- Logging structuré (JSON) via `structlog`, pas `print`
+- Logs structurés via la lib de logging du projet (ex. `structlog`), pas de `print` dans le code livré

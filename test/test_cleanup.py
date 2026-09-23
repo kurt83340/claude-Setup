@@ -404,5 +404,41 @@ with tempfile.TemporaryDirectory() as td:
        "Quand ne PAS utiliser" not in lc6)
     ok("lecon : ligne « Réversibilité » conservée", "**Réversibilité**" in lc6)
 
+# 8. Rules de code par langage (v1.5.0) — retirées selon la stack du profil, lien de nav recousu
+print("\n== 8. rules de code par langage + profil other ==")
+NAV_LINE = ("- [code-style Python](.claude/rules/code-style.md) · [testing Python](.claude/rules/testing.md) · "
+            "[code-style web](.claude/rules/code-style-web.md) · [testing web](.claude/rules/testing-web.md) · "
+            "[git-workflow](.claude/rules/git-workflow.md)\n")
+
+
+def make_rules_project(tmp: Path, name: str) -> Path:
+    r = tmp / name
+    for f in ("code-style.md", "testing.md", "code-style-web.md", "testing-web.md", "git-workflow.md"):
+        write(r / ".claude/rules" / f)
+    write(r / "CLAUDE.md", "# P\n\n## Conventions techniques\n\n" + NAV_LINE)
+    return r
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    tmp = Path(tmp)
+    w = make_rules_project(tmp, "web")
+    ok("web-app : exit 0", run(w, "--type", "web-app").returncode == 0)
+    ok("web-app : rules Python retirées, rules web gardées",
+       not (w / ".claude/rules/code-style.md").exists() and not (w / ".claude/rules/testing.md").exists()
+       and (w / ".claude/rules/code-style-web.md").exists())
+    nav_w = [l for l in (w / "CLAUDE.md").read_text().split("\n") if "code-style" in l][0]
+    ok("web-app : ligne de nav recousue (pas de « - · », pas de lien mort)",
+       nav_w == "- [code-style web](.claude/rules/code-style-web.md) · [testing web](.claude/rules/testing-web.md) · "
+                "[git-workflow](.claude/rules/git-workflow.md)")
+    py = make_rules_project(tmp, "py")
+    run(py, "--type", "python-app")
+    ok("python-app : rules web retirées, rules Python gardées",
+       not (py / ".claude/rules/code-style-web.md").exists() and (py / ".claude/rules/testing.md").exists())
+    ot = make_rules_project(tmp, "other")
+    r = run(ot, "--type", "other")
+    ok("other : type accepté (exit 0)", r.returncode == 0)
+    ok("other : aucune rule retirée",
+       all((ot / ".claude/rules" / f).exists() for f in ("code-style.md", "testing.md", "code-style-web.md")))
+
 print(f"\n{'🎉 CLEANUP OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

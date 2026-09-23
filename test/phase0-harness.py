@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Harnais Phase 0 × 5 types (PROTOCOL-E2E) — anti-régression sur projets GÉNÉRÉS.
 
-Pour chaque profil de cleanup-for-type : rsync documenté (USAGE §Setup) → chmod hooks →
+Pour chaque profil de cleanup-for-type : rsync documenté (USAGE §Setup) →
 git init/commit → render --vars (fixture « caisse ») → --check → cleanup-for-type →
 traçabilité version stack.md → verify-e2e.py + 3 scans :
   S1. blocs anti-mauvais-routage des SKILL.md survivants : chaque `/ref` = skill survivant,
@@ -22,7 +22,7 @@ import argparse, json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 TEMPLATE = Path(__file__).resolve().parent.parent
-TYPES = ["script-jetable", "automation-n8n", "python-app", "web-app", "bdd-migration"]
+TYPES = ["script-jetable", "automation-n8n", "python-app", "web-app", "bdd-migration", "other"]
 VARS = {
     "PROJECT_NAME": "Caisse Rapide", "CLIENT_NAME": "Boulangerie Martin",
     "PROJECT_FOLDER": "caisse-rapide", "NOM_DECIDEUR": "Sophie Martin",
@@ -69,7 +69,6 @@ def run_type(t, workdir, template_skills, version):
     root.mkdir(parents=True)
     excl = " ".join(f"--exclude='{e}'" for e in EXCLUDES)
     sh(f"rsync -a {excl} {TEMPLATE}/ {root}/")
-    sh("chmod +x .claude/hooks/*.py .claude/hooks/*.sh", cwd=root)
     sh("git init -q && git add -A && git -c user.email=e2e@test -c user.name=e2e "
        "commit -qm 'snapshot pre-init'", cwd=root)
     vars_path = workdir / f"vars-{t}.json"  # HORS du projet (comme le skill : /tmp)
@@ -132,7 +131,7 @@ def main():
     ap.add_argument("--force", action="store_true",
                     help="écraser un jetable qui contient de l'état agentique (specs)")
     args = ap.parse_args()
-    workdir = args.workdir or Path(tempfile.mkdtemp(prefix="phase0-"))
+    workdir = (args.workdir or Path(tempfile.mkdtemp(prefix="phase0-"))).resolve()
     types = [t.strip() for t in args.types.split(",") if t.strip()]
     if not args.force:
         for t in types:
