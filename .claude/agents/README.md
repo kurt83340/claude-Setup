@@ -53,13 +53,13 @@ Plugin agents ne supportent PAS les frontmatter fields : `hooks`, `mcpServers`, 
 
 ## Agents du template
 
-| Agent             | Quoi                                                                           | Mode typique                         |
-| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------ |
+| Agent             | Quoi                                                                                                 | Mode typique                         |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ |
 | `doc-maintainer`  | Maintenance doc EN LOT (livraisons, audit + actions, promotions) — jamais le HANDOFF. Diff par diff. | Subagent (Task)                      |
-| `reviewer`        | Review **lecture seule** — diffs ET plans (`/conception`), findings 🔴/🟠/🟢   | Subagent ou teammate                 |
-| `explore-code`    | Explorateur code (lecture seule) — patterns/intégration en `chemin:ligne`      | Subagent ou teammate (`/conception`) |
-| `explore-docs`    | Explorateur docs externes — context7 → MCP → web, URLs + versions              | Subagent ou teammate (`/conception`) |
-| `explore-memoire` | Explorateur mémoire projet — ADRs/leçons/idées : « déjà décidé/tenté ? »       | Subagent ou teammate (`/conception`) |
+| `reviewer`        | Review **lecture seule** — diffs ET plans (`/conception`), findings 🔴/🟠/🟢                         | Subagent ou teammate                 |
+| `explore-code`    | Explorateur code (lecture seule) — patterns/intégration en `chemin:ligne`                            | Subagent ou teammate (`/conception`) |
+| `explore-docs`    | Explorateur docs externes — context7 → MCP → web, URLs + versions                                    | Subagent ou teammate (`/conception`) |
+| `explore-memoire` | Explorateur mémoire projet — ADRs/leçons/idées : « déjà décidé/tenté ? »                             | Subagent ou teammate (`/conception`) |
 
 Les rôles portent chacun UNIQUEMENT leur spécialité ; le protocole d'équipe
 (communication, périmètre, cycle de vie, topologie) vit dans la rule `agent-teams.md` (invariants,

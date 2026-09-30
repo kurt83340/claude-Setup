@@ -57,7 +57,7 @@ Comparaison :
 
 ## Refs
 
-- Doc SAP B1 Service Layer :  [cadrage/documents/2026-05-21-doc-sap-service-layer.pdf](../../../cadrage/documents/)
+- Doc SAP B1 Service Layer : [cadrage/documents/2026-05-21-doc-sap-service-layer.pdf](../../../cadrage/documents/)
 - httpx docs : https://www.python-httpx.org/
 - tenacity docs : https://tenacity.readthedocs.io/
 - respx docs : https://lundberg.github.io/respx/
