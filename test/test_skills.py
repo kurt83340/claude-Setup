@@ -103,6 +103,11 @@ for d in sorted(SKILLS.iterdir()):
     rev = [l for l in body.splitlines() if "**Réversibilité**" in l]
     ok(f"{d.name}: réversibilité typée (🟢/🟠/🔴)",
        bool(rev) and any(c in "".join(block + rev) for c in "🟢🟠🔴"))
+    # Claude Code remplace $0, $1… par les arguments de l'invocation, blocs de code compris
+    # (https://code.claude.com/docs/en/skills) : appelé avec des arguments, un awk '{print $2}'
+    # lirait le 2e argument. Un $ littéral devant un chiffre s'écrit \$.
+    ok(f"{d.name}: aucun $chiffre non échappé (remplacé par un argument)",
+       not re.search(r"(?<!\\)\$[0-9]", text))
 
 # 2. Couplages des templates bundlés (contrat v0.19 — DoD typée, breakers, status, continuation)
 print("\n== templates bundlés : contrats v0.19 ==")

@@ -20,6 +20,12 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ### Fixed
 
+- Skills `/adr` et `/doc-health` : Claude Code remplace `$0`, `$1`… d'un SKILL.md par les arguments de
+  l'invocation, blocs de code compris ([skills](https://code.claude.com/docs/en/skills)). Appelés avec
+  des arguments, leurs `awk '{print $2}'` lisaient un faux statut : `/doc-health + … necessaire ?`
+  exécutait `awk '{print necessaire}'`. Lecture par `sed`, qui capture le premier mot après `status:`
+  ou `scope:`, commentaire compris. `test_skills` refuse désormais tout `$chiffre` non échappé dans un
+  SKILL.md.
 - Hook `posttooluse-growth-detection` : la racine du projet vient de `CLAUDE_PROJECT_DIR`, plus du
   `cwd` de l'outil, qui suit les `cd` des commandes (un `.claude/` vide apparaissait dans le
   sous-dossier courant). Un fichier hors du projet (scratchpad, `/tmp`) n'est plus signalé ; il
