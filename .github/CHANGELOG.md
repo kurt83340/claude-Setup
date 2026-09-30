@@ -3,6 +3,16 @@
 Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) · versions [SemVer](https://semver.org/lang/fr/).
 Versions du **template lui-même** — distinct du CHANGELOG d'un projet généré (qui vit dans `.claude/docs/CHANGELOG.md`).
 
+## [Unreleased]
+
+### Fixed
+
+- Hook `posttooluse-growth-detection` : la racine du projet vient de `CLAUDE_PROJECT_DIR`, plus du
+  `cwd` de l'outil, qui suit les `cd` des commandes (un `.claude/` vide apparaissait dans le
+  sous-dossier courant). Un fichier hors du projet (scratchpad, `/tmp`) n'est plus signalé ; il
+  l'était sous son seul nom. Le dossier n'est créé qu'au moment d'écrire une alerte. Trois tests de
+  régression dans `test/test_hooks.py`, qui échouent sur l'ancien hook.
+
 ## [1.5.0] — 2026-09-23
 
 Revue complète du template (rapport du 2026-09-23) : tout ce qui était vérifiable a été reproduit —

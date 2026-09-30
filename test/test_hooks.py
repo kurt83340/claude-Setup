@@ -22,12 +22,16 @@ def ok(label, cond):
     else: FAIL += 1; print(f"  ❌ {label}")
 
 
-def run_hook(name, payload, cwd):
+def run_hook(name, payload, cwd, project_dir=None):
     path = HOOKS / name
     if not path.exists():  # hooks livrés par un plugin (ex. teamtask-log.py → agent-teams)
         path = TEAM_HOOKS / name
     exe = ["bash", str(path)] if name.endswith(".sh") else [sys.executable, str(path)]
-    return subprocess.run(exe, input=json.dumps(payload), capture_output=True, text=True, cwd=cwd)
+    # CLAUDE_PROJECT_DIR : jamais hérité de la session qui lance les tests ; posé seulement si demandé
+    env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+    if project_dir:
+        env["CLAUDE_PROJECT_DIR"] = str(project_dir)
+    return subprocess.run(exe, input=json.dumps(payload), capture_output=True, text=True, cwd=cwd, env=env)
 
 
 def sandbox():
@@ -223,6 +227,27 @@ r5 = run_hook("posttooluse-growth-detection.py",
                "cwd": str(sb)}, sb)
 ok("tout .claude/ ignoré (rule parlant de credentials → aucun flag)",
    r5.stdout.strip() == "" and gs.read_text() == snap)
+# racine = CLAUDE_PROJECT_DIR, pas le cwd de l'outil qui suit les `cd`
+# (vécu 2026-09-30 : session restée dans .claude/docs → .claude/docs/.claude/ vide créé à chaque Edit)
+sous = sb / ".claude" / "docs"
+r6 = run_hook("posttooluse-growth-detection.py",
+              {"tool_name": "Write", "tool_input": {"file_path": str(sb / "src/anodin.py"),
+               "content": "x = 1\n"}, "cwd": str(sous)}, sous, project_dir=sb)
+ok("cwd dans un sous-dossier → aucun .claude/ parasite créé", not (sous / ".claude").exists())
+# fichier hors du projet (scratchpad, /tmp) → aucun flag, même plein de mots triggers
+# (vécu 2026-09-30 : « mock_jira.py », fichier de test d'une skill, réclamait un ACCESS.md au projet)
+dehors = Path(tempfile.mkdtemp(prefix="hors-projet-"))
+r7 = run_hook("posttooluse-growth-detection.py",
+              {"tool_name": "Write", "tool_input": {"file_path": str(dehors / "mock_jira.py"),
+               "content": "token = 'secret'  # credentials OAuth"}, "cwd": str(sb)}, sb, project_dir=sb)
+ok("fichier hors du projet → aucun flag", r7.stdout.strip() == "" and gs.read_text() == snap)
+shutil.rmtree(dehors, ignore_errors=True)
+# fichier du projet écrit depuis un sous-dossier → l'alerte va bien à la racine du projet
+r8 = run_hook("posttooluse-growth-detection.py",
+              {"tool_name": "Write", "tool_input": {"file_path": str(sb / "src/cle.py"),
+               "content": "API_KEY = 'x'"}, "cwd": str(sous)}, sous, project_dir=sb)
+ok("cwd dans un sous-dossier → alerte écrite à la racine",
+   "src/cle.py" in gs.read_text() and not (sous / ".claude").exists())
 shutil.rmtree(sb, ignore_errors=True)
 
 # 5. stop-handoff-reminder.sh → rappel si HANDOFF vieux + changements git
