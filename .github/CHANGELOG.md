@@ -12,6 +12,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
   sous-dossier courant). Un fichier hors du projet (scratchpad, `/tmp`) n'est plus signalé ; il
   l'était sous son seul nom. Le dossier n'est créé qu'au moment d'écrire une alerte. Trois tests de
   régression dans `test/test_hooks.py`, qui échouent sur l'ancien hook.
+- Hook `sessionend-snapshot` (filet mémoire) : `sim-growth` échouait au hasard à code égal (71/1,
+  68/4… : un filet écrit à tort). L'horloge murale de WSL2 recule de ~2,9 s toutes les ~30 s
+  (`journald` : « Time jumped backwards ») ; un `/handoff` écrit juste après un recul paraissait
+  antérieur au début de session, donc ignoré (12 échecs relevés sur 12). Le marqueur de début relève
+  la signature de `HANDOFF.md` (mtime_ns, taille) : « mis à jour pendant la session » = signature
+  changée, sans comparer deux horloges. En vrai, il fallait un recul plus long que l'écart démarrage
+  → `/handoff` ; une session simulée (~0,6 s) y tombait à chaque recul. Autre défaut trouvé en
+  chemin : `work_after` lisait `git status` rogné, « ␣M app.py » en 1re ligne donnait le chemin
+  « pp.py », et un travail fait seul après `/handoff` passait inaperçu (test H rouge ~1 fois sur 5).
+  Deux tests de régression (K, L) dans `test/test_hooks.py`, qui échouent sur l'ancien hook ; H, I, J
+  posent l'ordre des mtimes au lieu d'un `sleep` ; `sim-growth` date le HANDOFF simulé après le
+  travail déjà fait, comme un vrai `/handoff`.
 
 ## [1.5.0] — 2026-09-23
 
