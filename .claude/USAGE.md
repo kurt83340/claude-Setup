@@ -595,8 +595,9 @@ fermer (user-owned). **Topologie** : par défaut chaque teammate ne parle qu'au 
 permission du lead** au spawn → un seul levier. Soit le flag ponctuel
 (`tmux new -s <projet> 'claude --resume --dangerously-skip-permissions'`), soit persistant
 dans `.claude/settings.local.json` (non versionné) :
-`{ "permissions": { "defaultMode": "bypassPermissions" } }`. Les règles `deny` (rm -rf,
-`.env`…) restent appliquées. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
+`{ "permissions": { "defaultMode": "bypassPermissions" } }`. Les règles `deny` (`.env`…)
+restent appliquées, et les règles `ask` demandent toujours ton accord : tu vois chaque commande
+`rm` avant qu'elle parte. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
 mode normal (les `allow`/`ask` du template existent pour ça).
 
 → Invariants : `.claude/rules/agent-teams.md` (posée par l'activation) · protocole complet : `skills/team/protocole.md` du plugin (lu par `/agent-teams:team`).
@@ -644,8 +645,12 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 **Defaults du template** :
 
 - `allow` : pytest, ruff, mypy, alembic, uv, npm, `git add/commit/tag/branch`, `git worktree add/list/prune`, `git init`, `cp`, `date`, scripts du template (render, cleanup, archive-projet), `Edit(./**)` — les lectures (Read, `git status/log/diff`, grep…) sont déjà autorisées nativement : plus listées (v1.5)
-- `ask` : `git push`, `git reset`, `git merge`, `git branch -d/-D`, `git tag -d`, `git worktree remove`, `alembic downgrade`, `./scripts/deploy`
-- `deny` : `rm -rf`, `Read(.env)` + `Read(.env.*)` **à toute profondeur** avec exceptions pour les gabarits (`Read(!.env.example)`, `!.env.sample`, `!.env.template`), `secrets.*`, `*.pem`, `*.key` — `ACCESS.md` n'est **pas** en deny : y référencer les accès par NOM (où trouver quoi), jamais les valeurs
+- `ask` : `git push`, `git reset`, `git merge`, `git branch -d/-D`, `git tag -d`, `git worktree remove`, `alembic downgrade`, `./scripts/deploy`, `rm`
+- `deny` : `Read(.env)` + `Read(.env.*)` **à toute profondeur** avec exceptions pour les gabarits (`Read(!.env.example)`, `!.env.sample`, `!.env.template`), `secrets.*`, `*.pem`, `*.key` — `ACCESS.md` n'est **pas** en deny : y référencer les accès par NOM (où trouver quoi), jamais les valeurs
+
+**`rm` en `ask`** : toute commande `rm` demande l'accord (règle `ask`), même en bypassPermissions ; avant, un `deny`
+la refusait sans prévenir et laissait passer `rm -fr`. La règle `Bash(rm:*)` vaut aussi dans une commande composée
+(`cd x && rm …`), pas pour `rmdir` ; en `claude -p` (non interactif), un `rm` est refusé au lieu d'être demandé.
 
 **Secrets — 3 filets** (v1.5) : `.gitignore` ignore **tous** les `.env*` sauf les gabarits (`.env.example/.sample/.template`),
 ainsi que `secrets.*`, `*.key`, `*.pem`, `credentials.json` · deny `Read` ci-dessus · **gitleaks** au commit (`.pre-commit-config.yaml`,

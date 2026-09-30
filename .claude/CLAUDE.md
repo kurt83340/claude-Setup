@@ -29,6 +29,10 @@
 - BDD Alembic → `claude plugin install db-migration@claude-setup --scope project`
 - Équipe d'agents (opt-in) → `claude plugin install agent-teams@claude-setup --scope project`, puis `/agent-teams:team` : le 1er lancement l'active (flag + mode d'affichage + rule d'équipe), relance de Claude Code requise.
 
+## Permissions
+
+- Toute commande `rm` demande l'accord de l'utilisateur (règle `ask` de `settings.json`, même en bypassPermissions) : avant un `rm`, annoncer le chemin, le contenu et la raison.
+
 ## Version du template
 
 `.claude/template-version`. Mise à jour des fichiers de méthode (hooks, skills, agents, rules, settings) sans toucher à la doc projet → `/upgrade-template` (merge 3 voies, conflits signalés, jamais d'écrasement silencieux).

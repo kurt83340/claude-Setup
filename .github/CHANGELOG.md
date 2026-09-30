@@ -5,8 +5,27 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed
+
+- **`rm` : l'accord est demandé, au lieu d'un refus sans prévenir** (demande Julien). `settings.json`
+  retire `Bash(rm -rf:*)` du `deny` et ajoute `Bash(rm:*)` à la fin de `ask` : toute commande `rm`
+  demande l'accord, même en bypassPermissions, car une règle `ask` explicite y demande encore
+  ([permission-modes](https://code.claude.com/docs/en/permission-modes#actions-no-mode-auto-approves)) ;
+  en `claude -p` non interactif, elle est refusée. Avant, le `deny` la refusait sans prévenir et
+  ne visait que les commandes qui commencent par `rm -rf` : `rm -fr` ou `rm -r -f` passaient.
+  `Bash(rm:*)` couvre toute commande `rm …`, sous-commandes d'une commande composée comprises,
+  mais pas `rmdir` ([permissions](https://code.claude.com/docs/en/permissions)).
+  `.claude/CLAUDE.md` : avant un `rm`, annoncer le chemin, le contenu et la raison. USAGE,
+  `init-from-template` et PROTOCOL-E2E (M3) alignés.
+
 ### Fixed
 
+- Skills `/adr` et `/doc-health` : Claude Code remplace `$0`, `$1`… d'un SKILL.md par les arguments de
+  l'invocation, blocs de code compris ([skills](https://code.claude.com/docs/en/skills)). Appelés avec
+  des arguments, leurs `awk '{print $2}'` lisaient un faux statut : `/doc-health + … necessaire ?`
+  exécutait `awk '{print necessaire}'`. Lecture par `sed`, qui capture le premier mot après `status:`
+  ou `scope:`, commentaire compris. `test_skills` refuse désormais tout `$chiffre` non échappé dans un
+  SKILL.md.
 - Hook `posttooluse-growth-detection` : la racine du projet vient de `CLAUDE_PROJECT_DIR`, plus du
   `cwd` de l'outil, qui suit les `cd` des commandes (un `.claude/` vide apparaissait dans le
   sous-dossier courant). Un fichier hors du projet (scratchpad, `/tmp`) n'est plus signalé ; il
