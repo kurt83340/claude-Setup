@@ -445,28 +445,66 @@ if shutil.which("git"):
        (sb / ".claude/.cache/session-start-FORK.json").is_file() and rF.stdout.strip() == "")
     end("FORK")
     ok("G. fork en lecture seule → aucun filet (la fausse alerte revenait avant)", not net.exists())
+    # H, I, J : l'ordre « avant / après le /handoff » est posé sur les mtimes, plus par un sleep(1.2).
+    #   Vécu 2026-09-30 (WSL2) : l'horloge murale recule de ~2,9 s toutes les ~30 s ; un recul tombé
+    #   pendant le sleep inversait l'ordre des mtimes et rendait H, I ou J rouge.
     # H. travail APRÈS un /handoff en cours de session → filet
     subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "etat"], cwd=sb)
     start("H"); time.sleep(0.05)
-    ho.write_text("# HANDOFF\nv4 (/handoff à mi-session)\n"); time.sleep(1.2)
+    ho.write_text("# HANDOFF\nv4 (/handoff à mi-session)\n")
     (sb / "app.py").write_text("print(6)\n")
+    h = ho.stat().st_mtime; os.utime(sb / "app.py", (h + 1.2, h + 1.2))  # modifié 1,2 s après le /handoff
     end("H")
     ok("H. travail après le /handoff de mi-session → filet écrit", net.exists()
        and "APRÈS le dernier /handoff" in net.read_text(encoding="utf-8"))
     # I. /handoff puis simple commit (rien de neuf) → pas de filet
-    net.unlink()
+    net.unlink(missing_ok=True)
     start("I"); time.sleep(0.05)
-    (sb / "app.py").write_text("print(7)\n"); time.sleep(1.2)
+    (sb / "app.py").write_text("print(7)\n")
     ho.write_text("# HANDOFF\nv5\n")
+    h = ho.stat().st_mtime; os.utime(sb / "app.py", (h - 1.2, h - 1.2))  # modifié 1,2 s AVANT le /handoff
     subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "apres handoff"], cwd=sb)
     end("I")
     ok("I. /handoff puis commit de l'existant → aucun filet", not net.exists())
     # J. sessions parallèles : un filet PLUS RÉCENT que le HANDOFF (autre session) n'est pas supprimé
     start("J"); time.sleep(0.05)
-    ho.write_text("# HANDOFF\nv6\n"); time.sleep(1.2)
+    ho.write_text("# HANDOFF\nv6\n")
     net.write_text("filet d'une session parallèle\n")
+    h = ho.stat().st_mtime; os.utime(net, (h + 1.2, h + 1.2))  # écrit 1,2 s après le HANDOFF
     end("J")
     ok("J. filet d'une session parallèle (plus récent que le HANDOFF) conservé", net.exists())
+    shutil.rmtree(sb, ignore_errors=True)
+
+    # K, L. Régressions du 2026-09-30 (sim-growth instable : 71/1, 68/4, 70/2 à code égal). Bac à sable
+    #   neuf, commit initial daté de 2020 : aucun commit dans la fenêtre `git log --since` de work_after.
+    sb = sandbox()
+    ho = sb / ".claude/docs/HANDOFF.md"; ho.write_text("# HANDOFF\nv0\n")
+    for c in (["git", "init", "-q"], ["git", "config", "user.email", "t@t.t"], ["git", "config", "user.name", "t"]):
+        subprocess.run(c, cwd=sb)
+    (sb / "app.py").write_text("print(1)\n")
+    env2020 = dict(os.environ, GIT_AUTHOR_DATE="2020-01-01T00:00:00", GIT_COMMITTER_DATE="2020-01-01T00:00:00")
+    subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "init"], cwd=sb, env=env2020)
+    net = sb / ".claude/.cache/session-end-snapshot.md"
+    # K. l'horloge murale recule juste après le démarrage (WSL2 : −2,9 s toutes les ~30 s) : le code puis
+    #    HANDOFF, écrits après le recul, paraissent antérieurs au début de session (datés ici 5 s avant).
+    #    Avant : « mtime de HANDOFF < heure du marqueur » → /handoff ignoré → filet à tort (les 12 échecs
+    #    de sim-growth relevés avaient tous cette signature). Désormais : signature de HANDOFF changée.
+    start("K"); t0 = time.time()
+    (sb / "app.py").write_text("print(2)\n"); ho.write_text("# HANDOFF\nv1 (/handoff)\n")
+    os.utime(sb / "app.py", (t0 - 5.2, t0 - 5.2)); os.utime(ho, (t0 - 5, t0 - 5))
+    end("K")
+    ok("K. horloge reculée entre le démarrage et le /handoff → aucun filet (signature de HANDOFF, pas l'heure)",
+       not net.exists())
+    # L. seule modification après le /handoff : « ␣M app.py », 1re ligne de git status, aucun commit récent.
+    #    Avant : sortie rognée → « M app.py » → chemin « pp.py » ignoré → pas de filet (H ne passait que si
+    #    un commit de la même seconde listait app.py).
+    start("L"); time.sleep(0.05)
+    ho.write_text("# HANDOFF\nv2 (/handoff)\n")
+    (sb / "app.py").write_text("print(3)\n")
+    h = ho.stat().st_mtime; os.utime(sb / "app.py", (h + 1.2, h + 1.2))
+    end("L")
+    ok("L. travail après /handoff en tête de git status, sans commit récent → filet écrit (sortie lue non rognée)",
+       net.exists() and "APRÈS le dernier /handoff" in net.read_text(encoding="utf-8"))
     shutil.rmtree(sb, ignore_errors=True)
 else:
     ok("git absent (skip séquences)", True)

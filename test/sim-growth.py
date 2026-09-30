@@ -16,7 +16,9 @@ Skills émulés en Python, au format de LEUR version et seulement s'ils existent
 strict + 1 ligne dans HANDOFF-journal.md), /spec, /feature-done, /adr, /lecon, /idee, /codemap
 (gotchas : < 1.4 dans code-map.md, ≥ 1.4 dans code-map-gotchas.md ; règles de couplage).
 Le temps passe en reculant les mtimes du projet (≈ 1 jour entre deux sessions) : rappel Stop
-> 24 h, purge du cache > 7 j et filet (mtime HANDOFF vs début de session) jouent comme en vrai.
+> 24 h, purge du cache > 7 j et filet (HANDOFF mis à jour pendant la session, travail après lui)
+jouent comme en vrai. Dans une session (~0,6 s), HANDOFF.md est daté après tout le travail déjà
+fait, comme un vrai /handoff (cf. after_work : l'horloge murale peut reculer de quelques secondes).
 
 Scénarios :
   A  progression : même croissance seedée sur un projet v1.3.3 et un projet 1.5.0 (python-app)
@@ -697,6 +699,27 @@ class Sim:
                     pass
         self.git("update-index", "-q", "--refresh", check=False)
 
+    def after_work(self, p):
+        """HANDOFF.md daté APRÈS tout le travail déjà fait (fichiers et dossiers hors .claude/, ce que
+        lit work_after). En vrai, un /handoff vient des secondes, voire des minutes, après le dernier
+        edit ; une session simulée tient en ~0,6 s. Vécu 2026-09-30 (WSL2) : l'horloge murale recule
+        de ~2,9 s toutes les ~30 s ; un edit d'avant le recul (ou un dossier non suivi, que shift_time
+        ne recule pas) paraissait postérieur au HANDOFF écrit juste après → filet à tort. On attend que
+        l'horloge ait rattrapé (au plus l'amplitude du recul), puis HANDOFF.md est re-daté à cet instant."""
+        latest = 0
+        for dp, dns, fns in os.walk(self.proj):
+            if dp == str(self.proj):
+                dns[:] = [d for d in dns if d not in (".git", ".claude")]
+            for x in [dp] + [os.path.join(dp, f) for f in fns]:
+                try:
+                    latest = max(latest, os.stat(x, follow_symlinks=False).st_mtime_ns)
+                except OSError:
+                    pass
+        deadline = time.monotonic() + 10
+        while p.stat().st_mtime_ns <= latest and time.monotonic() < deadline:
+            time.sleep(0.02)
+            os.utime(p)
+
     def measure(self):
         r = sh([sys.executable, BUDGET, "--root", self.proj, "--json", "--no-user"], env=self.env, check=False)
         try:
@@ -787,6 +810,8 @@ class Sim:
                          "got": got, "placeholder": "{{" in add})
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
+        if rel == ".claude/docs/HANDOFF.md":
+            self.after_work(p)
         self.hooks("PostToolUse", {"tool_name": tool, "tool_input": inp, "permission_mode": "default",
                                    "tool_response": {"filePath": str(p), "success": True}}, ctx, tool)
         ctx.tr.tool(tool, inp, f"The file {p} has been updated successfully.",
