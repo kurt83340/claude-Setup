@@ -3,8 +3,8 @@
 > Skill de **migration de base de données (Alembic)**, packagé en **plugin Claude Code** installable par projet.
 > Marketplace `claude-setup` (racine du repo : [`.claude-plugin/marketplace.json`](../../.claude-plugin/marketplace.json)).
 
-| Skill | Invocation | Quoi |
-| --- | --- | --- |
+| Skill                                        | Invocation                   | Quoi                                                               |
+| -------------------------------------------- | ---------------------------- | ------------------------------------------------------------------ |
 | [db-migration](skills/db-migration/SKILL.md) | `/db-migration:db-migration` | Génération, revue et application de migrations de schéma (Alembic) |
 
 Skill auto-découvert par le harness (aucun listing `.claude/CLAUDE.md` requis).

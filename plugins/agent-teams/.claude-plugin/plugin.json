@@ -7,11 +7,5 @@
     "name": "Julien Leroy"
   },
   "repository": "https://github.com/kurt83340/claude-Setup",
-  "keywords": [
-    "agent-teams",
-    "teammates",
-    "orchestration",
-    "tmux",
-    "worktrees"
-  ]
+  "keywords": ["agent-teams", "teammates", "orchestration", "tmux", "worktrees"]
 }

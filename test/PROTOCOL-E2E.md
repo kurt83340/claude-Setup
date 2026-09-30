@@ -187,23 +187,23 @@ travaillerait sur un dossier déplacé. Alternative sûre : s'arrêter au `--dry
 
 ## Phase E — Cas d'erreur (tester les REFUS)
 
-| # | Provocation | Attendu |
-|---|---|---|
-| E1 | « Modifie l'ADR 0001 » (accepted) | Refus + proposition `supersede` |
-| E2 | Déposer une idée perso dans `cadrage/` | Redirection vers `idees/` |
-| E3 | Pipeline référençant un maillon absent | `/feature` le signale + propose l'alternative (pas d'échec silencieux) |
-| E4 | `/feature-done` avec tasks non cochées | Demande de confirmation explicite |
-| E5 | Committer HANDOFF « depuis un worktree teammate » | Refus (invariant 9 de `template-maintenance` ; + rule d'équipe si activée) |
+| #   | Provocation                                       | Attendu                                                                    |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| E1  | « Modifie l'ADR 0001 » (accepted)                 | Refus + proposition `supersede`                                            |
+| E2  | Déposer une idée perso dans `cadrage/`            | Redirection vers `idees/`                                                  |
+| E3  | Pipeline référençant un maillon absent            | `/feature` le signale + propose l'alternative (pas d'échec silencieux)     |
+| E4  | `/feature-done` avec tasks non cochées            | Demande de confirmation explicite                                          |
+| E5  | Committer HANDOFF « depuis un worktree teammate » | Refus (invariant 9 de `template-maintenance` ; + rule d'équipe si activée) |
 
 ## Phase M — Manuel assisté (session interactive requise, N-T en headless)
 
-| # | Quoi | Procédure |
-|---|---|---|
-| M1 | Auto-invocation par description | Dire « j'ai eu une idée : … » sans slash → `/idee` doit se déclencher |
-| M2 | Hooks réels | éditer un fichier de code cité dans `code-map-gotchas.md` → gotcha injecté avec le résultat de l'édition (1×/fichier) ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder **une seule fois** dans la session ; fermer sans `/handoff` après un commit → filet réinjecté au démarrage suivant, rien après une session sans trace git — rejouable sans humain : `python3 test/live-hooks-check.py` (4 vraies sessions `claude -p`, hors CI) |
-| M3 | Permissions | `rm -rf` / `rm -fr` → prompt ask, même en bypassPermissions · `Read .env` / `config/.env.prod` → deny (toute profondeur) · `.env.example` → lisible (exception `!`) · `git branch -D` → prompt ask |
-| M4 | Plugins | `/plugin marketplace add` + install `agent-teams` → 1er `/agent-teams:team` = activation (rule copiée, flag + `teammateMode: "auto"`, relance demandée) → après relance, `/agent-teams:team` sur spec 002 (panes si lancé dans tmux, sinon in-process) |
-| M5 | Compaction | `/compact` → snapshot réinjecté (SessionStart compact) |
+| #   | Quoi                            | Procédure                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| --- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M1  | Auto-invocation par description | Dire « j'ai eu une idée : … » sans slash → `/idee` doit se déclencher                                                                                                                                                                                                                                                                                                                                                                                        |
+| M2  | Hooks réels                     | éditer un fichier de code cité dans `code-map-gotchas.md` → gotcha injecté avec le résultat de l'édition (1×/fichier) ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder **une seule fois** dans la session ; fermer sans `/handoff` après un commit → filet réinjecté au démarrage suivant, rien après une session sans trace git — rejouable sans humain : `python3 test/live-hooks-check.py` (4 vraies sessions `claude -p`, hors CI) |
+| M3  | Permissions                     | `rm -rf` / `rm -fr` → prompt ask, même en bypassPermissions · `Read .env` / `config/.env.prod` → deny (toute profondeur) · `.env.example` → lisible (exception `!`) · `git branch -D` → prompt ask                                                                                                                                                                                                                                                           |
+| M4  | Plugins                         | `/plugin marketplace add` + install `agent-teams` → 1er `/agent-teams:team` = activation (rule copiée, flag + `teammateMode: "auto"`, relance demandée) → après relance, `/agent-teams:team` sur spec 002 (panes si lancé dans tmux, sinon in-process)                                                                                                                                                                                                       |
+| M5  | Compaction                      | `/compact` → snapshot réinjecté (SessionStart compact)                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Vérification finale scriptée
 
@@ -215,39 +215,41 @@ python3 <template>/test/verify-e2e.py --root <jetable>   # exit 0 = invariants O
 
 ```markdown
 # Rapport E2E — vX.Y.Z — YYYY-MM-DD
-| Phase | Verdict | Notes |
-|---|---|---|
-| 0 greenfield | PASS/… | |
-| 0bis brownfield | | |
-| 1..10, E, M | | |
-Frictions : F1 … / F2 …
-verify-e2e.py : N/N ✅
+
+| Phase                   | Verdict | Notes |
+| ----------------------- | ------- | ----- |
+| 0 greenfield            | PASS/…  |       |
+| 0bis brownfield         |         |       |
+| 1..10, E, M             |         |       |
+| Frictions : F1 … / F2 … |
+| verify-e2e.py : N/N ✅  |
 ```
 
 ---
 
 ## Rapport d'étalonnage — v0.17.0, 2026-07-07 (fixture « caisse »)
 
-| Phase | Verdict | Notes |
-|---|---|---|
-| 0 greenfield | **PASS** | 10/10 critères |
-| 0bis brownfield | **PASS** (mécanique) | merges CLAUDE.md agentiques = spot-check |
-| 1 cadrage + piège | **PASS** | idée correctement routée vers `idees/` |
-| 2 /spec | **PASS** | |
-| 3 /conception | **PASS** (allégé, sans subagents) | 2 options tracées, mode TDD noté |
-| 4 /feature tdd | **PASS** | rouge→vert, tests non modifiés |
-| 5 artefacts | **PASS** | supersede + promote OK, immuabilité respectée |
-| 6 /debug | **PASS** (après F1) | 1er bug choisi était un non-bug (commutatif, 0 rouge) → fixture corrigée, rejoué : rouge `11.4 != 6.0` observé → fix minimal → vert |
-| 7 feature-done + pivot | **PASS** (pivot léger) | |
-| 8 doc-health + codemap | **PASS** | audit fidèle, 0 modification |
-| 9 /scaffold | **PASS** | inventaire mis à jour |
-| 10 /handoff | **PASS** | 0 placeholder |
-| E1–E5 | **PASS** (E1–E4) / N-T (E5 partiel) | refus par règles auto-chargées |
-| M1–M5 | **N-T** | à jouer en session interactive |
+| Phase                  | Verdict                             | Notes                                                                                                                               |
+| ---------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 0 greenfield           | **PASS**                            | 10/10 critères                                                                                                                      |
+| 0bis brownfield        | **PASS** (mécanique)                | merges CLAUDE.md agentiques = spot-check                                                                                            |
+| 1 cadrage + piège      | **PASS**                            | idée correctement routée vers `idees/`                                                                                              |
+| 2 /spec                | **PASS**                            |                                                                                                                                     |
+| 3 /conception          | **PASS** (allégé, sans subagents)   | 2 options tracées, mode TDD noté                                                                                                    |
+| 4 /feature tdd         | **PASS**                            | rouge→vert, tests non modifiés                                                                                                      |
+| 5 artefacts            | **PASS**                            | supersede + promote OK, immuabilité respectée                                                                                       |
+| 6 /debug               | **PASS** (après F1)                 | 1er bug choisi était un non-bug (commutatif, 0 rouge) → fixture corrigée, rejoué : rouge `11.4 != 6.0` observé → fix minimal → vert |
+| 7 feature-done + pivot | **PASS** (pivot léger)              |                                                                                                                                     |
+| 8 doc-health + codemap | **PASS**                            | audit fidèle, 0 modification                                                                                                        |
+| 9 /scaffold            | **PASS**                            | inventaire mis à jour                                                                                                               |
+| 10 /handoff            | **PASS**                            | 0 placeholder                                                                                                                       |
+| E1–E5                  | **PASS** (E1–E4) / N-T (E5 partiel) | refus par règles auto-chargées                                                                                                      |
+| M1–M5                  | **N-T**                             | à jouer en session interactive                                                                                                      |
 
 **verify-e2e.py : 18/18 ✅ (premier run)**
 
 Frictions :
+
 - **F1** — le bug dormant initialement conçu (« remise après TVA ») était **mathématiquement équivalent** au code correct (commutativité) → aucun test ne rougissait, la Phase 6 ne testait rien. Corrigé dans la fixture : remise soustraite en montant absolu. **Leçon de protocole : toujours vérifier que le bug injecté fait ROUGIR avant de dérouler le debug.**
 
 ---
@@ -258,17 +260,18 @@ Phase 0 rejouée sur les **5 profils** (harnais scratchpad rsync→render→clea
 verify-e2e + scans S1/S2/S3 v0.19) puis **Phase B** jouée en agentique sur le jetable
 `python-app` (3 scénarios seed).
 
-| Vérification | Résultat |
-|---|---|
-| Phase 0 × 5 (verify-e2e) | **PASS ×5** (7-8 pass, 0 fail chacun) |
-| S1 blocs anti-mauvais-routage post-cleanup | 0 ref morte ×5 (après F6) |
-| S2 nav bullets/tables | 0 ref de skill supprimé ×5 |
-| S3 contrats v0.19 post-init (Continuation State, DoD, breakers, status) | présents ×5 (selon profil) |
-| Phase B `spec/numerotation-continue` | **PASS** (003 = max+1, status: draft, 0 `{{SPEC_*}}`) |
-| Phase B `handoff/fresh-regen` | **PASS** (fresh à 19 placeholders, 5 clés Continuation State, journal 1 ligne) |
-| Phase B `doc-health/rapport-lecture-seule` | **PASS** (🔴 HANDOFF 10j, 🟠 incohérence status/ROADMAP attrapée, git status inchangé) |
+| Vérification                                                            | Résultat                                                                               |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Phase 0 × 5 (verify-e2e)                                                | **PASS ×5** (7-8 pass, 0 fail chacun)                                                  |
+| S1 blocs anti-mauvais-routage post-cleanup                              | 0 ref morte ×5 (après F6)                                                              |
+| S2 nav bullets/tables                                                   | 0 ref de skill supprimé ×5                                                             |
+| S3 contrats v0.19 post-init (Continuation State, DoD, breakers, status) | présents ×5 (selon profil)                                                             |
+| Phase B `spec/numerotation-continue`                                    | **PASS** (003 = max+1, status: draft, 0 `{{SPEC_*}}`)                                  |
+| Phase B `handoff/fresh-regen`                                           | **PASS** (fresh à 19 placeholders, 5 clés Continuation State, journal 1 ligne)         |
+| Phase B `doc-health/rapport-lecture-seule`                              | **PASS** (🔴 HANDOFF 10j, 🟠 incohérence status/ROADMAP attrapée, git status inchangé) |
 
 Frictions trouvées puis corrigées (même version) :
+
 - **F6** — les blocs anti-mauvais-routage (v0.19) livraient des **refs mortes sur projets
   générés** : `/scaffold` → bootstrap strippé (tous profils) ; `handoff`/`lecon` → voisins
   strippés (script-jetable). → nouvelle purge `prune_dead_skill_blocks()` dans
@@ -284,25 +287,25 @@ Frictions trouvées puis corrigées (même version) :
 scénarios Phase B) et `brownfield` (neuf) — **0 défaut template** (3 accrocs = bugs des
 scripts d'audit eux-mêmes : mkdir manquant, idempotence dédup, sys.path de fixture) :
 
-| Périmètre | Checks | Notes |
-|---|---:|---|
-| Hooks × 7 (payloads réels post-init) | 20/20 | chmod, snapshots par-session, filet consommé, injection code-map sur src/ + silence .md, growth+dédup, Stop reminder + silence subagent |
-| Cycle artefacts `/adr`·`/lecon`·`/idee` | 12/12 | supersede avec **immuabilité vérifiée par hash**, promotion leçon→ADR-0003, idée→spec 004 (max+1), index/CHANGELOG synchro |
-| Machine à états spec (003 de bout en bout) | 6/6 | draft→validated→in-progress→done, DoD `command_passes` **réellement exécutée** (unittest vert), ROADMAP↔frontmatter 0 incohérence finale |
-| `/codemap`·`/debug`·`/scaffold`·`/pivot` | 12/12 | violation de couplage grep-détectée, debug rouge→vert→leçon, composant conforme (bloc v0.19 + inventaire), chaîne pivot datée |
-| Brownfield (adoption projet existant) | 9/9 | fichiers user intacts byte-à-byte (`git status` : 0 modif), aucun strip, blocs non purgés (greenfield only), CORE substitués |
+| Périmètre                                  | Checks | Notes                                                                                                                                    |
+| ------------------------------------------ | -----: | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Hooks × 7 (payloads réels post-init)       |  20/20 | chmod, snapshots par-session, filet consommé, injection code-map sur src/ + silence .md, growth+dédup, Stop reminder + silence subagent  |
+| Cycle artefacts `/adr`·`/lecon`·`/idee`    |  12/12 | supersede avec **immuabilité vérifiée par hash**, promotion leçon→ADR-0003, idée→spec 004 (max+1), index/CHANGELOG synchro               |
+| Machine à états spec (003 de bout en bout) |    6/6 | draft→validated→in-progress→done, DoD `command_passes` **réellement exécutée** (unittest vert), ROADMAP↔frontmatter 0 incohérence finale |
+| `/codemap`·`/debug`·`/scaffold`·`/pivot`   |  12/12 | violation de couplage grep-détectée, debug rouge→vert→leçon, composant conforme (bloc v0.19 + inventaire), chaîne pivot datée            |
+| Brownfield (adoption projet existant)      |    9/9 | fichiers user intacts byte-à-byte (`git status` : 0 modif), aucun strip, blocs non purgés (greenfield only), CORE substitués             |
 
 ### Déroulé agentique des phases restantes (2026-07-13, même session)
 
 23 checks — phases jamais jouées jusqu'ici, déroulées sur les jetables (0 défaut template) :
 
-| Phase | Checks | Notes |
-|---|---:|---|
-| 1 — Cadrage + piège bucket (E2) | 3/3 | verbatim client collé tel quel (source datée), ticket → `cadrage/tickets/`, « j'ai eu une idée » → `idees/` (cadrage non pollué) |
-| 3 — `/conception` complète (004) | 4/4 | 3 options dont « ne rien faire », décision argumentée, **revue adverse notée** (🔴 resync non atomique → parade `os.replace`), mode TDD gelé dans plan § Décisions |
-| 4 — `/feature` pipeline **tdd** (004) | 8/8 | tests AVANT le code, **rouges pour la bonne raison** (NotImplementedError ×8 vérifié), verts sans toucher aux tests (hash identique), parade de revue adverse dans le code livré |
-| E — Refus (E1/E3/E4/E5) + M3 | 5/5 | ADR accepted intact par hash + supersede proposé · maillon `/deploy-magique` détecté AVANT exécution · feature-done refusé à 4 tasks non cochées · règle HANDOFF-teammate auto-chargée · deny Read secrets présents |
-| 0bis — Rétro-remplissage brownfield | 3/3 | `stack.md` ← pyproject réel, HANDOFF ← `git log` réel + Continuation State, CLAUDE.md mergé (contenu user conservé, exactement 3 @-imports) |
+| Phase                                 | Checks | Notes                                                                                                                                                                                                               |
+| ------------------------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 — Cadrage + piège bucket (E2)       |    3/3 | verbatim client collé tel quel (source datée), ticket → `cadrage/tickets/`, « j'ai eu une idée » → `idees/` (cadrage non pollué)                                                                                    |
+| 3 — `/conception` complète (004)      |    4/4 | 3 options dont « ne rien faire », décision argumentée, **revue adverse notée** (🔴 resync non atomique → parade `os.replace`), mode TDD gelé dans plan § Décisions                                                  |
+| 4 — `/feature` pipeline **tdd** (004) |    8/8 | tests AVANT le code, **rouges pour la bonne raison** (NotImplementedError ×8 vérifié), verts sans toucher aux tests (hash identique), parade de revue adverse dans le code livré                                    |
+| E — Refus (E1/E3/E4/E5) + M3          |    5/5 | ADR accepted intact par hash + supersede proposé · maillon `/deploy-magique` détecté AVANT exécution · feature-done refusé à 4 tasks non cochées · règle HANDOFF-teammate auto-chargée · deny Read secrets présents |
+| 0bis — Rétro-remplissage brownfield   |    3/3 | `stack.md` ← pyproject réel, HANDOFF ← `git log` réel + Continuation State, CLAUDE.md mergé (contenu user conservé, exactement 3 @-imports)                                                                         |
 
 **M4 joué en réel (v1.0.0)** : `claude plugin marketplace add <repo>` + `claude plugin
 install agent-teams@claude-setup --scope project` sur jetable → **F8 attrapée** (manifests
@@ -324,11 +327,12 @@ re-runner le harnais Phase 0 **après** avoir accumulé de l'état agentique qu'
 Phase 0 rejouée sur les **5 profils** de `cleanup-for-type.py` via harnais scripté
 (rsync documenté → render → cleanup → verify-e2e + scan liens morts/inventaire) :
 
-| Type | verify-e2e | Liens morts | Inventaire mort |
-|---|---|---|---|
-| script-jetable · automation-n8n · python-app · web-app · bdd-migration | **PASS ×5** | 0 ×5 | 0 ×5 |
+| Type                                                                   | verify-e2e  | Liens morts | Inventaire mort |
+| ---------------------------------------------------------------------- | ----------- | ----------- | --------------- |
+| script-jetable · automation-n8n · python-app · web-app · bdd-migration | **PASS ×5** | 0 ×5        | 0 ×5            |
 
 Frictions trouvées puis corrigées en v0.18.0 (détail : `.github/CHANGELOG.md`) :
+
 - **F2** — `verify-e2e.py` FAIL sur tout jetable Phase-0-only (HANDOFF jamais exercé compté
   comme raté ; « 3 @-imports » faux pour `script-jetable`) → checks rendus type/état-aware.
 - **F3** — `script-jetable` laissait un projet **incohérent** : inventaire avec 11 skills

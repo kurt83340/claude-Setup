@@ -11,11 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # historique + tags vX.Y.Z : base des tests de /upgrade-template
+          fetch-depth: 0 # historique + tags vX.Y.Z : base des tests de /upgrade-template
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      # Même version et même config (par défaut) que le hook global de Julien, qui formate chaque
+      # fichier édité : un dépôt déjà au format ne produit plus de diff parasite à la retouche.
+      - name: Formatage Prettier (tout le dépôt)
+        run: npx --yes prettier@3.9.8 --check .
 
       - name: Suite de tests des hooks
         run: python3 test/test_hooks.py

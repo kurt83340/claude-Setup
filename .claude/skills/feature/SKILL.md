@@ -58,7 +58,7 @@ recâbler. Format :
 
 1. **<Étape>** — action : <maillon existant : skill `/x`, subagent `y`, ou commande> — sortie : <critère VÉRIFIABLE>
 2. ...
-N. **Persister** — action : `/feature-done` (+ `/lecon` si pièges) — sortie : mémoire à jour
+   N. **Persister** — action : `/feature-done` (+ `/lecon` si pièges) — sortie : mémoire à jour
 ```
 
 Règles : chaque action pointe un maillon **existant** ; chaque étape a un **critère de

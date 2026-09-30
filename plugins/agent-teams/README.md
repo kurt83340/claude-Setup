@@ -3,11 +3,11 @@
 > **Exécution d'équipe** du template claude-Setup, packagée en plugin Claude Code installable par projet.
 > Marketplace `claude-setup` (racine du repo : [`.claude-plugin/marketplace.json`](../../.claude-plugin/marketplace.json)).
 
-| Composant | Quoi |
-| --- | --- |
-| Skill [`team`](skills/team/SKILL.md) → **`/agent-teams:team <spec-id>`** | Orchestre une équipe de teammates tmux : plan validé, 1 worktree/codeur, task list native, TDD opt-in, suivi, merge, débrief mémoire, clôture |
-| Agents [`worker`](agents/worker.md) · [`front-end`](agents/front-end.md) · [`back-end`](agents/back-end.md) · [`tester`](agents/tester.md) | **Rôles d'exécution** teammate (généraliste, UI, serveur, QA) — auto-découverts à l'installation |
-| Hook [`teamtask-log.py`](hooks/teamtask-log.py) (TaskCreated/TaskCompleted/TeammateIdle) | Trace JSON de progression d'équipe → `.claude/.cache/team-progress.log` |
+| Composant                                                                                                                                  | Quoi                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skill [`team`](skills/team/SKILL.md) → **`/agent-teams:team <spec-id>`**                                                                   | Orchestre une équipe de teammates tmux : plan validé, 1 worktree/codeur, task list native, TDD opt-in, suivi, merge, débrief mémoire, clôture |
+| Agents [`worker`](agents/worker.md) · [`front-end`](agents/front-end.md) · [`back-end`](agents/back-end.md) · [`tester`](agents/tester.md) | **Rôles d'exécution** teammate (généraliste, UI, serveur, QA) — auto-découverts à l'installation                                              |
+| Hook [`teamtask-log.py`](hooks/teamtask-log.py) (TaskCreated/TaskCompleted/TeammateIdle)                                                   | Trace JSON de progression d'équipe → `.claude/.cache/team-progress.log`                                                                       |
 
 ## Opt-in : rien dans le cœur tant que l'équipe n'est pas activée (v1.5.0)
 
