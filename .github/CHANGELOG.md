@@ -5,6 +5,19 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed
+
+- **`rm` : l'accord est demandé, au lieu d'un refus sans prévenir** (demande Julien). `settings.json`
+  retire `Bash(rm -rf:*)` du `deny` et ajoute `Bash(rm:*)` à la fin de `ask` : toute commande `rm`
+  demande l'accord, même en bypassPermissions, car une règle `ask` explicite y demande encore
+  ([permission-modes](https://code.claude.com/docs/en/permission-modes#actions-no-mode-auto-approves)) ;
+  en `claude -p` non interactif, elle est refusée. Avant, le `deny` la refusait sans prévenir et
+  ne visait que les commandes qui commencent par `rm -rf` : `rm -fr` ou `rm -r -f` passaient.
+  `Bash(rm:*)` couvre toute commande `rm …`, sous-commandes d'une commande composée comprises,
+  mais pas `rmdir` ([permissions](https://code.claude.com/docs/en/permissions)).
+  `.claude/CLAUDE.md` : avant un `rm`, annoncer le chemin, le contenu et la raison. USAGE,
+  `init-from-template` et PROTOCOL-E2E (M3) alignés.
+
 ### Fixed
 
 - Hook `posttooluse-growth-detection` : la racine du projet vient de `CLAUDE_PROJECT_DIR`, plus du

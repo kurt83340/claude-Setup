@@ -174,8 +174,8 @@ doute, montrer d'abord le `--dry-run` des deux types et faire trancher.
 > marketplace — le projet **installe** les plugins via `/plugin`, il ne les embarque pas) et les
 > skills bootstrap `adopt-template` + `init-from-template`. Elle a aussi purgé de `settings.json` les
 > allow-rules mortes (scripts init supprimés). **Rien à supprimer à la main ici** — donc **pas de
-> `rm -rf`** (que le template interdit de toute façon). Ces artefacts restent dans le **repo template
-> source** ; l'init ne touche qu'à la copie du projet.
+> `rm -rf`** (toute commande `rm` demande l'accord de l'utilisateur : règle `ask` du template). Ces
+> artefacts restent dans le **repo template source** ; l'init ne touche qu'à la copie du projet.
 
 **Traçabilité** : ajoute en tête de `.claude/docs/stack.md` la ligne
 `> Généré depuis le template claude-Setup vX.Y.Z le YYYY-MM-DD` (version : lire

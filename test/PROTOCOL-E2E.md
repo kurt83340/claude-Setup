@@ -201,7 +201,7 @@ travaillerait sur un dossier déplacé. Alternative sûre : s'arrêter au `--dry
 |---|---|---|
 | M1 | Auto-invocation par description | Dire « j'ai eu une idée : … » sans slash → `/idee` doit se déclencher |
 | M2 | Hooks réels | éditer un fichier de code cité dans `code-map-gotchas.md` → gotcha injecté avec le résultat de l'édition (1×/fichier) ; `touch -d '2 days ago' HANDOFF.md` + changements git → Stop reminder **une seule fois** dans la session ; fermer sans `/handoff` après un commit → filet réinjecté au démarrage suivant, rien après une session sans trace git — rejouable sans humain : `python3 test/live-hooks-check.py` (4 vraies sessions `claude -p`, hors CI) |
-| M3 | Permissions | `rm -rf` → deny · `Read .env` / `config/.env.prod` → deny (toute profondeur) · `.env.example` → lisible (exception `!`) · `git branch -D` → prompt ask |
+| M3 | Permissions | `rm -rf` / `rm -fr` → prompt ask, même en bypassPermissions · `Read .env` / `config/.env.prod` → deny (toute profondeur) · `.env.example` → lisible (exception `!`) · `git branch -D` → prompt ask |
 | M4 | Plugins | `/plugin marketplace add` + install `agent-teams` → 1er `/agent-teams:team` = activation (rule copiée, flag + `teammateMode: "auto"`, relance demandée) → après relance, `/agent-teams:team` sur spec 002 (panes si lancé dans tmux, sinon in-process) |
 | M5 | Compaction | `/compact` → snapshot réinjecté (SessionStart compact) |
 
