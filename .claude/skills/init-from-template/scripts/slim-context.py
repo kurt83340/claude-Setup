@@ -12,9 +12,11 @@ scopée `paths:` ré-importée en `@`. Après migration : 59,8k (−58 %).
   3. `.claude/docs/code-map.md` : § Gotchas → `code-map-gotchas.md` (injecté par le hook, ciblé) + pointeur
   4. `CLAUDE.md` racine : `@.claude/docs/ROADMAP.md` → lien simple (dashboard lu par les skills)
   5. Fichiers v1.4 copiés depuis le template (sauf --no-template-files) — seulement s'ils
-     existent déjà dans le projet (pas de greffe) : rule `agent-teams.md` (version courte ;
-     l'ancienne → `.claude/.cache/agent-teams.md.pre-1.4`), hooks `pretooluse-inject-codemap.py`
-     + `sessionstart-inject-handoff.py`, et `doc-health/scripts/context-budget.py` (si /doc-health présent)
+     existent déjà dans le projet (pas de greffe) : hooks `pretooluse-inject-codemap.py`
+     + `sessionstart-inject-handoff.py`, et `doc-health/scripts/context-budget.py` (si /doc-health présent).
+     La rule `agent-teams.md` n'est plus recopiée : déplacée dans `.claude/.cache/agent-teams.md.pre-1.4`
+     (plugin agent-teams ≥ 1.2 : invariants injectés au spawn, plus rien d'auto-chargé ; sautée avec
+     --no-template-files, le mode de /upgrade-template qui gère la rule lui-même)
 
 Usage : python3 <template>/.claude/skills/init-from-template/scripts/slim-context.py --root <projet>
             [--dry-run] [--no-template-files] [--template <racine template>]
@@ -301,10 +303,10 @@ def step_roadmap(root: Path) -> None:
 
 
 # ── Étape 5 : fichiers v1.4 depuis le template ─────────────────────────────────────────────
-# (chemin dans le projet, chemin dans le template) — v1.5.0 : la rule d'équipe vit dans le plugin
-# agent-teams (copiée par son activation) ; mise à jour ici seulement si le projet l'a déjà.
+# (chemin dans le projet, chemin dans le template). La rule d'équipe n'en fait plus partie : plugin
+# agent-teams ≥ 1.2 = invariants injectés au spawn, la rule ne faisait plus que coûter (step_team_rule).
+TEAM_RULE = ".claude/rules/agent-teams.md"
 TEMPLATE_FILES = [
-    (".claude/rules/agent-teams.md", "plugins/agent-teams/skills/team/agent-teams-rule.md"),
     (".claude/hooks/pretooluse-inject-codemap.py", ".claude/hooks/pretooluse-inject-codemap.py"),
     (".claude/hooks/sessionstart-inject-handoff.py", ".claude/hooks/sessionstart-inject-handoff.py"),
     (".claude/hooks/snapshot_common.py", ".claude/hooks/snapshot_common.py"),
@@ -329,13 +331,28 @@ def step_template_files(root: Path, template: Path) -> None:
             log(f"⏭ 5. {rel} : déjà à jour")
             continue
         if not DRY:
-            if rel.endswith("agent-teams.md") and dst.is_file():
-                bak = root / ".claude" / ".cache" / "agent-teams.md.pre-1.4"
-                bak.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(dst, bak)
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
-        log(f"✅ 5. {rel} : copié depuis le template" + (" (ancienne rule → .claude/.cache/agent-teams.md.pre-1.4)" if rel.endswith("agent-teams.md") else ""))
+        log(f"✅ 5. {rel} : copié depuis le template")
+    step_team_rule(root)
+
+
+def step_team_rule(root: Path) -> None:
+    """Hors --no-template-files seulement : /upgrade-template (qui passe ce flag) gère la rule lui-même,
+    avec ses garde-fous (lien symbolique, projet équipé)."""
+    rule = root / TEAM_RULE
+    if not rule.is_file():
+        return
+    if rule.is_symlink() or rule.parent.is_symlink() or not rule.resolve().is_relative_to(root.resolve()):
+        log(f"⚠️ 5. {TEAM_RULE} : lien symbolique / hors du projet — laissée (à retirer à la main)")
+        return
+    if not DRY:
+        bak = root / ".claude" / ".cache" / "agent-teams.md.pre-1.4"
+        bak.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(rule), str(bak))
+    log(f"✅ 5. {TEAM_RULE} → .claude/.cache/agent-teams.md.pre-1.4 (auto-chargée à chaque session ; le plugin "
+        "agent-teams ≥ 1.2 injecte les invariants au spawn → `/plugin marketplace update claude-setup` si le projet "
+        "a une équipe, puis `/agent-teams:team status`)")
 
 
 def main() -> int:

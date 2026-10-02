@@ -54,7 +54,7 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
    - libs externes → `mcp__context7` (rule `doc-lookup`)
    - invoque des skills → `Skill`
 3. Crée `.claude/agents/<nom>.md` — frontmatter `name`/`description`/`tools`/`model: inherit`,
-   body = **sa spécialité uniquement** (le protocole d'équipe vit dans la rule `agent-teams.md` du plugin `agent-teams`,
+   body = **sa spécialité uniquement** (le protocole d'équipe est injecté au spawn par le plugin `agent-teams`,
    ne pas dupliquer).
 4. **Référence** : ligne dans la table de [`.claude/agents/README.md`](../../agents/README.md).
 5. Rappel : rôle d'**exécution d'équipe** générique ? → il a peut-être sa place dans le plugin

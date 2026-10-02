@@ -1,46 +1,51 @@
 ---
 name: team
-description: Délègue une feature ou une mission à une équipe de teammates visibles en tmux — plan d'équipe validé par l'utilisateur (rôles, topologie de communication), worktree par codeur, task list native, suivi, merge, débrief mémoire, clôture propre. À invoquer quand l'utilisateur veut paralléliser une spec sur plusieurs agents (« lance une équipe », « délègue à des agents »). Opt-in : le 1er lancement ACTIVE les agent teams dans le projet (flag + mode d'affichage + rule d'équipe, relance requise).
-allowed-tools: Read, Write, Edit, Grep, Glob, Agent, SendMessage, TaskCreate, TaskUpdate, TaskList, Skill, Bash(git worktree:*), Bash(git branch:*), Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git merge:*), Bash(tmux -V), Bash(grep:*)
+description: Délègue une feature ou une mission à une équipe de teammates visibles en tmux — plan d'équipe validé par l'utilisateur (rôles, topologie de communication), worktree par codeur, task list native, suivi, merge, débrief mémoire, clôture propre. À invoquer quand l'utilisateur veut paralléliser une spec sur plusieurs agents (« lance une équipe », « délègue à des agents »), ou activer / couper / vérifier les agent teams du projet (« active les agent teams », « désactive l'équipe ») - /agent-teams:team <spec-id> | on | off | status.
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent, SendMessage, TaskCreate, TaskUpdate, TaskList, Skill, Bash(python3:*), Bash(git worktree:*), Bash(git branch:*), Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(git merge:*), Bash(tmux -V), Bash(grep:*)
 disable-model-invocation: false
 ---
 
 # /team — Orchestrer une équipe de teammates sur une feature
 
-Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead) = la rule **`agent-teams.md`**
-(`.claude/rules/`, posée par l'activation — Étape 0 —, auto-chargée par le lead ET chaque teammate). Le **protocole complet**
+Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead, `invariants.md` dans le dossier de ce skill)
+ne sont **jamais auto-chargés** : le hook du plugin les injecte au spawn (§ Teammate ajouté au prompt
+de chaque teammate, § Lead à toi au 1er spawn de la session). Le **protocole complet**
 (politique teammate vs subagent, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh,
 worktrees, spawn, suivi, débrief mémoire) = **`protocole.md`, dans le dossier de ce skill** — lis-le
 en Étape 0 s'il n'est pas déjà dans ton contexte. Ce skill = la **séquence opératoire**.
 
-**Argument** : `/agent-teams:team <spec-id>` (ex. `/agent-teams:team 001-erp-connector`) ou
-`/agent-teams:team "<mission libre>"`. Les rôles d'exécution (`worker`, `front-end`,
-`back-end`, `tester`) sont fournis par CE plugin ; `reviewer` + `explore-*` par le cœur.
+**Argument** : `/agent-teams:team <spec-id>` (ex. `/agent-teams:team 001-erp-connector`),
+`/agent-teams:team "<mission libre>"`, ou un **interrupteur** : `on` · `off` · `status`
+(→ Étape 0, puis arrêt). Les rôles d'exécution (`worker`, `front-end`, `back-end`, `tester`)
+sont fournis par CE plugin ; `reviewer` + `explore-*` par le cœur.
 
-## Étape 0 — Activation (1re fois dans le projet), puis préflight
+## Étape 0 — Interrupteur (on / off / status), puis préflight
 
-Les agent teams sont **opt-in** (v1.5.0) : rien n'est câblé dans le cœur du template — le flag
-expérimental monte une équipe à CHAQUE session et laisse Claude proposer des teammates de lui-même,
-inutile pour un projet solo.
+Les agent teams sont **opt-in** : le flag `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` monte une équipe à
+CHAQUE session et transforme tout subagent nommé en teammate — inutile pour un projet solo. Un seul
+outil pour lire et basculer l'état (settings local > projet > user, rule héritée) :
 
 ```bash
-grep -qs '"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"' .claude/settings.json .claude/settings.local.json && echo "✅ flag présent" || echo "⚙️ flag absent → activation"
-diff -q .claude/rules/agent-teams.md "${CLAUDE_SKILL_DIR}/agent-teams-rule.md" >/dev/null 2>&1 && echo "✅ rule d'équipe à jour" || echo "⚙️ rule absente ou périmée → activation"
+python3 "${CLAUDE_SKILL_DIR}/scripts/teams.py" status
 ```
 
-**Activation** (demander l'accord, puis) :
-
-1. Rule d'équipe : copie `${CLAUDE_SKILL_DIR}/agent-teams-rule.md` → `.claude/rules/agent-teams.md`
-   (auto-chargée par le lead ET par chaque teammate, y compris ad-hoc).
-2. Flag + affichage, fusionnés dans `.claude/settings.json` (partagé via git) — ou
-   `.claude/settings.local.json` (perso) si l'utilisateur préfère :
-   `{"env": {"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"}, "teammateMode": "auto"}`.
-   `auto` = un pane par teammate si la session tourne DANS tmux, sinon teammates dans ce terminal
-   (panneau d'agents : ↑/↓ + Entrée). `"tmux"` forcerait une session tmux séparée — invisible sans
-   `tmux attach`.
-3. **Relance requise** (flag lu au démarrage) : l'utilisateur quitte, relance (`claude --continue`,
-   idéalement dans `tmux new -s <projet>` pour les panes), puis rappelle `/agent-teams:team <id>`.
-   Arrête-toi là.
+- **`status`** → montre la sortie à l'utilisateur. Arrête-toi là.
+- **`on`** / **`off`** → `teams.py <on|off> --dry-run`, montre le plan, **demande l'accord**, puis
+  `teams.py <on|off>`. Portée : `--scope project` (défaut, partagé via git) · `--scope local`
+  (perso, `settings.local.json`) · `--scope user` (toutes les sessions — seulement si l'utilisateur
+  le demande). Relaie la sortie telle quelle :
+  - `on` : flag `"1"` + `teammateMode: "auto"` (si rien ne le définit) — **relance requise** (l'équipe
+    se monte au démarrage) : `claude --continue`, idéalement dans `tmux new -s <projet>`. Arrête-toi là.
+  - `off` : flag retiré, ou `"0"` explicite s'il reste à 1 ailleurs (user, shell) — effet immédiat
+    sur les prochains spawns. Arrête-toi là.
+  - Dans les deux cas, une rule héritée `.claude/rules/agent-teams.md` (plugin ≤ 1.1 : ~1,9k tokens
+    à chaque session) est déplacée dans `.claude/.cache/agent-teams.md.obsolete`.
+- **`<spec-id>` / mission** et `status` dit **COUPÉES** → propose `on` (même séquence), puis
+  l'utilisateur relance et rappelle `/agent-teams:team <id>`. Arrête-toi là. `status` signale une
+  rule héritée → propose `on` (qui la retire) avant de continuer.
+- `teammateMode` : `auto` = un pane par teammate si la session tourne DANS tmux, sinon teammates
+  dans ce terminal (panneau d'agents : ↑/↓ + Entrée). `"tmux"` forcerait une session tmux
+  séparée — invisible sans `tmux attach`.
 
 **Préflight** (flag actif) :
 
@@ -110,8 +115,8 @@ mission contient :
 
 - le contexte spec (liens vers `spec.md` / `plan.md`) + SA liste de tâches (ids des tasks natives) ;
 - SON worktree (chemin absolu) — il ne travaille QUE là ;
-- la consigne rapport : **résultat + fichiers touchés + échecs/pièges + reste à faire**, via
-  `SendMessage`, AVANT de passer idle ;
+- la consigne rapport (résultat + fichiers touchés + échecs/pièges + reste à faire, via
+  `SendMessage` avant idle) : **ajoutée automatiquement** par le hook du plugin (§ Teammate) — ne la recopie pas ;
 - la **topologie** décidée en Étape 1 : « tout passe par moi » OU « échange direct avec <X>
   sur <sujet> uniquement ; le reste passe par moi » ;
 - claim tes tasks (owner) et fais-les vivre (`in_progress` → `completed`) ;
@@ -127,11 +132,11 @@ reviewer sur les diffs au fil de l'eau. Tu restes disponible pour l'utilisateur.
 
 Teammate **muet** (pas de rapport, pas d'idle ping) ? `tmux capture-pane -p -t <pane>` AVANT
 tout respawn — un dialogue de démarrage bloque sans aucun signal ; déblocage :
-`tmux -L <socket> send-keys -t <pane> Enter` (cf. rule § Suivi).
+`tmux -L <socket> send-keys -t <pane> Enter` (cf. `protocole.md` § Suivi).
 
 ## Étape 6 — Débrief mémoire (à CHAQUE rapport — pas seulement à la fin)
 
-cf. rule § Lead : échecs → HANDOFF « Échecs tentés » ; pièges/gotchas → `/lecon` ou
+cf. § Lead (injecté au 1er spawn) : échecs → HANDOFF « Échecs tentés » ; pièges/gotchas → `/lecon` ou
 code-map ; décision structurante → `/adr` ; avancement → tasks natives + ROADMAP `X/Y`.
 **Un rapport non persisté = savoir perdu** (le contexte teammate meurt avec la session).
 

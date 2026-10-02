@@ -13,6 +13,8 @@ SessionStart hook — flux selon la source :
    PLUS FRAIS que .claude/docs/HANDOFF.md → l'injecter. Dans TOUS les cas, le consommer
    (unlink) pour ne jamais réinjecter un filet périmé.
 
+   Toujours au startup : agent teams actives (flag) sans le plugin agent-teams → rappel (flux 4).
+
 3. source="startup" | "resume" | "clear" | "fork" — marqueur de début de session (horodatage +
    empreinte git + signature de HANDOFF.md) relu par sessionend-snapshot.py ; au startup, purge
    du cache par-session de plus de 7 jours.
@@ -166,6 +168,52 @@ Cette session démarre lourde : CLAUDE.md, ses `@-imports` et les rules non scop
 du template. Ne modifie aucun fichier sans son accord.""")
 
 
+TEAM_ENV = "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+
+
+def warn_team_without_plugin(data) -> None:
+    """Flux 4 — agent teams actives SANS le plugin agent-teams : le dire, jamais en silence.
+    Le flag monte une équipe à chaque session et fait partir tout subagent nommé en teammate
+    (doc agent teams) ; sans le plugin, aucun invariant d'équipe n'est injecté et l'interrupteur
+    `/agent-teams:team off` n'existe pas. Vécu : flag posé en user → toutes les sessions de tous
+    les projets. Plugin activé = 1re clé `agent-teams@…` de `enabledPlugins` par priorité
+    local > projet > user. Coupé par CLAUDE_TEAMS_PLUGIN_CHECK=off."""
+    if os.environ.get("CLAUDE_TEAMS_PLUGIN_CHECK", "").lower() == "off":
+        return
+    if os.environ.get(TEAM_ENV, "").strip().lower() not in ("1", "true", "yes", "on"):
+        return
+    root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd())
+    user_dir = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    plugin, src = None, None
+    for label, p in (("local", root / ".claude" / "settings.local.json"),
+                     ("projet", root / ".claude" / "settings.json"),
+                     ("user", user_dir / "settings.json")):
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(d, dict):
+            continue
+        ep = d.get("enabledPlugins")
+        if plugin is None and isinstance(ep, dict):
+            plugin = next((bool(v) for k, v in ep.items() if k.startswith("agent-teams@")), None)
+        env = d.get("env")
+        if src is None and isinstance(env, dict) and TEAM_ENV in env:
+            src = f"{label} — `{p}`"
+    if plugin:
+        return
+    print(f"""## ⚠️ Agent teams actives, plugin `agent-teams` absent
+
+Le flag `{TEAM_ENV}` est à 1 (source : {src or "export shell"}) mais le plugin `agent-teams` n'est pas
+activé ici : chaque session monte une équipe, et tout subagent nommé part en teammate SANS règles
+d'équipe (rapport au lead, périmètre, docs partagés) ; `/agent-teams:team on|off|status` n'existe pas.
+
+→ Signale-le à l'utilisateur en 1 ligne, sans rien modifier. Remèdes : installer le plugin
+(`claude plugin install agent-teams@claude-setup --scope project`, puis `/agent-teams:team status`), ou
+couper le flag (le retirer de sa source, ou `"{TEAM_ENV}": "0"` dans `env` de `.claude/settings.json`).
+Pour faire taire ce rappel : `CLAUDE_TEAMS_PLUGIN_CHECK=off`.""")
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -185,6 +233,7 @@ def main():
         if source == "startup":
             inject_session_end_net(data)
             warn_context_budget(data)
+            warn_team_without_plugin(data)
 
     sys.exit(0)
 

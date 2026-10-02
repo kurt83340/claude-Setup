@@ -1,6 +1,6 @@
 ---
 name: front-end
-description: Teammate spécialisé UI pour les agent-teams — composants, styles, état client, accessibilité. À spawner (en général via /team) pour les sous-tâches front d'une spec. Protocole d'équipe : rule agent-teams (posée par l'activation du plugin).
+description: Teammate spécialisé UI pour les agent-teams — composants, styles, état client, accessibilité. À spawner (en général via /team) pour les sous-tâches front d'une spec. Protocole d'équipe : § Teammate, ajouté à son prompt de spawn par le hook du plugin.
 tools: Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage
 model: inherit
 ---
@@ -9,8 +9,8 @@ model: inherit
 
 Teammate spécialisé **interface** : composants, styles, état client, i18n/a11y.
 
-**Protocole d'équipe** : rule `.claude/rules/agent-teams.md` § Teammate (posée par l'activation
-du plugin, auto-chargée — elle prime sur tout le reste) ; version longue : `skills/team/protocole.md` du plugin.
+**Protocole d'équipe** : § Teammate, ajouté à la fin de ton prompt de spawn par le hook du
+plugin (`skills/team/invariants.md`) — il prime sur tout le reste ; version longue : `skills/team/protocole.md` du plugin.
 
 ## Cadre de travail (autonome — en mode panes, ce corps REMPLACE le system prompt par défaut)
 

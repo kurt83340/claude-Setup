@@ -48,7 +48,7 @@ mon-projet/
     │   ├── git-workflow.md         # convention commits (Conventional Commits), branches, PRs, tags
     │   ├── doc-lookup.md           # recherche de doc externe : context7 (MCP) → MCP docs → web — SOURCE UNIQUE
     │   ├── template-maintenance.md # invariants d'écriture de la doc (scopée `paths: .claude/docs/**`) — formats → skills, conventions → CE fichier
-    │   └── (agent-teams.md)        # OPT-IN — posée par le 1er `/agent-teams:team` (plugin) : invariants lead/teammate ; absente du cœur
+    │   └── (agent-teams.md)        # HÉRITÉE (plugin ≤ 1.1) — plus jamais posée : invariants injectés au spawn par le plugin ; `/agent-teams:team on|off` la retire
     │
     ├── skills/                     # skills perso — À PLAT (Claude Code scanne 1 niveau, cf issue #18192)
     │   ├── README.md               # INVENTAIRE canonique des skills cœur (compte CI-vérifié) + conventions (préfixe, plugins, import)

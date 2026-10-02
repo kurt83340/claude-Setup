@@ -136,7 +136,7 @@ Projet généré avec une version plus ancienne du template → `/upgrade-templa
   projet adopté : les hooks et règles du template qui lui manquent sont ajoutés).
 - **Jamais touché** : la doc projet `.claude/docs/` (seules des migrations versionnées y écrivent — ex. 1.4.0 :
   journal HANDOFF et gotchas sortis des fichiers auto-chargés), ton code, `README.md`, `.env.example`,
-  `settings.local.json`. Équipe d'agents activée → flag et `teammateMode` conservés, rule d'équipe mise à jour depuis le plugin.
+  `settings.local.json`. Équipe d'agents activée → flag et `teammateMode` conservés (une rule d'équipe héritée est signalée : `/agent-teams:team status` la retire).
 - Toujours un `--dry-run` montré et validé d'abord, sur un arbre git propre, en un seul commit (`git revert` pour annuler).
 - **Conflit** (ex. modifié des deux côtés sans fusion propre) → ton fichier est **gardé tel quel** ; la version cible
   (`<fichier>.template`) et le merge annoté (`<fichier>.merge`) atterrissent dans `.claude/.cache/upgrade-<version>/`
@@ -306,7 +306,7 @@ Rapport généré → tu suis les actions par priorité.
 | Audit hebdo                                | `/doc-health`                                                                 |
 | BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
 | Doc en lot (livraisons, audit + actions)   | agent `doc-maintainer` (Task) — jamais le HANDOFF                             |
-| Déléguer une feature à une équipe          | `/agent-teams:team <spec-id>` (plugin, opt-in — le 1er lancement active l'équipe) |
+| Déléguer une feature à une équipe          | `/agent-teams:team <spec-id>` (plugin, opt-in — `on` · `off` · `status` pour l'interrupteur) |
 | Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
 | Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                       |
 | Promotion idée → spec                      | `/idee promote <date>`                                                        |
@@ -563,20 +563,27 @@ Lance l'agent doc-maintainer pour faire l'audit complet du projet et proposer to
 
 ## 🧑‍🤝‍🧑 Agent teams — déléguer à une équipe (opt-in)
 
-**Rien n'est câblé dans le cœur** (v1.5) : le flag expérimental monte une équipe à chaque session et la rule
-d'équipe pesait sur chaque session, même solo. Le skill `/agent-teams:team`, les rôles d'exécution
+**Rien n'est câblé dans le cœur** (v1.5) : le flag expérimental monte une équipe à chaque session et transforme
+tout subagent nommé en teammate ; et rien n'est auto-chargé (plugin 1.2 : les invariants arrivent au spawn). Le skill `/agent-teams:team`, les rôles d'exécution
 (`worker`/`front-end`/`back-end`/`tester`) et le hook de trace viennent du **plugin `agent-teams`** ;
 `reviewer` et les `explore-*` restent dans le cœur (utilisables en subagents sans équipe).
 
 ```
 /plugin install agent-teams@claude-setup   # une fois (marketplace kurt83340/claude-Setup)
-/agent-teams:team 001-erp-connector       # 1er lancement = ACTIVATION, puis relance de Claude Code
+/agent-teams:team on                      # active (avec ton accord), puis relance de Claude Code
+/agent-teams:team 001-erp-connector       # lance l'équipe sur une spec
+/agent-teams:team status                  # où est le flag (local / projet / user), rule héritée ?
+/agent-teams:team off                     # coupe — effet immédiat sur les prochains spawns
 ```
 
-**Activation** (1er lancement, avec ton accord) : copie la rule d'équipe du plugin dans `.claude/rules/agent-teams.md`
-(invariants lead/teammate, auto-chargée), pose `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "auto"`
-dans `settings.json` (ou `settings.local.json` si tu ne veux pas le partager), puis demande une **relance** (flag lu au
-démarrage) — rappelle ensuite `/agent-teams:team <id>`. `auto` = un pane tmux par teammate si la session tourne
+**`on`** (avec ton accord, après un `--dry-run` montré) : pose `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` +
+`teammateMode: "auto"` (si rien ne le définit) dans `settings.json` (`--scope local` : `settings.local.json`, non partagé),
+puis demande une **relance** (l'équipe se monte au démarrage). **`off`** retire le flag, ou le met à `"0"` s'il reste à 1
+ailleurs (settings user, export shell). Les deux retirent une rule héritée `.claude/rules/agent-teams.md` (plugin ≤ 1.1,
+~1,9k tokens à chaque session) vers `.claude/.cache/`. Un spec-id avec l'équipe coupée → le skill propose `on`.
+**Invariants au spawn** : le hook du plugin ajoute les règles teammate à la fin du prompt de chaque teammate et donne
+les règles lead au lead au 1er spawn — 0 token pour les sessions sans équipe. **Plugin absent mais flag à 1** → le hook
+SessionStart du cœur le signale au démarrage (`CLAUDE_TEAMS_PLUGIN_CHECK=off` pour le taire). `auto` = un pane tmux par teammate si la session tourne
 **dans** tmux (`tmux new -s <projet>` avant `claude`), sinon teammates in-process dans le terminal courant.
 ⚠️ En mode panes, le corps d'une définition d'agent **remplace** le system prompt par défaut du teammate (en
 in-process il s'y ajoute) : chaque rôle du plugin porte donc son propre « Cadre de travail ».
@@ -600,7 +607,7 @@ restent appliquées, et les règles `ask` demandent toujours ton accord : tu voi
 `rm` avant qu'elle parte. ⚠️ À réserver aux bacs à essai — sur un projet client, garde le
 mode normal (les `allow`/`ask` du template existent pour ça).
 
-→ Invariants : `.claude/rules/agent-teams.md` (posée par l'activation) · protocole complet : `skills/team/protocole.md` du plugin (lu par `/agent-teams:team`).
+→ Invariants : `skills/team/invariants.md` du plugin (injectés au spawn) · protocole complet : `skills/team/protocole.md` (lu par `/agent-teams:team`).
 
 ## 🤖 Comprendre les hooks automatiques
 
