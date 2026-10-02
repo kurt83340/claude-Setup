@@ -22,13 +22,26 @@ def ok(label, cond):
     else: FAIL += 1; print(f"  ❌ {label}")
 
 
-def run_hook(name, payload, cwd, project_dir=None):
+TEAM_ENV = "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+# Réglages utilisateur isolés : le flag d'équipe ou un plugin activé sur la machine du testeur
+# (settings user, export shell) ne doit pas changer le résultat.
+USER_CFG = Path(tempfile.mkdtemp(prefix="hooktest-cfg-"))
+
+
+def hermetic_env(**extra):
+    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_PROJECT_DIR", TEAM_ENV)}
+    env["CLAUDE_CONFIG_DIR"] = str(USER_CFG)
+    env.update({k: str(v) for k, v in extra.items()})
+    return env
+
+
+def run_hook(name, payload, cwd, project_dir=None, **extra_env):
     path = HOOKS / name
     if not path.exists():  # hooks livrés par un plugin (ex. teamtask-log.py → agent-teams)
         path = TEAM_HOOKS / name
     exe = ["bash", str(path)] if name.endswith(".sh") else [sys.executable, str(path)]
     # CLAUDE_PROJECT_DIR : jamais hérité de la session qui lance les tests ; posé seulement si demandé
-    env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+    env = hermetic_env(**extra_env)
     if project_dir:
         env["CLAUDE_PROJECT_DIR"] = str(project_dir)
     return subprocess.run(exe, input=json.dumps(payload), capture_output=True, text=True, cwd=cwd, env=env)
@@ -363,10 +376,35 @@ ok("surface sous le seuil → silence", r4b.stdout.strip() == "")
 ho.write_text("# HANDOFF\n" + ("x" * 70000) + "\n")
 r4c = subprocess.run([sys.executable, str(HOOKS / "sessionstart-inject-handoff.py")],
                      input=json.dumps({"session_id": "n6", "cwd": str(sb), "source": "startup"}),
-                     capture_output=True, text=True, cwd=sb, env=dict(os.environ, CLAUDE_CONTEXT_BUDGET_MAX="0"))
+                     capture_output=True, text=True, cwd=sb, env=hermetic_env(CLAUDE_CONTEXT_BUDGET_MAX="0"))
 ok("CLAUDE_CONTEXT_BUDGET_MAX=0 → filet budget désactivé", r4c.stdout.strip() == "")
 shutil.rmtree(sb / ".claude/skills", ignore_errors=True)
 ho.write_text("# HANDOFF\n")
+# agent teams actives SANS le plugin → le dire au démarrage (jamais d'équipe sans protocole en silence)
+st_proj = sb / ".claude/settings.json"
+r6 = run_hook("sessionstart-inject-handoff.py", {"session_id": "t1", "cwd": str(sb), "source": "startup"}, sb,
+              **{TEAM_ENV: "1"})
+ok("flag d'équipe à 1 + plugin absent → rappel avec la commande d'install",
+   "plugin `agent-teams` absent" in r6.stdout and "claude plugin install agent-teams@claude-setup" in r6.stdout)
+(USER_CFG / "settings.json").write_text(json.dumps({"env": {TEAM_ENV: "1"}}))
+r6b = run_hook("sessionstart-inject-handoff.py", {"session_id": "t2", "cwd": str(sb), "source": "startup"}, sb,
+               **{TEAM_ENV: "1"})
+ok("source du flag nommée (settings user)", "source : user" in r6b.stdout)
+st_proj.write_text(json.dumps({"enabledPlugins": {"agent-teams@claude-setup": True}}))
+r6c = run_hook("sessionstart-inject-handoff.py", {"session_id": "t3", "cwd": str(sb), "source": "startup"}, sb,
+               **{TEAM_ENV: "1"})
+ok("plugin activé pour le projet → silence", "agent-teams" not in r6c.stdout)
+(sb / ".claude/settings.local.json").write_text(json.dumps({"enabledPlugins": {"agent-teams@claude-setup": False}}))
+r6d = run_hook("sessionstart-inject-handoff.py", {"session_id": "t4", "cwd": str(sb), "source": "startup"}, sb,
+               **{TEAM_ENV: "1"})
+ok("plugin désactivé en local (prime sur le projet) → rappel", "plugin `agent-teams` absent" in r6d.stdout)
+r6e = run_hook("sessionstart-inject-handoff.py", {"session_id": "t5", "cwd": str(sb), "source": "startup"}, sb)
+ok("flag absent → silence", "agent-teams" not in r6e.stdout)
+r6f = run_hook("sessionstart-inject-handoff.py", {"session_id": "t6", "cwd": str(sb), "source": "startup"}, sb,
+               **{TEAM_ENV: "1", "CLAUDE_TEAMS_PLUGIN_CHECK": "off"})
+ok("CLAUDE_TEAMS_PLUGIN_CHECK=off → silence", "agent-teams" not in r6f.stdout)
+for f in (st_proj, sb / ".claude/settings.local.json", USER_CFG / "settings.json"):
+    f.unlink(missing_ok=True)
 # routing : source="compact" → flux marker (comportement historique préservé)
 run_hook("precompact-snapshot-handoff.py",
          {"session_id": "cmp", "transcript_path": "", "cwd": str(sb), "trigger": "auto"}, sb)
@@ -581,6 +619,8 @@ shutil.rmtree(sb, ignore_errors=True)
 # Ménage : marqueurs PreCompact des sessions de test laissés dans $TMPDIR (sessions sans compaction suivie)
 for _sid in ("sess-A", "sess-B", "sess-M", "sess-OLD", "loop", "cmp", "unknown"):
     (Path(tempfile.gettempdir()) / f"claude-handoff-marker-{_sid}.json").unlink(missing_ok=True)
+
+shutil.rmtree(USER_CFG, ignore_errors=True)
 
 print(f"\n{'🎉 TOUS LES HOOKS OK' if FAIL == 0 else '⚠️  ÉCHEC'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

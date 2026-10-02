@@ -5,6 +5,45 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — agent teams : interrupteur on/off/status, invariants au spawn (plugin `agent-teams` 1.2.0)
+
+Demande Julien : un interrupteur plutôt qu'une activation cachée dans le 1er lancement, et plus de
+rule d'équipe auto-chargée. En 1.5.0, l'activation copiait `.claude/rules/agent-teams.md` (~1,9k
+tokens) dans le projet : chargée à CHAQUE session, teammates compris, équipe ou pas. Et rien ne
+permettait de couper.
+
+- **`/agent-teams:team on | off | status`** (`skills/team/scripts/teams.py`, stdlib, `--dry-run`
+  montré avant tout changement) : lit le flag dans l'ordre de priorité de Claude Code
+  (`settings.local.json` > `settings.json` > `~/.claude/settings.json`). `on` pose le flag
+  (+ `teammateMode: "auto"` si rien ne le définit) et annonce la relance. `off` retire le flag, ou le
+  met à `"0"` s'il reste à 1 ailleurs (user, export shell). D'après la doc, Claude Code relit le flag
+  à chaque spawn, donc pas de relance. `--scope user` ne touche jamais un projet qui a choisi. Un
+  JSON invalide n'est jamais réécrit (code 2). `status` avertit si le flag est posé en user, donc
+  actif dans toutes les sessions de tous les projets.
+- **Invariants au spawn, 0 token sans équipe** : la rule devient `skills/team/invariants.md`, jamais
+  copiée. Le hook `team-invariants.py` (PreToolUse `Agent`) agit quand le flag est actif et que
+  l'appel porte un `name` (ni fork, ni `isolation`, ni appel depuis un subagent). Il ajoute § Teammate
+  à la fin du prompt de spawn (`updatedInput`), donc chaque teammate le reçoit, rôle préconfiguré ou
+  ad-hoc, sans que le contexte du lead grossisse. Il injecte aussi § Lead au lead au 1er spawn de la
+  session (ré-armé après compaction ou `/clear`). Vérifié dans une vraie session `claude -p`
+  (2.1.287) : le hook voit le flag des settings, le subagent reçoit le texte ajouté, le lead reçoit
+  l'`additionalContext`. Invariants illisibles → le lead est averti, jamais de teammate sans règles
+  en silence. Limite connue : en `claude -p`, un subagent nommé reste un subagent (doc : pas de teammates
+  en non interactif), mais reçoit quand même § Teammate. Le hook n'a aucun moyen de le savoir.
+- **Plugin absent, flag à 1 → dit au démarrage** : le hook SessionStart du cœur (startup) le signale
+  avec la source du flag et la commande d'install. Une clé `agent-teams@…` désactivée en local prime
+  sur le projet. `CLAUDE_TEAMS_PLUGIN_CHECK=off` pour le taire. `.claude/CLAUDE.md` : plugin absent →
+  le dire, jamais monter une équipe en silence.
+- **Rule héritée** (`.claude/rules/agent-teams.md`, plugin ≤ 1.1 ou template 1.4) : `on` et `off` la
+  déplacent dans `.claude/.cache/agent-teams.md.obsolete` (une rule maison au titre inattendu est
+  laissée). `/upgrade-template` sur un projet équipé ne la met plus à jour : il la laisse et la
+  signale. `slim-context.py` la sauvegarde au lieu de la recopier, sauf avec `--no-template-files`
+  (le mode de l'upgrade, qui garde ses garde-fous sur les liens symboliques). Rôles du plugin et
+  agents du cœur (`reviewer`, `explore-*`) : référence au protocole injecté.
+- Tests : `test/test_agent_teams.py` (35 assertions, en CI). `test_hooks` : +6 assertions (rappel
+  plugin absent) ; `run_hook` est hermétique (flag d'équipe et settings user du testeur ignorés).
+  `test_upgrade` et `test_context_budget` alignés.
+
 ### Changed
 
 - **`rm` : l'accord est demandé, au lieu d'un refus sans prévenir** (demande Julien). `settings.json`

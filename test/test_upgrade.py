@@ -444,6 +444,7 @@ try:
     st["enabledPlugins"] = {"agent-teams@claude-setup": True}
     (p / ".claude/settings.json").write_text(json.dumps(st, indent=2) + "\n", encoding="utf-8")
     commit(p, "plugin agent-teams activé")
+    rule_before = (p / ".claude/rules/agent-teams.md").read_bytes()
     rc, rep = upgrade_json(p)
     st2 = json.loads((p / ".claude/settings.json").read_text(encoding="utf-8"))
     ok("équipe active : flag + teammateMode conservés, enabledPlugins intact",
@@ -458,8 +459,9 @@ try:
     rc_b, rep_b = upgrade_json(p2)
     ok("settings.json projet en JSON invalide → conflit, fichier GARDÉ (jamais remplacé)",
        rc_b == 1 and bad.read_bytes() == before_bad and ".claude/settings.json" in rep_b.get("conflicts", []))
-    ok("équipe active : rule d'équipe mise à jour depuis le plugin (pas retirée)",
-       rule.is_file() and rule.read_bytes() == (ROOT / "plugins/agent-teams/skills/team/agent-teams-rule.md").read_bytes())
+    ok("équipe active, plugin ≥ 1.2 : rule héritée laissée telle quelle + signalée (l'interrupteur du plugin la retire)",
+       rule.is_file() and rule.read_bytes() == rule_before
+       and any("/agent-teams:team status" in w for w in rep.get("warnings", [])))
 finally:
     shutil.rmtree(TMP, ignore_errors=True)
 

@@ -14,7 +14,7 @@
     },
     {
       "name": "agent-teams",
-      "description": "Exécution d'équipe (opt-in) : skill /team — activation au 1er lancement, orchestration tmux/in-process, worktrees, task list, débrief mémoire — + rôles worker/front-end/back-end/tester + hook de trace team-progress.",
+      "description": "Exécution d'équipe (opt-in) : skill /team — interrupteur on/off/status, orchestration tmux/in-process, worktrees, task list, débrief mémoire — + invariants injectés au spawn (rien d'auto-chargé) + rôles worker/front-end/back-end/tester + hook de trace team-progress.",
       "source": "./plugins/agent-teams"
     }
   ]

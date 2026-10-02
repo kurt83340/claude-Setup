@@ -1,16 +1,15 @@
 # Agent teams — protocole complet (source unique)
 
-> Déplacé ici depuis la rule `agent-teams.md` en v1.4.0 (budget contexte) : la rule ne garde que
-> les **invariants** (§ Teammate 6 règles, § Lead 5 invariants) — v1.5.0 : elle vit à côté
-> (`agent-teams-rule.md`) et n'est copiée dans `.claude/rules/` du projet qu'à l'activation.
-> Ce fichier = la version longue (politique teammate vs subagent, cycle de vie, topologie,
-> worktrees, spawn, suivi, débrief, mémoire, hooks). Lu par `/agent-teams:team` (Étape 0) ;
-> un teammate n'en a pas besoin : la rule courte lui suffit et lui est auto-chargée.
+> Version longue du protocole d'équipe (politique teammate vs subagent, cycle de vie, topologie,
+> worktrees, spawn, suivi, débrief, mémoire, hooks). Lue par `/agent-teams:team` (Étape 0) ; jamais
+> auto-chargée. Les **invariants** courts (§ Teammate 6 règles, § Lead 5 invariants) vivent dans
+> `invariants.md` et sont **injectés au spawn** par le hook du plugin (v1.2.0 — avant : rule copiée
+> dans `.claude/rules/`, ~1,9k tokens à chaque session du projet, équipe ou pas) : § Teammate à la
+> fin du prompt de chaque teammate, § Lead au lead au 1er spawn de la session.
 
-> Protocole multi-agent du template (lead + teammates). Auto-chargée dans **chaque** session
-> du repo — y compris les teammates (qui sont des sessions Claude Code complètes).
-> Câblage (posé par l'activation, `/agent-teams:team` Étape 0) : `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`
-> + `teammateMode: "auto"` dans les settings du projet (ou `settings.local.json`).
+> Interrupteur : `/agent-teams:team on | off | status` (`scripts/teams.py`) — `on` pose
+> `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` + `teammateMode: "auto"` dans les settings du projet
+> (ou `settings.local.json`), `off` le retire (ou `"0"` s'il reste à 1 en user / shell).
 > Orchestration d'une feature : **`/agent-teams:team`** — plugin `agent-teams` (rôles d'exécution
 > `worker`/`front-end`/`back-end`/`tester` + hook de trace ; `/plugin install agent-teams@claude-setup`).
 > Rôles lecture seule du cœur (`reviewer`, `explore-*`) : [`agents/`](../agents/README.md).

@@ -36,7 +36,7 @@ Si l'un échoue → STOP, demander au user de fixer.
 > dans `~/.claude.json`, **keyé par le chemin du projet** — le template ne peut pas le
 > pré-poser. Conséquence agent-teams : un teammate spawné depuis un **sous-dossier** re-tombe
 > sur ce dialogue (chemin différent) et se fige en silence → toujours spawner depuis la
-> racine (rule d'équipe `agent-teams.md` du plugin `agent-teams` § Lead / Spawn).
+> racine (invariants du plugin `agent-teams` § Lead, injectés au 1er spawn).
 
 ## Convention placeholders : CORE vs CONTENT
 

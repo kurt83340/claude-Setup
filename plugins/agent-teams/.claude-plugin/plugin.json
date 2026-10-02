@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "agent-teams",
-  "description": "Exécution d'équipe pour le template claude-Setup (opt-in) : skill /team (activation au 1er lancement — flag + mode d'affichage + rule d'équipe —, plan validé, worktrees, task list native, TDD opt-in, merge, débrief mémoire), rôles d'exécution worker/front-end/back-end/tester, hook de trace team-progress.",
-  "version": "1.1.0",
+  "description": "Exécution d'équipe pour le template claude-Setup (opt-in) : skill /team — interrupteur on/off/status, plan validé, worktrees, task list native, TDD opt-in, merge, débrief mémoire —, invariants d'équipe injectés au spawn (rien d'auto-chargé), rôles d'exécution worker/front-end/back-end/tester, hook de trace team-progress.",
+  "version": "1.2.0",
   "author": {
     "name": "Julien Leroy"
   },

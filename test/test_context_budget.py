@@ -191,9 +191,9 @@ with tempfile.TemporaryDirectory() as td:
     ok("CLAUDE.md : @ROADMAP → lien simple, HANDOFF/code-map toujours en @, « 3 docs » → « 2 docs »",
        "@.claude/docs/ROADMAP.md" not in cl and "[ROADMAP.md](.claude/docs/ROADMAP.md)" in cl
        and "@.claude/docs/HANDOFF.md" in cl and "@.claude/docs/code-map.md" in cl and "seuls les 2 docs" in cl)
-    ok("fichiers v1.4 copiés depuis le template (hook + rule courte), ancienne rule sauvegardée",
+    ok("fichiers v1.4 copiés depuis le template (hook), rule d'équipe retirée (sauvegardée, plus auto-chargée)",
        (p / ".claude/hooks/pretooluse-inject-codemap.py").read_bytes() == (ROOT / ".claude/hooks/pretooluse-inject-codemap.py").read_bytes()
-       and (p / ".claude/rules/agent-teams.md").read_bytes() == (ROOT / "plugins/agent-teams/skills/team/agent-teams-rule.md").read_bytes()
+       and not (p / ".claude/rules/agent-teams.md").exists()
        and (p / ".claude/.cache/agent-teams.md.pre-1.4").is_file()
        and (p / ".claude/skills/doc-health/scripts/context-budget.py").is_file())
     rc2, j2 = budget(p)

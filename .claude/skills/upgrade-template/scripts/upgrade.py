@@ -60,7 +60,8 @@ SCOPE_FILES = (".claude/settings.json", ".claude/CLAUDE.md", ".claude/USAGE.md",
 PROFILES = ("script-jetable", "automation-n8n", "python-app", "web-app", "bdd-migration", "other")
 BOOTSTRAP_PREFIXES = (".claude/skills/init-from-template/", ".claude/skills/adopt-template/")
 TEAM_RULE = ".claude/rules/agent-teams.md"
-TEAM_RULE_SRC = "plugins/agent-teams/skills/team/agent-teams-rule.md"  # (v1.5.0+) dans le dépôt
+TEAM_RULE_SRC = "plugins/agent-teams/skills/team/agent-teams-rule.md"  # plugin 1.1 (template 1.5.0) seulement :
+# depuis le plugin 1.2, plus de rule — invariants injectés au spawn, rule héritée retirée par `/agent-teams:team on|off`
 TEAM_ENV = "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
 CORE_RE = re.compile(r"\{\{([A-Z]{2,}_[A-Z][A-Z0-9_]+)\}\}")
 MISSING = object()
@@ -621,8 +622,15 @@ def plan_and_apply(a) -> dict:
                 if is_git_repo(repo) else b""
             if content:
                 team_rule_src.write_bytes(content)
-            report["warnings"].append("équipe d'agents active (plugin agent-teams) : flag, teammateMode et "
-                                      "rule d'équipe conservés — rule mise à jour depuis le plugin")
+                report["warnings"].append("équipe d'agents active (plugin agent-teams) : flag, teammateMode et "
+                                          "rule d'équipe conservés — rule mise à jour depuis le plugin")
+            else:
+                legacy = (project / TEAM_RULE).is_file()
+                report["warnings"].append(
+                    "équipe d'agents active (plugin agent-teams) : flag et teammateMode conservés"
+                    + (f" — `{TEAM_RULE}` laissée telle quelle : obsolète avec le plugin ≥ 1.2 (invariants "
+                       "injectés au spawn, ~1,9k tokens économisés par session) → `/plugin marketplace update "
+                       "claude-setup`, puis `/agent-teams:team status` la retire" if legacy else ""))
 
         conflict_dir = project / ".claude" / ".cache" / f"upgrade-{to_v}"
         paths = sorted(scoped_files(base) | scoped_files(target) | scoped_files(project))
@@ -631,8 +639,10 @@ def plan_and_apply(a) -> dict:
             B = read_bytes(base / rel) if has_base else None
             T = read_bytes(target / rel)
             O = read_bytes(project / rel)
-            if rel == TEAM_RULE and teams and team_rule_src.is_file():
-                T = team_rule_src.read_bytes()  # la rule d'équipe vient du plugin (projet équipé)
+            if rel == TEAM_RULE and teams:
+                if not team_rule_src.is_file():
+                    continue  # plugin ≥ 1.2 : la rule héritée relève de son interrupteur, jamais touchée ici
+                T = team_rule_src.read_bytes()  # plugin 1.1 : la rule d'équipe vient du plugin (projet équipé)
             if O == T:
                 continue
             if B is None and T is None:

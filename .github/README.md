@@ -8,7 +8,7 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, web app,
 ## Ce qu'il contient
 
 - **Skills cœur** (`.claude/skills/` — inventaire canonique, compte vérifié par la CI → [`.claude/skills/README.md`](../.claude/skills/README.md)) : `/handoff`, `/spec`, `/conception`, `/feature` (pipelines), `/feature-done`, `/debug`, `/pivot`, `/archive-projet`, `/upgrade-template`, `/lecon`, `/adr`, `/idee`, `/doc-health`, `/codemap`, `/scaffold`, `/init-from-template`, `/adopt-template`.
-- **Plugins** (marketplace `claude-setup`, dossier `plugins/`) : `db-migration`, `agent-teams` (**opt-in** : `/agent-teams:team` + rôles d'exécution + hook de trace — activé projet par projet au 1er lancement). Stack n8n = plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills).
+- **Plugins** (marketplace `claude-setup`, dossier `plugins/`) : `db-migration`, `agent-teams` (**opt-in** : `/agent-teams:team` + rôles d'exécution + hook de trace — interrupteur `/agent-teams:team on|off|status` projet par projet, invariants injectés au spawn, rien d'auto-chargé). Stack n8n = plugin officiel `n8n-mcp-skills` (czlonkowski/n8n-skills).
 - **Agents cœur** : `explore-code` / `explore-docs` / `explore-memoire` (explorateurs lecture seule), `reviewer` (revue adverse), `doc-maintainer` (maintenance doc en lot — jamais le HANDOFF).
 - **Hooks** : filet « n'oublie rien » (snapshot si une session se ferme SANS `/handoff` après avoir modifié le dépôt, réinjecté au démarrage suivant), snapshot pré-compaction, gotchas ciblés injectés à l'édition du fichier concerné, rappel `/handoff` (1×/session), garde-fous de budget de contexte, growth-detection.
 - **Doc structurée** : cadrage / conception (PRD, ARCHITECTURE) / specs / ADR / ROADMAP / HANDOFF / code-map / stack…

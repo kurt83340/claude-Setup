@@ -67,7 +67,7 @@ Rien à merger : le rsync a tout posé, passe directement à l'Étape 3.
 - **`.claude/settings.json` existant** : merge JSON proposé en diff — unions des
   `permissions.allow/ask/deny` (dont les deny de secrets `Read(.env)`, `Read(.env.*)` + exceptions
   `!.env.example`…), append des hooks du template (sans doublon). Pas de flag d'équipe : les agent
-  teams sont opt-in (activées par `/agent-teams:team` si le plugin est installé).
+  teams sont opt-in (`/agent-teams:team on` si le plugin est installé).
 - **`.gitignore`** : append des lignes template manquantes (`.claude/.cache/`,
   `.claude/settings.local.json`, `.claude/.growth-suggestions.md`, `.env`, `.env.*` +
   `!.env.example`, `secrets.*`…).
