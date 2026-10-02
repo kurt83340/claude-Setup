@@ -10,8 +10,8 @@
 
 ```bash
 # 1. Copier le template (exclut l'exemple ACME, test, la CI, et la source plugins/marketplace)
-rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
-  --exclude='plugins/' --exclude='.claude-plugin/' \
+rsync -av --exclude='/EXAMPLES/' --exclude='/test/' --exclude='/.github/' --exclude='/.git' \
+  --exclude='/plugins/' --exclude='/.claude-plugin/' \
   /chemin/vers/template/ /chemin/vers/mon-nouveau-projet/
 
 # 2. Aller dedans
@@ -97,10 +97,12 @@ Ton projet a déjà du code et une histoire ? **Ne pas** utiliser `/init-from-te
 
 ```bash
 cd /chemin/vers/projet-existant     # working tree PROPRE (commit/stash avant)
+# excludes ANCRÉS (« / » initial) : sans lui, rsync écarte ces noms à TOUS les niveaux
+#   (vécu : 11 README imbriqués perdus, dont .claude/skills/README.md — l'inventaire des skills)
 rsync -av --ignore-existing \
-  --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' \
-  --exclude='plugins/' --exclude='.claude-plugin/' \
-  --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
+  --exclude='/EXAMPLES/' --exclude='/test/' --exclude='/.github/' \
+  --exclude='/plugins/' --exclude='/.claude-plugin/' \
+  --exclude='/.git' --exclude='/README.md' --exclude='/.env.example' \
   /chemin/vers/template/ .
 # (Recommandé) Dépose MAINTENANT tes matériaux — le skill les ingère :
 #   docs client → .claude/docs/cadrage/documents/   tickets → cadrage/tickets/
@@ -130,7 +132,8 @@ Projet généré avec une version plus ancienne du template → `/upgrade-templa
 
 - **base** = l'init de TA version rejouée depuis le tag git du template (même profil) · **cible** = l'init de la
   nouvelle version · **nous** = ton projet. Profil, mode et source lus dans `.claude/template-lock.json` (écrit à
-  l'init, sans aucune variable d'init) ; absent (projet < 1.5) → profil et mode déduits, à confirmer.
+  l'init, sans aucune variable d'init) ; absent (projet < 1.5) → profil et mode déduits, à confirmer (web-app deviné du seul `package.json` :
+  refusé sans `--profile`, les inits python-app et web-app étant identiques avant 1.5).
 - Fichier jamais touché → la cible s'applique · template inchangé → ta personnalisation reste · les deux ont
   bougé → `git merge-file` (fusion clé par clé pour `settings.json`, règles de permission et hooks compris ;
   projet adopté : les hooks et règles du template qui lui manquent sont ajoutés).
@@ -783,6 +786,10 @@ jamais déclenchée par Claude tout seul.
 - Normal s'il n'y a aucun gotcha pour ce fichier : le hook n'injecte QUE les entrées de `code-map-gotchas.md` qui
   le ciblent (chemin, nom de fichier ou dossier cité en backticks, ou heading `###` ; section « Globaux » = toute
   édition de code) — 1×/fichier/session. Projet < 1.4 sans `code-map-gotchas.md` → § Gotchas de `code-map.md`
+- Ordre : le fichier exact d'abord, puis le dossier le plus profond, les parents, les Globaux en dernier ; coupe à
+  2 500 caractères entre deux entrées entières, avec « N gotcha(s) non injecté(s) » quand il en reste
+- Section « À classer » (créée par la migration 1.4 au-delà de 5 entrées sans chemin) : jamais injectée — cite le
+  fichier ou le dossier en backticks et range l'entrée sous un titre de zone
 - Rien pour `.claude/`, les docs et la config (`.md`, `.json`, `.yaml`…) ; tout autre fichier du projet compte (plus
   de liste fixe `src/`/`tests/`/`lib/`/`app/`)
 - L'injection arrive **avec le résultat** de l'Edit/Write (juste après l'édition), pas avant

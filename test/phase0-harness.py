@@ -33,7 +33,9 @@ VARS = {
 BUILTINS = {"plugin", "resume", "compact", "clear", "doctor", "init",
             "security-review", "code-review", "loop", "reload-skills"}
 NAV = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude/skills/README.md", ".claude/rules/template-maintenance.md", ".claude/USAGE.md"]
-EXCLUDES = ("EXAMPLES/", "test/", ".github/", ".git/", "plugins/", ".claude-plugin/")
+# Ancrés (« / » initial) comme dans la doc : sans lui, rsync applique le motif à TOUS les niveaux.
+# `/.git` sans « / » final : dans un worktree (ou --separate-git-dir), .git est un FICHIER.
+EXCLUDES = ("/EXAMPLES/", "/test/", "/.github/", "/.git", "/plugins/", "/.claude-plugin/")
 
 
 def sh(cmd, cwd=None, check=True):

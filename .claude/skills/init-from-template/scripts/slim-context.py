@@ -170,11 +170,27 @@ def _has_path(entry: str) -> bool:
     return any(("/" in t or "." in t) and " " not in t.strip() for t in toks)
 
 
+GLOBALS_MAX = 5  # au-delà, des Globaux injectés à CHAQUE édition noient les gotchas ciblés
+
+
+def _globals_count(text: str) -> int:
+    """Entrées déjà rangées sous un heading « Globaux » (même critère que le hook)."""
+    n, in_glob = 0, False
+    for line in text.split("\n"):
+        if re.match(r"#{1,4} ", line):
+            in_glob = bool(re.search(r"globa", line, re.IGNORECASE))
+        elif in_glob and re.match(r"\s*([-*]|⚠️)\s", line):
+            n += 1
+    return n
+
+
 def write_gotchas(gf: Path, text: str, origin: str) -> None:
     """Écrit des gotchas migrés dans code-map-gotchas.md en les RANGEANT : une entrée sans chemin
     cité (piège transversal, injecté à CHAQUE édition par le hook < 1.4) va sous un heading
     « Globaux » — sinon le hook ≥ 1.4 ne l'injecterait plus jamais (v1.5.0) ; les autres sous
-    « Par zone »."""
+    « Par zone ». Au-delà de GLOBALS_MAX entrées sans chemin (vécu : 53), elles vont sous
+    « À classer » (non injectées) et le log le dit : des dizaines de Globaux injectés à chaque
+    édition ne laissaient plus de place aux gotchas propres au fichier."""
     entries = split_entries(text)
     rest = text
     for e in entries:
@@ -182,16 +198,27 @@ def write_gotchas(gf: Path, text: str, origin: str) -> None:
     rest = re.sub(r"\n{3,}", "\n\n", rest).strip("\n")
     glob = [e for e in entries if not _has_path(e)]
     zone = [e for e in entries if _has_path(e)] + ([rest] if rest.strip() else [])
+    existing = gf.read_text(encoding="utf-8").rstrip("\n") if gf.is_file() else ""
+    unsorted = []
+    if glob and _globals_count(existing) + len(glob) > GLOBALS_MAX:
+        unsorted, glob = glob, []
+        log(f"⚠️ 3. {len(unsorted)} gotcha(s) sans chemin (depuis {origin}) → « À classer » de "
+            "code-map-gotchas.md, NON injectés : cite le fichier ou le dossier en backticks "
+            f"(ou garde ≤ {GLOBALS_MAX} vrais Globaux)")
+    todo = (f"\n\n## À classer — migrés depuis {origin} (non injectés)\n\n"
+            f"> Trop d'entrées sans chemin pour des Globaux (max {GLOBALS_MAX}, injectés à chaque édition).\n"
+            "> Cite en backticks le fichier ou le dossier visé (`src/x/`) et range l'entrée sous un titre\n"
+            "> de zone : le hook ne l'injectera qu'à l'édition de ces fichiers.\n\n" + "\n".join(unsorted)) if unsorted else ""
     if gf.is_file():
-        out = gf.read_text(encoding="utf-8").rstrip("\n")
+        out = existing
         if glob:
             out += f"\n\n## Globaux — migrés depuis {origin}\n\n" + "\n".join(glob)
         if zone:
             out += f"\n\n## Migrés depuis {origin}\n\n" + "\n".join(zone)
-        write(gf, out + "\n")
+        write(gf, out + todo + "\n")
     else:
-        write(gf, GOTCHAS_INTRO + "## Globaux (injectés pour TOUTE édition de code — max 5 lignes)\n\n"
-              + ("\n".join(glob) + "\n\n" if glob else "") + "## Par zone\n\n" + "\n".join(zone) + "\n")
+        write(gf, GOTCHAS_INTRO + f"## Globaux (injectés pour TOUTE édition de code — max {GLOBALS_MAX} entrées)\n\n"
+              + ("\n".join(glob) + "\n\n" if glob else "") + "## Par zone\n\n" + "\n".join(zone) + todo + "\n")
 
 
 def step_codemap_gotchas(root: Path) -> None:

@@ -57,6 +57,48 @@ permettait de couper.
   `.claude/CLAUDE.md` : avant un `rm`, annoncer le chemin, le contenu et la raison. USAGE,
   `init-from-template` et PROTOCOL-E2E (M3) alignés.
 
+### Fixed — constats d'un projet généré (2026-10-02), tous reproduits avant correction
+
+- **Commandes rsync documentées** (`.github/README.md`, USAGE, `/adopt-template`) : un `--exclude`
+  sans « / » initial vaut à tous les niveaux (man rsync). Avec `--exclude='README.md'`, la copie
+  brownfield écartait en silence **11 README imbriqués**, dont `.claude/skills/README.md` (l'inventaire
+  que la CI vérifie) et `.claude/agents/README.md`. Tous les motifs sont maintenant ancrés
+  (`/README.md`, `/.env.example`, `/test/`, `/plugins/`…), y compris dans `phase0-harness.py`.
+  `/.git` perd son « / » final : dans un worktree, `.git` est un fichier, que `/.git/` (dossiers
+  seulement) laissait passer, et le projet se retrouvait rattaché au dépôt du template.
+  Nouveau test `test/test_rsync_docs.py` (en CI) : il extrait chaque commande rsync de la doc, vérifie
+  que ses motifs sont ancrés et la joue pour de vrai (README imbriqués copiés, dossiers de maintenance
+  laissés dehors, README et `.env.example` du projet intacts). Il échoue sur l'ancienne doc.
+- **`/upgrade-template` : mode déduit brownfield à tort.** Sans lock, n'importe quelle ligne de liste
+  qui citait `` `/init-from-template` `` faisait passer en brownfield, par exemple « ⚠️
+  `/init-from-template` a été retiré… », écrite par l'utilisateur dans USAGE.md. Résultat : 3
+  conflits parasites. Seule compte désormais une ligne **identique** à une ligne d'inventaire livrée
+  par le template (versions base et cible ; espaces et colonnes de tableau normalisés). Le rapport
+  marque `mode … (déduit)` et cite l'indice retenu.
+- **`/upgrade-template` : profil web-app deviné d'après un `package.json`.** Avant 1.5.0, les inits
+  python-app et web-app sont identiques : rien ne dit lequel a été choisi. Appliquer web-app ajoutait
+  `code-style-web.md` et `testing-web.md` (chargés sur `**/*.ts`) et retirait les rules Python. Ce cas
+  est maintenant **refusé** hors dry-run sans `--profile` (code 2, rien d'écrit) ; en dry-run, il
+  s'affiche avec un avertissement. Le défaut python-app reste, car il garde les rules d'origine.
+- **Gotchas : les plus spécifiques d'abord, coupe sur une entrée entière.** Le hook
+  `pretooluse-inject-codemap.py` gardait l'ordre du fichier, puis coupait à 2 500 caractères. Vécu : 53
+  Globaux en tête, donc aucun gotcha propre au fichier n'arrivait. Et `src/adapter/` passait avant
+  `src/adapter/ocr/` : sur 8 gotchas OCR, 1 seul arrivait entier. Nouvel ordre : chemin exact ou nom
+  du fichier, puis le dossier le plus profond, puis les parents, les Globaux en dernier. La coupe tombe
+  entre deux entrées, avec « N gotcha(s) non injecté(s) → code-map-gotchas.md ». Une entrée seule plus
+  longue que le budget est tronquée (`[…]`) plutôt que perdue.
+- **Migration 1.4.0 : 53 gotchas sans chemin rangés sous « Globaux ».** `slim-context.py` les mettait
+  tous sous ce titre, alors que le gabarit dit « max 5 ». Au-delà de 5, ils vont maintenant sous
+  « À classer » (jamais injectés, rien n'est perdu), avec le remède en tête de section, et le log le
+  signale (`⚠️ 3.`). `/upgrade-template` reprend ces lignes ⚠️ dans le rapport de migration.
+- **`--ack-conflicts` refusé sur un arbre non commité**, alors que le skill fait acquitter (Étape 4)
+  avant le commit (Étape 5). L'acquittement d'un projet déjà à la version cible ne réécrit que le
+  lock : il passe maintenant sans `--allow-dirty`. Une vraie mise à jour avec `--ack-conflicts` exige
+  toujours un arbre propre.
+- Tests : `test_hooks` +6 (ordre, coupe, troncature ; ils échouent sur l'ancien hook), `test_upgrade`
+  +6 (mention vs ligne livrée, refus du profil deviné, acquittement sur arbre sale), et
+  `test_context_budget` +4 (« À classer », log, hook).
+
 ### Fixed
 
 - Skills `/adr` et `/doc-health` : Claude Code remplace `$0`, `$1`… d'un SKILL.md par les arguments de
