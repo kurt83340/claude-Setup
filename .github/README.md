@@ -18,16 +18,17 @@ Base standard pour démarrer un projet (automatisation n8n, app Python, web app,
 ## Démarrer un projet
 
 ```bash
-rsync -av --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' --exclude='.git/' \
-  --exclude='plugins/' --exclude='.claude-plugin/' \
+rsync -av --exclude='/EXAMPLES/' --exclude='/test/' --exclude='/.github/' --exclude='/.git' \
+  --exclude='/plugins/' --exclude='/.claude-plugin/' \
   ./ /chemin/vers/mon-projet/
 cd /chemin/vers/mon-projet
 claude   # puis, dans la session : /init-from-template
 # garde-fou secrets (une fois par clone) : pre-commit install
 ```
 
-**Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `README.md` et
-`.env.example`), puis `/adopt-template` — merges non destructifs + rétro-remplissage de la doc
+**Projet existant (brownfield)** : même rsync avec `--ignore-existing` (+ exclure `/README.md` et
+`/.env.example`, **avec le `/` initial** : sans lui, rsync écarte ces noms à tous les niveaux — dont
+`.claude/skills/README.md`, l'inventaire des skills), puis `/adopt-template` — merges non destructifs + rétro-remplissage de la doc
 depuis l'existant. Détails : [USAGE.md § Projet EXISTANT](../.claude/USAGE.md).
 
 ## Mettre à jour un projet déjà généré

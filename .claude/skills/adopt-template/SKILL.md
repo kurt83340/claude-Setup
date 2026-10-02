@@ -25,10 +25,11 @@ jamais écrasé.
 
 ```bash
 # Depuis le projet existant — copie SANS ÉCRASEMENT (les fichiers existants gagnent toujours)
+# excludes ANCRÉS (« / » initial) : sans lui, rsync écarte ces noms à TOUS les niveaux
 rsync -av --ignore-existing \
-  --exclude='EXAMPLES/' --exclude='test/' --exclude='.github/' \
-  --exclude='plugins/' --exclude='.claude-plugin/' \
-  --exclude='.git/' --exclude='README.md' --exclude='.env.example' \
+  --exclude='/EXAMPLES/' --exclude='/test/' --exclude='/.github/' \
+  --exclude='/plugins/' --exclude='/.claude-plugin/' \
+  --exclude='/.git' --exclude='/README.md' --exclude='/.env.example' \
   /chemin/vers/template/ .
 
 # (Optionnel, recommandé) Déposer les matériaux AVANT de lancer le skill :

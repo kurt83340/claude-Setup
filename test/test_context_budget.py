@@ -255,6 +255,36 @@ with tempfile.TemporaryDirectory() as td:
                        capture_output=True, text=True)
     ok("… et le hook l'injecte bien à l'édition d'un fichier de code quelconque", "centimes" in r.stdout)
 
+    print("\n== 5a-ter. 53 gotchas sans chemin (vécu) → « À classer », pas 53 Globaux injectés partout ==")
+    q3 = tmp / "gotchas-a-classer"
+    write(q3 / ".claude/docs/HANDOFF.md", "# HANDOFF\n")
+    write(q3 / "CLAUDE.md", "# P\n- @.claude/docs/HANDOFF.md\n")
+    write(q3 / ".claude/docs/code-map.md", "# CM\n\n## Gotchas (pièges non évidents)\n\n"
+          + "".join(f"- ⚠️ piège transversal {n} sans chemin cité\n" for n in range(53))
+          + "- ⚠️ `src/adapter/ocr/lecture.ts` — le moteur OCR renvoie les pages dans le désordre\n")
+    r3 = run(SLIM, "--root", str(q3), "--no-template-files")
+    g3 = (q3 / ".claude/docs/code-map-gotchas.md").read_text(encoding="utf-8")
+    glob_sec = g3.split("## Globaux", 1)[1].split("\n## ", 1)[0]
+    ok("53 entrées sans chemin → section « À classer » (non injectée), Globaux vide, aucune perdue",
+       "## À classer" in g3 and "piège transversal" not in glob_sec
+       and all(f"piège transversal {n} sans" in g3 for n in range(53)))
+    ok("… et la migration le DIT (⚠️ dans le log, avec le remède)", "⚠️ 3." in r3.stdout and "À classer" in r3.stdout)
+    r = subprocess.run([sys.executable, str(hook)], input=json.dumps({"session_id": "S", "tool_name": "Edit",
+                        "tool_input": {"file_path": str(q3 / "src/adapter/ocr/lecture.ts")}, "cwd": str(q3)}),
+                       capture_output=True, text=True)
+    ctx = json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"] if r.stdout.strip() else ""
+    ok("… le gotcha ciblé du fichier arrive, les « À classer » ne noient plus l'injection",
+       "désordre" in ctx and "piège transversal" not in ctx)
+    q4 = tmp / "gotchas-peu-de-globaux"
+    write(q4 / ".claude/docs/HANDOFF.md", "# HANDOFF\n")
+    write(q4 / "CLAUDE.md", "# P\n- @.claude/docs/HANDOFF.md\n")
+    write(q4 / ".claude/docs/code-map.md", "# CM\n\n## Gotchas (pièges non évidents)\n\n"
+          + "".join(f"- ⚠️ vrai global {n}\n" for n in range(5)))
+    run(SLIM, "--root", str(q4), "--no-template-files")
+    g4 = (q4 / ".claude/docs/code-map-gotchas.md").read_text(encoding="utf-8")
+    ok("≤ 5 entrées sans chemin → toujours « Globaux » (comportement inchangé)",
+       "## À classer" not in g4 and all(f"vrai global {n}" in g4.split("## Par zone")[0] for n in range(5)))
+
     print("\n== 5b. Listing skills : nom + description seulement, hors disable-model-invocation ==")
     k = tmp / "skills-listing"
     write(k / "CLAUDE.md", "# P\n")

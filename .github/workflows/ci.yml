@@ -26,6 +26,9 @@ jobs:
       - name: Suite de tests cleanup-for-type.py (sentinelles + brownfield + prune)
         run: python3 test/test_cleanup.py
 
+      - name: Commandes rsync documentées (excludes ancrés, jouées pour de vrai)
+        run: python3 test/test_rsync_docs.py
+
       - name: Suite de tests des skills (structure + conventions + benchmarks)
         run: python3 test/test_skills.py
 

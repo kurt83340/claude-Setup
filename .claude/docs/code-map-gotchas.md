@@ -5,7 +5,8 @@
 > par session et par fichier. Une entrée cible un fichier en citant en backticks un chemin, un
 > nom de fichier ou un dossier : `` `src/sync/notion.py` ``, `` `notion.py` ``, `` `src/sync/` ``
 > (un heading `### src/sync/` cible toutes ses entrées). Une entrée sans chemin cité n'est
-> injectée que sous le heading « Globaux » — à garder rare et court.
+> injectée que sous le heading « Globaux » — à garder rare et court. Ordre d'injection : le fichier
+> exact, puis le dossier le plus profond, puis les parents, les Globaux en dernier (budget 2 500 car.).
 > Un piège qui t'a coûté du temps → ici (1 bullet, `chemin:ligne` si possible). Décision structurante → ADR.
 
 ## Globaux (injectés pour TOUTE édition de code — max 5 lignes)

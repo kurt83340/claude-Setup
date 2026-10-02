@@ -182,6 +182,29 @@ ok("fichier .json : jamais les Globaux (réservés au code)", "vrai piège globa
 big = "## Globaux\n\n" + "".join(f"- ⚠️ piège global numéro {n} " + "x" * 80 + "\n" for n in range(200))
 (sb / ".claude/docs/code-map-gotchas.md").write_text(big, encoding="utf-8")
 ok("gotchas volumineux → injection plafonnée", len(inject(sb, "src/big.py", session="S9")) < 3000)
+# Vécu (projet généré, migration 1.4.0) : 53 Globaux en TÊTE de fichier + coupe à 2 500 car. → les
+# gotchas propres au fichier n'arrivaient jamais ; et `src/adapter/` (général) passait avant
+# `src/adapter/ocr/` (spécifique), que la coupe faisait tomber.
+many = ("## Globaux\n\n" + "".join(f"- ⚠️ global {n} " + "g" * 400 + "\n" for n in range(53))
+        + "\n## src/adapter/\n\n" + "".join(f"- ⚠️ `src/adapter/` général {n} " + "a" * 150 + "\n" for n in range(4))
+        + "\n## OCR\n\n" + "".join(f"- ⚠️ `src/adapter/ocr/` piège OCR {n} " + "o" * 150 + "\n" for n in range(8))
+        + "- ⚠️ `src/adapter/ocr/lecture.ts` — piège du fichier lui-même\n")
+(sb / ".claude/docs/code-map-gotchas.md").write_text(many, encoding="utf-8")
+io = inject(sb, "src/adapter/ocr/lecture.ts", session="O1")
+pos = lambda s: io.find(s) if s in io else 10 ** 9
+ok("gotcha du fichier exact injecté en PREMIER", 0 <= io.find("piège du fichier lui-même") < pos("piège OCR 0"))
+ok("dossier le plus profond (ocr/) avant le dossier parent (adapter/), Globaux en dernier",
+   pos("piège OCR 7") < pos("général 0") < pos("global 0"))
+ok("les 8 gotchas OCR + celui du fichier arrivent tous (plus coupés par les Globaux)",
+   all(f"piège OCR {n} " in io for n in range(8)))
+ok("coupe sur une entrée entière (aucune entrée tronquée) + « N non injectés » annoncé",
+   "[…]" not in io and "non injecté" in io and "code-map-gotchas.md" in io)
+ok("injection toujours bornée", len(io) < 3200)
+(sb / ".claude/docs/code-map-gotchas.md").write_text("## Par zone\n\n- ⚠️ `src/huge.py` " + "h" * 4000 + "\n",
+                                                     encoding="utf-8")
+ih = inject(sb, "src/huge.py", session="O2")
+ok("une seule entrée plus longue que le budget → tronquée (marquée […]) plutôt que perdue",
+   "[…]" in ih and len(ih) < 3200)
 shutil.rmtree(sb, ignore_errors=True)
 
 # 4. posttooluse-growth-detection → flag API_KEY

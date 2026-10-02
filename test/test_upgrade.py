@@ -292,7 +292,7 @@ try:
     t_sj = "v1.2.0" if "v1.2.0" in TAGS else olds[-1]
     p = init_project(t_sj, "script-jetable", TMP / "jetable")
     rc, rep = upgrade_json(p)
-    ok(f"script-jetable ({t_sj}) déduit, code 0", rc == 0 and rep.get("profile", "").startswith("script-jetable"))
+    ok(f"script-jetable ({t_sj}) déduit, code 0", rc == 0 and (rep.get("profile") or "").startswith("script-jetable"))
     ok("script-jetable : pas de greffe des skills retirés par le profil (spec, conception, USAGE)",
        not (p / ".claude/skills/spec").exists() and not (p / ".claude/skills/conception").exists()
        and not (p / ".claude/USAGE.md").exists())
@@ -300,9 +300,17 @@ try:
        (p / ".claude/skills/upgrade-template/SKILL.md").is_file())
     ok("script-jetable : = init fraîche du profil", method_files(p) == method_files(fresh("script-jetable")))
     p = init_project(base_tag, "web-app", TMP / "web", extra=lambda d: (d / "package.json").write_text("{}\n"))
+    h_web = tree_hash(p)
     rc, rep = upgrade_json(p)
-    ok("web-app déduit (package.json sans pyproject) → rules web ajoutées, rules Python retirées",
-       rc == 0 and rep.get("profile", "").startswith("web-app")
+    ok("package.json seul (inits python-app = web-app avant 1.5) → refus sans --profile, RIEN d'écrit",
+       rc == 2 and "--profile" in rep.get("error", "") and tree_hash(p) == h_web)
+    rc, rep = upgrade_json(p, "--dry-run")
+    ok("… en dry-run : plan web-app montré + avertissement « deviné d'après package.json »",
+       rc == 0 and (rep.get("profile") or "").startswith("web-app")
+       and any("package.json seul" in w for w in rep.get("warnings", [])))
+    rc, rep = upgrade_json(p, "--profile", "web-app")
+    ok("--profile web-app confirmé → rules web ajoutées, rules Python retirées",
+       rc == 0 and (rep.get("profile") or "").startswith("web-app")
        and (p / ".claude/rules/code-style-web.md").is_file() and not (p / ".claude/rules/code-style.md").exists())
 
     # ── 4b. Projet ADOPTÉ (brownfield, < 1.5 : pas de lock) ──────────────────────────────────
@@ -333,7 +341,8 @@ try:
     user_claude = (b / "CLAUDE.md").read_bytes()
     rc, rep = upgrade_json(b)
     st = json.loads((b / ".claude/settings.json").read_text(encoding="utf-8"))
-    ok("adopté sans lock : mode brownfield déduit (skills bootstrap encore présents)", rep.get("mode") == "brownfield")
+    ok("adopté sans lock : mode brownfield déduit (skills bootstrap encore présents), marqué « (déduit) »",
+       rep.get("mode") == "brownfield (déduit)" and any("skill bootstrap" in w for w in rep.get("warnings", [])))
     ok("adopté : code 1, seuls conflits = CLAUDE.md et .gitignore (fichiers de l'utilisateur, jamais écrasés)",
        rc == 1 and sorted(rep.get("conflicts", [])) == [".gitignore", "CLAUDE.md"])
     ok("adopté : CLAUDE.md de l'utilisateur intact", (b / "CLAUDE.md").read_bytes() == user_claude)
@@ -410,9 +419,39 @@ try:
     rc_p, rep_p = upgrade_json(p, "--allow-dirty")
     ok("conflits non résolus MÉMORISÉS (lock versionné) : la relance les re-signale (code 1)",
        rc_p == 1 and "en attente" in rep_p.get("status", "") and rep_p.get("conflicts"))
-    rc_a, rep_a = upgrade_json(p, "--allow-dirty", "--ack-conflicts")
+    ok("(l'arbre est bien sale à ce stade : conflits résolus, pas encore committés)", bool(sh(["git", "status", "--porcelain"], cwd=p).stdout.strip()))
+    rc_a, rep_a = upgrade_json(p, "--ack-conflicts")
     lock = json.loads((p / ".claude/template-lock.json").read_text(encoding="utf-8"))
-    ok("--ack-conflicts : conflits marqués résolus, code 0", rc_a == 0 and "pending_conflicts" not in lock)
+    ok("--ack-conflicts SANS --allow-dirty sur l'arbre non commité (le skill acquitte avant le commit) → code 0",
+       rc_a == 0 and "pending_conflicts" not in lock)
+
+    # ── 4d. Constats d'un projet généré (2026-10-02) ─────────────────────────────────────────
+    print("\n== 4d. déductions mode / profil, acquittement ==")
+    p = init_project(base_tag, "python-app", TMP / "gf-mention")
+    us = p / ".claude/USAGE.md"
+    us.write_text(us.read_text(encoding="utf-8")
+                  + "\n- ⚠️ `/init-from-template` a été retiré de ce projet (init faite le 01/09)\n", encoding="utf-8")
+    commit(p, "note perso qui cite /init-from-template")
+    rc, rep = upgrade_json(p, "--dry-run")
+    ok("greenfield + simple mention de `/init-from-template` dans USAGE.md → reste greenfield (déduit), "
+       "sans les conflits parasites du brownfield (.claude/CLAUDE.md, template-maintenance.md)",
+       rc in (0, 1) and (rep.get("mode") or "") == "greenfield (déduit)"
+       and not {".claude/CLAUDE.md", ".claude/rules/template-maintenance.md"} & set(rep.get("conflicts", [])))
+    p = init_project(base_tag, "python-app", TMP / "gf-shipped")
+    us = p / ".claude/USAGE.md"
+    us.write_text(us.read_text(encoding="utf-8")
+                  + "\n|   Nouveau projet   |   `/init-from-template`   |\n", encoding="utf-8")
+    commit(p, "ligne d'inventaire du template, reformatée")
+    rc, rep = upgrade_json(p, "--dry-run")
+    ok("ligne d'inventaire IDENTIQUE au template (colonnes reformatées) → brownfield déduit, indice cité",
+       rc in (0, 1) and rep.get("mode") == "brownfield (déduit)"
+       and any("ligne d'inventaire du template" in w for w in rep.get("warnings", [])))
+    p = init_project(base_tag, "python-app", TMP / "ack-real")
+    (p / "wip.txt").write_text("wip\n")
+    h_ack = tree_hash(p)
+    rc, rep = upgrade_json(p, "--ack-conflicts")
+    ok("--ack-conflicts sur une VRAIE mise à jour (versions différentes) → arbre sale toujours refusé",
+       rc == 2 and tree_hash(p) == h_ack)
 
     p = init_project(base_tag, "python-app", TMP / "rev-gotchas14")
     cm = p / ".claude/docs/code-map.md"
