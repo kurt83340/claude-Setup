@@ -5,6 +5,23 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — `CLAUDE_CONFIG_DIR` respecté par `/archive-projet` et `/doc-health`
+
+Relevé en corrigeant `test_archive` (PR n°13) : avec `CLAUDE_CONFIG_DIR` (un second compte, par
+exemple), ces deux skills cherchaient la mémoire et la config sous `~/.claude`. `/archive-projet`
+annonçait « rien à migrer » et sa commande finale laissait la mémoire derrière ; `context-budget.py`
+sous-comptait le contexte sans le dire.
+
+- Dossier de config = `CLAUDE_CONFIG_DIR`, sinon `~/.claude`, comme `teams.py`, `upgrade.py` et le
+  hook SessionStart. `.claude.json` le suit (vérifié avec Claude Code 2.1.293 et
+  `claude purge --dry-run` : celui du home est alors ignoré). Le rapport d'`/archive-projet` donne
+  le chemin lu.
+- `context-budget.py` : slug de la mémoire aligné sur Claude Code (tout caractère non alphanumérique
+  devient `-`, `_` compris) ; il ne trouvait pas le `MEMORY.md` d'un chemin contenant `_`.
+- `/doc-health`, étape 10 : la mémoire se cherche sous `$CLAUDE_CONFIG_DIR` s'il est défini.
+- `test_archive` +3, `test_context_budget` +2 (portée user, jamais testée jusque-là), rouges sur
+  l'ancien code ; le `CLAUDE_CONFIG_DIR` de la session qui lance les tests ne fuit plus dans le script.
+
 ### Fixed — `test_archive` : faux rouge si le chemin contient « projects »
 
 Constaté à la vérification de la 1.6.0. L'assertion « pas de mv mémoire » cherchait le mot « projects »

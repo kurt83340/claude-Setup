@@ -67,7 +67,9 @@ python3 .claude/skills/archive-projet/scripts/archive-projet.py archive \
 ```
 
 Montrer le résultat : destination, références internes au chemin absolu, référents externes
-détectés (crontab, `~/.claude.json`), auto-memory trouvée ou non. **Attendre le OK.**
+détectés (crontab, `~/.claude.json`), auto-memory trouvée ou non. **Attendre le OK.** Avec
+`CLAUDE_CONFIG_DIR` (un second compte, par exemple), le script cherche la mémoire et
+`.claude.json` dans ce dossier, comme Claude Code.
 
 ### Étape 4 — Exécution réelle (sans `--dry-run`)
 

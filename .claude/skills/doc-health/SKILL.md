@@ -198,7 +198,8 @@ Si > 5 idées vieilles → 🟢 "review idées : promouvoir / discard / archiver
 > (« n'oublie rien ») vient de la **promotion** vers les docs versionnées (rule / leçon / ADR).
 
 1. Localise la mémoire : `autoMemoryDirectory` dans `.claude/settings.json` si défini, sinon
-   `~/.claude/projects/<clé>/memory/MEMORY.md` où `<clé>` = le chemin absolu du repo avec
+   `<config>/projects/<clé>/memory/MEMORY.md` où `<config>` = `$CLAUDE_CONFIG_DIR` s'il est
+   défini, `~/.claude` sinon, et `<clé>` = le chemin absolu du repo avec
    chaque caractère non-alphanumérique remplacé par `-` (ex. `/mnt/e/proj/x` → `-mnt-e-proj-x`).
    (Keyée par repo git : les worktrees partagent la même mémoire.) Lis-la avec le tool Read.
 2. Lis `MEMORY.md` (l'index) + les fichiers de mémoire pointés qui semblent stables.
