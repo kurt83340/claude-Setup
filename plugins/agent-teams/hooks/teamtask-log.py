@@ -23,7 +23,8 @@ def main():
     except Exception:
         sys.exit(0)
 
-    cwd = data.get("cwd") or os.getcwd()
+    # Racine = CLAUDE_PROJECT_DIR (fixe pour la session), pas le cwd du payload, qui suit les `cd`.
+    cwd = os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd()
     if not (Path(cwd) / ".claude").exists():
         sys.exit(0)
 

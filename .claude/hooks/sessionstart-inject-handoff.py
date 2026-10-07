@@ -34,6 +34,15 @@ from pathlib import Path
 from snapshot_common import mark_session_start, purge_stale_cache
 
 
+def racine_projet(data) -> str:
+    """Racine du projet : CLAUDE_PROJECT_DIR (fixe pour la session), sinon le cwd du payload.
+
+    Le cwd du payload suit les `cd` : une session restée dans un sous-dossier ne trouvait plus
+    ni le filet ni le HANDOFF (même règle que posttooluse-growth-detection depuis la PR n°2).
+    """
+    return os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd()
+
+
 def inject_compact_marker(data) -> None:
     """Flux 1 : ré-injection post-compaction via marker par-session."""
     session_id = data.get("session_id", "unknown")
@@ -83,7 +92,7 @@ Le contexte vient d'être compacté. Voici le snapshot HANDOFF.md récent pour r
 
 def inject_session_end_net(data) -> None:
     """Flux 2 : filet fin de session — injecte si plus frais que HANDOFF.md, puis consomme."""
-    cwd = data.get("cwd", os.getcwd())
+    cwd = racine_projet(data)
     snap = Path(cwd) / ".claude" / ".cache" / "session-end-snapshot.md"
     if not snap.exists():
         return
@@ -118,7 +127,7 @@ def rearm_codemap_injection(data) -> None:
     """Post-compaction : efface le marker « gotchas déjà injectés » du hook PreToolUse
     (une injection par (session, fichier)) → la prochaine édition de chaque fichier ré-injecte
     ses gotchas, là où le rappel a de la valeur (le contexte vient d'être résumé)."""
-    cwd = data.get("cwd", os.getcwd())
+    cwd = racine_projet(data)
     sid = re.sub(r"[^\w.-]", "_", str(data.get("session_id", "nosession")))
     try:
         (Path(cwd) / ".claude" / ".cache" / f"codemap-injected-{sid}.json").unlink()
@@ -142,7 +151,7 @@ def warn_context_budget(data) -> None:
         max_tok = BUDGET_MAX_TOK
     if max_tok <= 0:
         return
-    cwd = Path(data.get("cwd", os.getcwd()))
+    cwd = Path(racine_projet(data))
     script = cwd / ".claude" / "skills" / "doc-health" / "scripts" / "context-budget.py"
     if not script.is_file():
         return
@@ -182,7 +191,7 @@ def warn_team_without_plugin(data) -> None:
         return
     if os.environ.get(TEAM_ENV, "").strip().lower() not in ("1", "true", "yes", "on"):
         return
-    root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd())
+    root = Path(racine_projet(data))
     user_dir = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
     plugin, src = None, None
     for label, p in (("local", root / ".claude" / "settings.local.json"),
@@ -221,7 +230,7 @@ def main():
         sys.exit(0)
 
     source = data.get("source")
-    cwd = data.get("cwd", os.getcwd())
+    cwd = racine_projet(data)
     if source in ("compact", None):  # post-compaction (ou schéma historique sans « source »)
         rearm_codemap_injection(data)
         inject_compact_marker(data)

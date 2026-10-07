@@ -643,6 +643,50 @@ shutil.rmtree(sb, ignore_errors=True)
 for _sid in ("sess-A", "sess-B", "sess-M", "sess-OLD", "loop", "cmp", "unknown"):
     (Path(tempfile.gettempdir()) / f"claude-handoff-marker-{_sid}.json").unlink(missing_ok=True)
 
+# 9. Racine = CLAUDE_PROJECT_DIR pour TOUS les hooks : une session restée dans un sous-dossier garde
+#    le même projet. Seul growth-detection le faisait (PR n°2) ; les autres lisaient le cwd du payload,
+#    qui suit les `cd` : aucun gotcha injecté, aucun filet écrit (constaté à la vérification de la 1.6.0).
+print("\n== racine = CLAUDE_PROJECT_DIR, session restée dans un sous-dossier ==")
+sb = sandbox()
+sous = sb / "src"
+sous.mkdir()
+(sb / ".claude/docs/code-map-gotchas.md").write_text(GOTCHAS, encoding="utf-8")
+r = run_hook("pretooluse-inject-codemap.py",
+             {"session_id": "R1", "tool_name": "Edit",
+              "tool_input": {"file_path": str(sb / "src/sync/notion.py")}, "cwd": str(sous)},
+             sous, project_dir=sb)
+ctx = json.loads(r.stdout).get("hookSpecificOutput", {}).get("additionalContext", "") if r.stdout.strip() else ""
+ok("gotchas : fichier du projet édité depuis src/ → gotcha ciblé injecté", "renvoie 200" in ctx)
+run_hook("precompact-snapshot-handoff.py",
+         {"session_id": "R2", "transcript_path": "", "cwd": str(sous), "trigger": "auto"}, sous, project_dir=sb)
+ok("pré-compaction depuis src/ → filet écrit à la racine", (sb / ".claude/.cache/handoff-snapshot-R2.md").exists())
+r = run_hook("sessionstart-inject-handoff.py", {"session_id": "R2", "cwd": str(sous)}, sous, project_dir=sb)
+ok("reprise après compaction depuis src/ → filet ré-injecté", "Re-injection post-compaction" in r.stdout)
+ho = sb / ".claude/docs/HANDOFF.md"
+ho.write_text("# HANDOFF\n")
+for c in (["git", "init", "-q"], ["git", "config", "user.email", "t@t.t"], ["git", "config", "user.name", "t"]):
+    subprocess.run(c, cwd=sb)
+(sb / "src/app.py").write_text("x = 1\n")
+subprocess.run(["git", "add", "-A"], cwd=sb); subprocess.run(["git", "commit", "-qm", "init"], cwd=sb)
+(sb / "src/app.py").write_text("x = 2\n")  # trace git, sans marqueur de début : filet attendu
+run_hook("sessionend-snapshot.py",
+         {"session_id": "R3", "transcript_path": "", "cwd": str(sous), "reason": "other"}, sous, project_dir=sb)
+ok("fin de session depuis src/ → filet écrit à la racine", (sb / ".claude/.cache/session-end-snapshot.md").exists())
+old = time.time() - 3600
+os.utime(ho, (old, old))  # HANDOFF plus vieux que le filet → /handoff oublié
+r = run_hook("sessionstart-inject-handoff.py",
+             {"session_id": "R4", "cwd": str(sous), "source": "startup"}, sous, project_dir=sb)
+ok("démarrage depuis src/ → filet de fin de session injecté", "Filet mémoire" in r.stdout)
+old = time.time() - 48 * 3600
+os.utime(ho, (old, old))  # HANDOFF vieux + dépôt modifié → rappel attendu
+r = run_hook("stop-handoff-reminder.sh", {"cwd": str(sous), "session_id": "R5"}, sous, project_dir=sb)
+ok("fin de tour depuis src/ → rappel du HANDOFF de la racine", "HANDOFF" in r.stdout)
+run_hook("teamtask-log.py", {"hook_event_name": "TaskCreated", "cwd": str(sous), "task_id": "T1"},
+         sous, project_dir=sb)
+ok("plugin agent-teams : trace d'équipe écrite à la racine", (sb / ".claude/.cache/team-progress.log").exists())
+ok("aucun .claude/ parasite dans le sous-dossier", not (sous / ".claude").exists())
+shutil.rmtree(sb, ignore_errors=True)
+
 shutil.rmtree(USER_CFG, ignore_errors=True)
 
 print(f"\n{'🎉 TOUS LES HOOKS OK' if FAIL == 0 else '⚠️  ÉCHEC'} — {PASS} pass, {FAIL} fail")
