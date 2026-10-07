@@ -5,6 +5,16 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — `test_archive` : faux rouge si le chemin contient « projects »
+
+Constaté à la vérification de la 1.6.0. L'assertion « pas de mv mémoire » cherchait le mot « projects »
+dans toute la commande finale, qui contient aussi le chemin du projet : rouge à tort sous un dossier
+`projects/`. Elle vise maintenant le dossier de mémoire lui-même (`<home>/.claude/projects`), et le
+test tourne toujours sous un dossier temporaire en « projects », pour que la CI éprouve ce cas.
+
+- Scénario `feature-done/relire-avant-clore` : ses `assert-contains` (« inconnue », « limite ») viennent
+  de l'état de l'epic et non plus de l'entrée, pour ne réussir que si l'epic a vraiment été relu.
+
 ### Fixed — racine du projet pour tous les hooks (session restée dans un sous-dossier)
 
 Constaté à la vérification de la 1.6.0 : la PR n°2 n'avait corrigé que `posttooluse-growth-detection`.

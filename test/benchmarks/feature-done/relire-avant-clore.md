@@ -4,8 +4,8 @@ skill: feature-done
 input: /feature-done 001-socle quand tous les tasks sont cochés et que l'epic du jalon, dans l'outil de tickets, porte encore une question qu'un ticket enfant a résolue
 state: spec 001 complète (tasks [x], DoD rempli) ; l'epic décrit « limite de l'instance : inconnue », alors qu'un ticket enfant a relevé la limite
 assert-contains:
-  - "epic"
-  - "question"
+  - "inconnue"
+  - "limite"
 assert-not-contains:
   - "{{"
 ---
