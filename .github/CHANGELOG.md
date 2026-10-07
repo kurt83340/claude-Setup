@@ -5,6 +5,14 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-10-07
+
+Huit PR depuis la 1.5.0, toutes nées de l'usage réel du template sur des projets générés : le filet
+mémoire ne dépend plus de l'horloge, `rm` demande l'accord, l'équipe d'agents s'allume et s'éteint,
+`/upgrade-template` déduit mieux le mode et le profil, `/handoff` consigne avant de réécrire,
+`/feature-done` relit avant de clore, et tout le dépôt est au format Prettier. Aucune migration des
+docs d'un projet : `/upgrade-template` suffit.
+
 ### Changed — tout le dépôt au format Prettier (3.9.8, configuration par défaut)
 
 Le hook global de Julien formate chaque fichier édité par Claude Code : une simple retouche d'un
