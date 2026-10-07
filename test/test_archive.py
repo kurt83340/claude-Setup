@@ -55,7 +55,9 @@ def git(root, *args):
     return subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True)
 
 
-with tempfile.TemporaryDirectory() as td:
+# « projects » dans le chemin, exprès : la CI éprouve à chaque passage le cas d'un projet rangé sous
+# un dossier « projects » (vérification de la 1.6.0 : faux rouge sur ce seul cas).
+with tempfile.TemporaryDirectory(prefix="archtest-projects-") as td:
     base = Path(td)
     fake_home = base / "home"
     (fake_home / ".claude" / "projects").mkdir(parents=True)
@@ -149,8 +151,11 @@ with tempfile.TemporaryDirectory() as td:
     ok("--dest custom : exit 0 + marqueur pointe la dest custom",
        r.returncode == 0 and str(dest2) in (p2 / ".claude" / "archived").read_text())
     ok("--dest custom : commande finale utilise la dest custom", f"mv '{p2}' '{dest2}'" in r.stdout)
+    # Le dossier de mémoire (<home>/.claude/projects/…) ne doit pas apparaître ; le mot « projects »
+    # seul, si : il peut figurer dans le chemin du projet (vérif. 1.6.0, dossier temporaire en « projects »).
     ok("sans auto-memory : note « rien à migrer », pas de mv mémoire",
-       "rien à migrer" in r.stdout and "projects" not in r.stdout.split("COMMANDE FINALE")[-1])
+       "rien à migrer" in r.stdout
+       and str(fake_home / ".claude" / "projects") not in r.stdout.split("COMMANDE FINALE")[-1])
     back2 = base / "retour" / "projet_y"
     r = run(fake_home, "restore", "--root", str(p2), "--dest", str(back2))
     ok("restore --dest override : commande vers la nouvelle cible", f"mv '{p2}' '{back2}'" in r.stdout)
