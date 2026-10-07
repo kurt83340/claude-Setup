@@ -218,7 +218,7 @@ Claude va :
 1. Lire git status + log + diff + tests
 2. Lire HANDOFF.md actuel
 3. Te proposer un nouveau HANDOFF **réécrit** (≤ 40 lignes, jamais empilé : status / échecs / blockers / next steps
-   + **Continuation State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
+   - **Continuation State** : 5 clés `Clé: valeur` machine-readable — le point de reprise parseable)
 4. Te demander confirmation avant d'écrire, puis ajouter 1 ligne à `HANDOFF-journal.md` (non auto-chargé)
 
 Toujours **dans la session qui a travaillé** : elle seule a la conversation (échecs tentés, blockers) — jamais
@@ -267,61 +267,61 @@ Claude va :
 
 Audit complet qui scanne sans modifier :
 
-| Check                                                   | Seuil                          | Priorité |
-| ------------------------------------------------------- | ------------------------------ | -------- |
-| Budget de contexte auto-chargé (`context-budget.py`)    | > 25k tokens                   | 🔴       |
-| Fraîcheur HANDOFF                                       | > 7j                           | 🔴       |
-| Growth triggers (API_KEY → ACCESS.md, deploy → RUNBOOK) | > 5 hits                       | 🟢       |
-| ADRs manquants (décisions dans plan.md sans ADR)        | ratio > 5                      | 🟢       |
-| Leçons `🆕 new` en attente                              | > 5 ou >14j                    | 🟠       |
-| Drift code-map vs code                                  | dernier commit > date code-map | 🟠       |
-| Placeholders **CORE** non remplis (`{{UPPER_SNAKE}}`)   | > 0                            | 🔴       |
-| Placeholders **CONTENT** non remplis (`{{libre}}`)      | informationnel — pas un signal | 🟢       |
-| ADRs sans status valide                                 | > 0                            | 🔴       |
-| Specs `[~]` EN COURS stalled                            | > 30j                          | 🟠       |
-| Incohérence ROADMAP ↔ frontmatter `status:` des specs   | > 0                            | 🟠       |
+| Check                                                    | Seuil                          | Priorité |
+| -------------------------------------------------------- | ------------------------------ | -------- |
+| Budget de contexte auto-chargé (`context-budget.py`)     | > 25k tokens                   | 🔴       |
+| Fraîcheur HANDOFF                                        | > 7j                           | 🔴       |
+| Growth triggers (API_KEY → ACCESS.md, deploy → RUNBOOK)  | > 5 hits                       | 🟢       |
+| ADRs manquants (décisions dans plan.md sans ADR)         | ratio > 5                      | 🟢       |
+| Leçons `🆕 new` en attente                               | > 5 ou >14j                    | 🟠       |
+| Drift code-map vs code                                   | dernier commit > date code-map | 🟠       |
+| Placeholders **CORE** non remplis (`{{UPPER_SNAKE}}`)    | > 0                            | 🔴       |
+| Placeholders **CONTENT** non remplis (`{{libre}}`)       | informationnel — pas un signal | 🟢       |
+| ADRs sans status valide                                  | > 0                            | 🔴       |
+| Specs `[~]` EN COURS stalled                             | > 30j                          | 🟠       |
+| Incohérence ROADMAP ↔ frontmatter `status:` des specs    | > 0                            | 🟠       |
 | Instructions mortes dans les skills (refs `/x`, chemins) | > 0                            | 🟠       |
-| Idées sans décision                                     | > 30j                          | 🟢       |
-| Liens cassés dans docs                                  | > 0                            | 🔴       |
-| Patterns auto-memory stables non consolidés             | informationnel                 | 🟢       |
+| Idées sans décision                                      | > 30j                          | 🟢       |
+| Liens cassés dans docs                                   | > 0                            | 🔴       |
+| Patterns auto-memory stables non consolidés              | informationnel                 | 🟢       |
 
 Rapport généré → tu suis les actions par priorité.
 
 ## 📋 Cheat sheet — Quand utiliser quoi
 
-| Situation                                  | Skill / Action                                                                |
-| ------------------------------------------ | ----------------------------------------------------------------------------- |
-| Nouveau projet                             | `/init-from-template`                                                         |
-| Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)   |
-| Mettre à jour la méthode (template récent) | `/upgrade-template [vX.Y.Z]` — merge 3 voies, conflits signalés, doc intacte  |
-| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                             |
-| Dérouler le pipeline complet (avec gates)  | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done                             |
-| Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse) |
-| Fin de session                             | `/handoff`                                                                    |
-| Feature livrée                             | `/feature-done <spec-id>`                                                     |
-| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                                      |
-| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`                               |
-| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                                    |
-| Débugger un bug non trivial                | `/debug "<symptôme>"` (repro → cause → fix minimal → leçon)                   |
-| Idée perso à capturer                      | `/idee "<titre>"`                                                             |
-| Refacto majeur sur le code                 | `/codemap`                                                                    |
-| Créer un skill / agent / pipeline conforme | `/scaffold skill·agent·pipeline "<nom>"` — conventions + référencement auto  |
-| Audit hebdo                                | `/doc-health`                                                                 |
-| BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)          |
-| Doc en lot (livraisons, audit + actions)   | agent `doc-maintainer` (Task) — jamais le HANDOFF                             |
+| Situation                                  | Skill / Action                                                                               |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Nouveau projet                             | `/init-from-template`                                                                        |
+| Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)                  |
+| Mettre à jour la méthode (template récent) | `/upgrade-template [vX.Y.Z]` — merge 3 voies, conflits signalés, doc intacte                 |
+| Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                                            |
+| Dérouler le pipeline complet (avec gates)  | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done |
+| Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse)                |
+| Fin de session                             | `/handoff`                                                                                   |
+| Feature livrée                             | `/feature-done <spec-id>`                                                                    |
+| Décision tech structurante (cross-feature) | `/adr <scope> "<titre>"`                                                                     |
+| Décision tech locale à 1 feature           | Section `## Décisions` dans `specs/00X/plan.md`                                              |
+| Bug/observation à noter rapidement         | `/lecon <scope> "<titre>"`                                                                   |
+| Débugger un bug non trivial                | `/debug "<symptôme>"` (repro → cause → fix minimal → leçon)                                  |
+| Idée perso à capturer                      | `/idee "<titre>"`                                                                            |
+| Refacto majeur sur le code                 | `/codemap`                                                                                   |
+| Créer un skill / agent / pipeline conforme | `/scaffold skill·agent·pipeline "<nom>"` — conventions + référencement auto                  |
+| Audit hebdo                                | `/doc-health`                                                                                |
+| BDD migration (Alembic)                    | plugin `db-migration` (`/plugin install db-migration@claude-setup`)                          |
+| Doc en lot (livraisons, audit + actions)   | agent `doc-maintainer` (Task) — jamais le HANDOFF                                            |
 | Déléguer une feature à une équipe          | `/agent-teams:team <spec-id>` (plugin, opt-in — `on` · `off` · `status` pour l'interrupteur) |
-| Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                           |
-| Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                       |
-| Promotion idée → spec                      | `/idee promote <date>`                                                        |
-| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                                       |
-| Lister tous les ADRs                       | `/adr list [scope]`                                                           |
-| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                                           |
-| Projet terminé/abandonné → archiver        | `/archive-projet "<raison>"` — bilan + marquage + move vers `_archives/`      |
-| Reprendre un projet archivé                | `/archive-projet restore`                                                     |
-| Reprendre exactement où on en était        | `/resume` (built-in Claude)                                                   |
-| Compaction context (auto)                  | RIEN — hooks gèrent                                                           |
-| Édition fichier code (auto)                | RIEN — hook injecte les gotchas qui ciblent ce fichier                        |
-| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                                      |
+| Pivot client                               | `/pivot "<raison>"` (workflow 9 étapes orchestrées)                                          |
+| Promotion leçon → ADR / rule               | `/lecon promote <date>`                                                                      |
+| Promotion idée → spec                      | `/idee promote <date>`                                                                       |
+| Supersede un ADR                           | `/adr supersede <NN> <scope> "<titre>"`                                                      |
+| Lister tous les ADRs                       | `/adr list [scope]`                                                                          |
+| Archiver leçons/idées vieilles             | `/lecon archive` ou `/idee archive`                                                          |
+| Projet terminé/abandonné → archiver        | `/archive-projet "<raison>"` — bilan + marquage + move vers `_archives/`                     |
+| Reprendre un projet archivé                | `/archive-projet restore`                                                                    |
+| Reprendre exactement où on en était        | `/resume` (built-in Claude)                                                                  |
+| Compaction context (auto)                  | RIEN — hooks gèrent                                                                          |
+| Édition fichier code (auto)                | RIEN — hook injecte les gotchas qui ciblent ce fichier                                       |
+| Mention API_KEY/deploy dans code (auto)    | RIEN — hook flag dans growth-suggestions                                                     |
 
 ## 🔁 Workflow type pour une feature complète
 
@@ -540,14 +540,14 @@ contexte vide (ni échecs tentés, ni blockers) et ne peut pas obtenir ta valida
 
 ### Quand préférer l'agent vs un skill
 
-| Tu veux                                                 | Préfère                                  |
-| ------------------------------------------------------- | ---------------------------------------- |
-| 1 action ciblée rapide (< 1 min)                        | Skill (`/adr`, `/lecon`, etc.)           |
+| Tu veux                                                 | Préfère                                     |
+| ------------------------------------------------------- | ------------------------------------------- |
+| 1 action ciblée rapide (< 1 min)                        | Skill (`/adr`, `/lecon`, etc.)              |
 | Fin de session (HANDOFF)                                | `/handoff` — toujours dans le fil principal |
-| Plusieurs specs livrées d'un coup (ROADMAP + CHANGELOG) | Agent `doc-maintainer`                   |
-| Pivot client (9 étapes)                                 | `/pivot` (l'agent peut le pré-remplir)   |
-| Audit + actions (vs juste audit)                        | Agent                                    |
-| Promotion multiple leçons → ADRs en une passe           | Agent                                    |
+| Plusieurs specs livrées d'un coup (ROADMAP + CHANGELOG) | Agent `doc-maintainer`                      |
+| Pivot client (9 étapes)                                 | `/pivot` (l'agent peut le pré-remplir)      |
+| Audit + actions (vs juste audit)                        | Agent                                       |
+| Promotion multiple leçons → ADRs en une passe           | Agent                                       |
 
 ### Comment l'invoquer
 
@@ -614,17 +614,17 @@ mode normal (les `allow`/`ask` du template existent pour ça).
 
 ## 🤖 Comprendre les hooks automatiques
 
-| Hook                       | Quand ça se déclenche         | Ce que ça fait                            |
-| -------------------------- | ----------------------------- | ----------------------------------------- |
-| `PreCompact`               | Avant compaction du contexte  | Snapshot (git + derniers messages humains) dans `.claude/.cache/` (non-versionné) + marker `/tmp/` |
-| `SessionStart` (compact)   | Reprise après compaction      | Re-inject le snapshot + ré-arme l'injection des gotchas |
-| `SessionEnd`               | Fin de session **sans `/handoff`** ayant laissé une trace git (commit ou arbre modifié) | Filet « n'oublie rien » : snapshot (git + derniers messages humains) dans `.claude/.cache/`. Rien après un `/handoff` ni après une session sans trace (v1.5 : fini la fausse alerte à chaque démarrage) |
-| `SessionStart` (startup)   | Nouveau démarrage             | Marqueur de début de session (heure + empreinte git) ; purge du cache par-session > 7 j ; injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme ; **filet budget** : surface auto-chargée > 25k tokens → coupables + remède injectés (`CLAUDE_CONTEXT_BUDGET_MAX`, 0 = off) |
-| `SessionStart` (resume · clear) | `claude --resume`, `/clear` | Marqueur de début de session (base du filet `SessionEnd`) |
-| `PreToolUse(Edit\|Write)`  | Édition d'un fichier de code du projet (hors `.claude/`, docs, config) | Gotchas de `code-map-gotchas.md` qui **ciblent ce fichier**, 1×/fichier/session (ré-armé après compaction) — arrivent avec le résultat de l'outil, juste après l'édition. Couplage + intention : déjà en contexte via `code-map.md` |
-| `PostToolUse(Edit\|Write)` | Après Edit/Write fichier      | Détecte API_KEY/deploy/RGPD → flag growth |
-| `Stop`                     | Fin de tour Claude            | Rappel `/handoff` si HANDOFF > 24h + changements git — **1×/session** ; **garde-fou taille** : HANDOFF > 12 Ko → rappel 1×/session (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off) |
-| `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (plugin `agent-teams`) | Trace JSON dans `.claude/.cache/team-progress.log` |
+| Hook                                         | Quand ça se déclenche                                                                   | Ce que ça fait                                                                                                                                                                                                                                                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PreCompact`                                 | Avant compaction du contexte                                                            | Snapshot (git + derniers messages humains) dans `.claude/.cache/` (non-versionné) + marker `/tmp/`                                                                                                                                                                                                         |
+| `SessionStart` (compact)                     | Reprise après compaction                                                                | Re-inject le snapshot + ré-arme l'injection des gotchas                                                                                                                                                                                                                                                    |
+| `SessionEnd`                                 | Fin de session **sans `/handoff`** ayant laissé une trace git (commit ou arbre modifié) | Filet « n'oublie rien » : snapshot (git + derniers messages humains) dans `.claude/.cache/`. Rien après un `/handoff` ni après une session sans trace (v1.5 : fini la fausse alerte à chaque démarrage)                                                                                                    |
+| `SessionStart` (startup)                     | Nouveau démarrage                                                                       | Marqueur de début de session (heure + empreinte git) ; purge du cache par-session > 7 j ; injecte le filet fin-de-session s'il est plus frais que HANDOFF.md, puis le consomme ; **filet budget** : surface auto-chargée > 25k tokens → coupables + remède injectés (`CLAUDE_CONTEXT_BUDGET_MAX`, 0 = off) |
+| `SessionStart` (resume · clear)              | `claude --resume`, `/clear`                                                             | Marqueur de début de session (base du filet `SessionEnd`)                                                                                                                                                                                                                                                  |
+| `PreToolUse(Edit\|Write)`                    | Édition d'un fichier de code du projet (hors `.claude/`, docs, config)                  | Gotchas de `code-map-gotchas.md` qui **ciblent ce fichier**, 1×/fichier/session (ré-armé après compaction) — arrivent avec le résultat de l'outil, juste après l'édition. Couplage + intention : déjà en contexte via `code-map.md`                                                                        |
+| `PostToolUse(Edit\|Write)`                   | Après Edit/Write fichier                                                                | Détecte API_KEY/deploy/RGPD → flag growth                                                                                                                                                                                                                                                                  |
+| `Stop`                                       | Fin de tour Claude                                                                      | Rappel `/handoff` si HANDOFF > 24h + changements git — **1×/session** ; **garde-fou taille** : HANDOFF > 12 Ko → rappel 1×/session (`CLAUDE_HANDOFF_MAX_BYTES`, 0 = off)                                                                                                                                   |
+| `TaskCreated`/`TaskCompleted`/`TeammateIdle` | Événements d'équipe (plugin `agent-teams`)                                              | Trace JSON dans `.claude/.cache/team-progress.log`                                                                                                                                                                                                                                                         |
 
 **Tous non-bloquants** : si un hook échoue, Claude continue. Lancés via `python3 …` / `bash …` depuis
 `settings.json` — pas de `chmod +x` à faire.
@@ -843,17 +843,17 @@ plugins, MCP) se voit aussi dans le rapport (`user, hors projet`).
 
 ## 📚 Aller plus loin
 
-| Fichier                                                                        | Pour quoi                                                       |
-| ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| [STRUCTURE.md](STRUCTURE.md)                                                   | **Référence** : arborescence + conventions (naming, ADR, statuts, diagrammes, quand créer) |
-| [CLAUDE.md](../CLAUDE.md)                                                      | Index **projet** : résumé + nav doc + conventions               |
-| [.claude/CLAUDE.md](CLAUDE.md)                                         | Index **méthode** (mince) : où est quoi, pipelines, agents, plugins, version |
-| [.claude/skills/README.md](skills/README.md)                           | Inventaire canonique des skills (CI-vérifié) + conventions      |
-| [.claude/rules/template-maintenance.md](rules/template-maintenance.md) | Invariants d'écriture de la doc (chargée quand Claude lit `.claude/docs/`) |
-| [.claude/docs/adr/README.md](docs/adr/README.md)                       | Convention ADRs détaillée                                       |
-| [.claude/docs/conception/README.md](docs/conception/README.md)         | Pattern mirror macro/micro                                      |
-| [.claude/docs/cadrage/README.md](docs/cadrage/README.md)               | Template cadrage initial                                        |
-| `EXAMPLES/acme-sync-erp-notion-docs/`                                          | Exemple rempli (repo template ; exclu de ton projet par l'init) |
+| Fichier                                                                | Pour quoi                                                                                  |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [STRUCTURE.md](STRUCTURE.md)                                           | **Référence** : arborescence + conventions (naming, ADR, statuts, diagrammes, quand créer) |
+| [CLAUDE.md](../CLAUDE.md)                                              | Index **projet** : résumé + nav doc + conventions                                          |
+| [.claude/CLAUDE.md](CLAUDE.md)                                         | Index **méthode** (mince) : où est quoi, pipelines, agents, plugins, version               |
+| [.claude/skills/README.md](skills/README.md)                           | Inventaire canonique des skills (CI-vérifié) + conventions                                 |
+| [.claude/rules/template-maintenance.md](rules/template-maintenance.md) | Invariants d'écriture de la doc (chargée quand Claude lit `.claude/docs/`)                 |
+| [.claude/docs/adr/README.md](docs/adr/README.md)                       | Convention ADRs détaillée                                                                  |
+| [.claude/docs/conception/README.md](docs/conception/README.md)         | Pattern mirror macro/micro                                                                 |
+| [.claude/docs/cadrage/README.md](docs/cadrage/README.md)               | Template cadrage initial                                                                   |
+| `EXAMPLES/acme-sync-erp-notion-docs/`                                  | Exemple rempli (repo template ; exclu de ton projet par l'init)                            |
 
 ## 🎯 Philosophie
 

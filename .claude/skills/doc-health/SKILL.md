@@ -41,12 +41,13 @@ stat -c "%y %n" .claude/docs/cadrage/README.md
 ```
 
 Seuils :
-| Fichier | Vert | 🟠 Orange | 🔴 Rouge |
-|---|---|---|---|
-| .claude/docs/HANDOFF.md | < 3j | 3-7j | > 7j |
-| .claude/docs/ROADMAP.md | < 7j | 7-14j | > 14j |
-| .claude/docs/CHANGELOG.md | < 14j (si livraison récente) | — | > 30j sans entry |
-| .claude/docs/ACCESS.md | — | — | > 30j (peut-être obsolète) |
+
+| Fichier                   | Vert                         | 🟠 Orange | 🔴 Rouge                   |
+| ------------------------- | ---------------------------- | --------- | -------------------------- |
+| .claude/docs/HANDOFF.md   | < 3j                         | 3-7j      | > 7j                       |
+| .claude/docs/ROADMAP.md   | < 7j                         | 7-14j     | > 14j                      |
+| .claude/docs/CHANGELOG.md | < 14j (si livraison récente) | —         | > 30j sans entry           |
+| .claude/docs/ACCESS.md    | —                            | —         | > 30j (peut-être obsolète) |
 
 ## Étape 2 — Growth opportunities
 

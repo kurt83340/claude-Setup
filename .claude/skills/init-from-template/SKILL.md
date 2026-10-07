@@ -130,14 +130,14 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
 ### Profils
 
-| Type             | Impact   | Ce que ça supprime |
-| ---------------- | -------- | ------------------ |
+| Type             | Impact   | Ce que ça supprime                                                                                                                                                                                                                                     |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `script-jetable` | **-80%** | Toute la conception (PRD/ARCHITECTURE/specs), ADRs, idees, ROADMAP, RUNBOOK, code-map, stack, ACCESS, GLOSSARY, hooks code, agents, skills overkill (adr/codemap/doc-health/feature-done/spec/idee…). **Garde** `lecons.md` (cible du `/lecon` vital). |
-| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement), rules web |
-| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules web (`code-style-web`, `testing-web`) |
-| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules Python (`code-style`, `testing`) |
-| `bdd-migration`  | léger    | `workflows/`, rules web |
-| `other`          | aucun    | rien — projet hors cases (Go, Rust, data…) : les rules de code scopées restent inertes tant qu'aucun fichier de leur langage n'est lu |
+| `automation-n8n` | léger    | `.claude/docs/RUNBOOK.md` (créé post-prod uniquement), rules web                                                                                                                                                                                       |
+| `python-app`     | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules web (`code-style-web`, `testing-web`)                                                                                                                                                                   |
+| `web-app`        | moyen    | `workflows/`, `.claude/docs/RUNBOOK.md`, rules Python (`code-style`, `testing`)                                                                                                                                                                        |
+| `bdd-migration`  | léger    | `workflows/`, rules web                                                                                                                                                                                                                                |
+| `other`          | aucun    | rien — projet hors cases (Go, Rust, data…) : les rules de code scopées restent inertes tant qu'aucun fichier de leur langage n'est lu                                                                                                                  |
 
 **Skills stack = PLUGINS (plus de copie)** — **vérifier AVANT de proposer** (un plugin déjà en user-scope couvre déjà ce projet — refaire `marketplace add` = re-clone inutile du repo) :
 
@@ -149,6 +149,7 @@ python3 .claude/skills/init-from-template/scripts/cleanup-for-type.py \
 
   - **Déjà installé** (scope `user`, enabled) → confirmer en **UNE ligne** (« ✅ plugin `n8n-mcp-skills` déjà installé en global (vX.Y.Z) — rien à faire ») et passer à la suite. Ne PAS refaire `marketplace add`, ne PAS proposer d'install par projet.
   - **Absent** → proposer l'install **user-scope** (une fois, couvre tous les projets) : `claude plugin marketplace add czlonkowski/n8n-skills` puis `claude plugin install n8n-mcp-skills@n8n-mcp-skills --scope user`
+
 - `bdd-migration` → (marketplace ajouté) `claude plugin install db-migration@claude-setup --scope project`
 
   Les plugins sont **auto-découverts** (aucun ajout à `.claude/CLAUDE.md`). Skills namespacés `/n8n-mcp-skills:<skill>`.

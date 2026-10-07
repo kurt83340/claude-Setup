@@ -134,7 +134,6 @@ chaque session et le journal grossit sans borne ; mesuré 25k tokens sur un proj
 > 1 ligne par session, ajoutée par `/handoff`, **jamais réécrite**. Non auto-chargé : lu à la demande.
 
 ## Journal
-
 ```
 
 2. **Migration** (projet < v1.4) : si HANDOFF.md contient encore une section `## Journal` → déplacer

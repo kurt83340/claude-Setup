@@ -39,7 +39,7 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
      **1-2 skills voisins existants** (c'est ce qui évite le mauvais routage, pas la description) ;
    - `> **Réversibilité** : 🟢|🟠|🔴 <ce que ça écrit> — undo : <commande littérale>.`
 4. **Référence (exigé par la CI)** : ajoute la ligne `- \`/<nom>\` — <1 ligne>` dans l'inventaire
-   de [`.claude/skills/README.md`](../README.md), dans la section adaptée.
+de [`.claude/skills/README.md`](../README.md), dans la section adaptée.
 5. Rappels : fichiers de support possibles (`templates/`, `scripts/`) ; pris en compte à chaud
    (ou `/reload-skills`) ; **sur le repo template**, un scénario benchmark
    `test/benchmarks/<nom>/<cas>.md` est bienvenu (format : `test/benchmarks/README.md`).
@@ -64,20 +64,23 @@ rend **impossibles à oublier** : il les encode à la création. Tu ne retiens p
 
 **A. Dirigé — tu dictes.** Tu donnes l'ordre des étapes et, pour chacune, le maillon
 (skill `/x`, subagent `y`, outil MCP, commande). Le skill :
+
 - **vérifie que CHAQUE maillon existe** (skills cœur, plugins installés, agents, MCP
   connectés) — maillon absent = le dire + proposer l'alternative (install du plugin, variante) ;
 - complète chaque étape d'un **critère de sortie vérifiable** (proposé, tu ajustes) ;
 - impose **Persister** en dernière étape.
 
 **B. Proposé — il conçoit.** Tu décris la tâche récurrente (1-3 phrases). Le skill :
+
 - inventorie les maillons **disponibles ici** (skills, agents, plugins, MCP) ;
 - mappe sur la **grammaire** `Planifier → Exécuter → Tester → Review adverse → Vérifier →
-  Persister` en instanciant chaque étape avec les maillons les plus adaptés (une étape peut
+Persister` en instanciant chaque étape avec les maillons les plus adaptés (une étape peut
   changer de nature selon le contexte — cf. pipeline `n8n` vs `tdd`) ;
 - propose LE pipeline (+ 1 variante seulement si un vrai trade-off existe), **justification
   par étape** ; tu ajustes, il fige.
 
 Dans les deux cas, à la fin :
+
 - **validation structurelle** : maillons existants, un critère par étape, Persister final ;
 - crée `.claude/skills/feature/pipelines/<nom>.md` (format du SKILL `/feature`) —
   **auto-découvert** par `/feature`, rien d'autre à câbler ;

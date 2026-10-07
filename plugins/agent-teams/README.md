@@ -3,13 +3,13 @@
 > **Exécution d'équipe** du template claude-Setup, packagée en plugin Claude Code installable par projet.
 > Marketplace `claude-setup` (racine du repo : [`.claude-plugin/marketplace.json`](../../.claude-plugin/marketplace.json)).
 
-| Composant | Quoi |
-| --- | --- |
-| Skill [`team`](skills/team/SKILL.md) → **`/agent-teams:team <spec-id>`** | Orchestre une équipe de teammates tmux : plan validé, 1 worktree/codeur, task list native, TDD opt-in, suivi, merge, débrief mémoire, clôture |
-| Agents [`worker`](agents/worker.md) · [`front-end`](agents/front-end.md) · [`back-end`](agents/back-end.md) · [`tester`](agents/tester.md) | **Rôles d'exécution** teammate (généraliste, UI, serveur, QA) — auto-découverts à l'installation |
-| Hook [`team-invariants.py`](hooks/team-invariants.py) (PreToolUse `Agent` + SessionStart compact/clear) | Invariants d'équipe **au spawn** : § Teammate ajouté au prompt de chaque teammate, § Lead au lead (1×/session, ré-armé après compaction) |
-| Script [`teams.py`](skills/team/scripts/teams.py) → **`/agent-teams:team on · off · status`** | Interrupteur : flag + `teammateMode` dans les settings (local > projet > user), retrait d'une rule héritée |
-| Hook [`teamtask-log.py`](hooks/teamtask-log.py) (TaskCreated/TaskCompleted/TeammateIdle) | Trace JSON de progression d'équipe → `.claude/.cache/team-progress.log` |
+| Composant                                                                                                                                  | Quoi                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skill [`team`](skills/team/SKILL.md) → **`/agent-teams:team <spec-id>`**                                                                   | Orchestre une équipe de teammates tmux : plan validé, 1 worktree/codeur, task list native, TDD opt-in, suivi, merge, débrief mémoire, clôture |
+| Agents [`worker`](agents/worker.md) · [`front-end`](agents/front-end.md) · [`back-end`](agents/back-end.md) · [`tester`](agents/tester.md) | **Rôles d'exécution** teammate (généraliste, UI, serveur, QA) — auto-découverts à l'installation                                              |
+| Hook [`team-invariants.py`](hooks/team-invariants.py) (PreToolUse `Agent` + SessionStart compact/clear)                                    | Invariants d'équipe **au spawn** : § Teammate ajouté au prompt de chaque teammate, § Lead au lead (1×/session, ré-armé après compaction)      |
+| Script [`teams.py`](skills/team/scripts/teams.py) → **`/agent-teams:team on · off · status`**                                              | Interrupteur : flag + `teammateMode` dans les settings (local > projet > user), retrait d'une rule héritée                                    |
+| Hook [`teamtask-log.py`](hooks/teamtask-log.py) (TaskCreated/TaskCompleted/TeammateIdle)                                                   | Trace JSON de progression d'équipe → `.claude/.cache/team-progress.log`                                                                       |
 
 ## Opt-in : rien dans le cœur, rien d'auto-chargé (v1.5.0 du template, plugin 1.2.0)
 

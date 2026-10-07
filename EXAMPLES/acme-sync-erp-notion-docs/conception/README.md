@@ -48,11 +48,11 @@ Convention diagrammes détaillée : voir [diagrams/README.md](diagrams/README.md
 Tu apprends UN pattern, tu l'appliques à 2 niveaux dans CE dossier :
 
 | Macro (`conception/`) | Micro (`specs/00X-feature/`) | Question                                        |
-| --------------------- | --------------------------------------- | ----------------------------------------------- |
-| `research.md`         | `research.md`                           | Quelles options on a explorées ?                |
-| `PRD.md`              | `spec.md`                               | Qu'est-ce qu'on construit et pourquoi ?         |
-| `ARCHITECTURE.md`     | `plan.md`                               | Comment on l'implémente ?                       |
-| `tasks.md`            | `tasks.md`                              | Quoi exécuter, dans quel ordre, avec quel DoD ? |
+| --------------------- | ---------------------------- | ----------------------------------------------- |
+| `research.md`         | `research.md`                | Quelles options on a explorées ?                |
+| `PRD.md`              | `spec.md`                    | Qu'est-ce qu'on construit et pourquoi ?         |
+| `ARCHITECTURE.md`     | `plan.md`                    | Comment on l'implémente ?                       |
+| `tasks.md`            | `tasks.md`                   | Quoi exécuter, dans quel ordre, avec quel DoD ? |
 
 → `../ROADMAP.md` (racine) = **dashboard vivant** qui agrège le status (sync depuis `specs/00X/tasks.md`).
 
