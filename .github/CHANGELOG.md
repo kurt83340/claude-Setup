@@ -5,6 +5,22 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — tout le dépôt au format Prettier (3.9.8, configuration par défaut)
+
+Le hook global de Julien formate chaque fichier édité par Claude Code : une simple retouche d'un
+fichier pas encore au format ajoutait des centaines de lignes de mise en forme au vrai changement
+(163 lignes de `USAGE.md` pour un paragraphe). Julien a préféré mettre le dépôt au format plutôt que
+brider le hook.
+
+- **Fichiers mis au format sans autre changement** : structure CommonMark identique avant et après,
+  vérifiée fichier par fichier ; seul l'en-tête YAML d'`archive-projet` change de guillemets, pour la
+  même valeur.
+- **Deux gabarits Markdown placés dans des blocs de code** (`feature/SKILL.md`,
+  `test/PROTOCOL-E2E.md`) marqués `<!-- prettier-ignore -->` : Prettier reformate le Markdown d'un
+  bloc de code, et y aurait indenté une ligne de gabarit ou avalé deux lignes dans un tableau. Tout
+  nouveau gabarit Markdown dans un bloc de code demande la même marque.
+- **CI** : `npx --yes prettier@3.9.8 --check .`, même version que le hook.
+
 ### Changed — `/feature-done` : relire le ticket ou l'epic avant de le clore
 
 Vécu sur node4jPOC (2026-10-07) : un epic s'est fermé en disant encore « la limite d'AuraDB Free est
@@ -165,10 +181,10 @@ Jusqu'ici un projet était une copie figée (37 versions en 3 mois ; aucun corre
   puis fichier de méthode par fichier : projet = base → cible · template inchangé → projet gardé ·
   les deux ont bougé → `git merge-file` (fusion JSON 3 voies pour `settings.json` : règles, hooks
   clés (événement, matcher, commande), clés imbriquées) ; **conflit → fichier du projet gardé**, cible
-  + merge annoté dans `.claude/.cache/upgrade-<v>/` + `REPORT.md`. `.claude/docs/` n'est jamais
-  fusionné : migrations versionnées idempotentes (< 1.4.0 → `slim-context.py` ; 1.5.0 → note
-  multi-agent du gabarit HANDOFF). Arbre git sale refusé, `--dry-run`, `--json`, équipe d'agents
-  active préservée.
+  - merge annoté dans `.claude/.cache/upgrade-<v>/` + `REPORT.md`. `.claude/docs/` n'est jamais
+    fusionné : migrations versionnées idempotentes (< 1.4.0 → `slim-context.py` ; 1.5.0 → note
+    multi-agent du gabarit HANDOFF). Arbre git sale refusé, `--dry-run`, `--json`, équipe d'agents
+    active préservée.
 - **Skill `/upgrade-template`** (manuel) : clone, dry-run montré, validation, application, conflits
   résolus avec l'utilisateur, vérifications, commit. Projets < 1.5 : one-liner dans le README.
 - **`.claude/template-lock.json`** écrit à l'init (version, profil, mode, source).
@@ -472,9 +488,9 @@ Hors template (socle ~29k) : `~/.claude/CLAUDE.md` et le hook SessionStart du pl
   Encodé dans `rules/agent-teams.md` § Lead : sous-section **Spawn** (toujours depuis la
   racine, `cd "$(git rev-parse --show-toplevel)"`) + § Suivi (**teammate silencieux ≠ mort** :
   `tmux capture-pane -p -t <pane>` avant respawn ; déblocage `tmux -L <socket> send-keys -t
-  <pane> Enter`, socket via `ls /tmp/tmux-$UID/`). Relayé dans `/agent-teams:team` (Étapes 4-5
-  + anti-patterns) et `/init-from-template` Étape 0 (l'approbation d'imports est
-  machine-locale, non shippable).
+<pane> Enter`, socket via `ls /tmp/tmux-$UID/`). Relayé dans `/agent-teams:team` (Étapes 4-5
+  - anti-patterns) et `/init-from-template` Étape 0 (l'approbation d'imports est
+    machine-locale, non shippable).
 
 ## [1.2.1] — 2026-07-13
 

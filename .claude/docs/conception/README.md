@@ -20,8 +20,8 @@
 
 ### Niveau MICRO (une feature)
 
-| Dossier                        | Quoi                                                       |
-| ------------------------------ | ---------------------------------------------------------- |
+| Dossier                           | Quoi                                                       |
+| --------------------------------- | ---------------------------------------------------------- |
 | [`specs/00X-feature/`](../specs/) | 1 dossier par feature avec `{research,spec,plan,tasks}.md` |
 
 ### Diagrammes
