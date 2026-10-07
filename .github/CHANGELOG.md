@@ -5,6 +5,13 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.6.1] — 2026-10-07
+
+Trois correctifs nés de la vérification de la 1.6.0 : tous les hooks prennent la racine du projet,
+même quand la session reste dans un sous-dossier ; `test_archive` ne rougit plus à tort sous un
+dossier `projects/` ; `/archive-projet` et `/doc-health` respectent `CLAUDE_CONFIG_DIR`. Plugin
+`agent-teams` en 1.2.1. Aucune migration des docs d'un projet : `/upgrade-template` suffit.
+
 ### Fixed — `CLAUDE_CONFIG_DIR` respecté par `/archive-projet` et `/doc-health`
 
 Relevé en corrigeant `test_archive` (PR n°13) : avec `CLAUDE_CONFIG_DIR` (un second compte, par
