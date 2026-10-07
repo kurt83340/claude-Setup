@@ -7,6 +7,8 @@
   - slim-context.py : migration idempotente d'un projet < v1.4 — journal HANDOFF et gotchas code-map
     déplacés SANS perte, ROADMAP et rules scopées en lien simple, --dry-run sans effet, rejouable.
   - le template vierge tient sous le seuil CI.
+  - portée user : `CLAUDE.md` user et `MEMORY.md` lus dans `$CLAUDE_CONFIG_DIR` s'il est défini,
+    sinon sous `~/.claude` ; slug de la mémoire = tout caractère non alphanumérique → `-`.
 
 Origine : 2026-09-08 — un projet généré d'un mois démarrait à 144k tokens (86k pour 3 docs
 auto-chargées sans borne, 12k pour une rule scopée importée) → 59,8k après migration.
@@ -15,6 +17,8 @@ Usage : python3 test/test_context_budget.py   (exit 0 = tout vert)
 """
 import hashlib
 import json
+import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -41,8 +45,8 @@ def write(p: Path, text):
     p.write_text(text, encoding="utf-8")
 
 
-def run(script, *args):
-    return subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True)
+def run(script, *args, env=None):
+    return subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True, env=env)
 
 
 def budget(root, *args):
@@ -307,6 +311,30 @@ with tempfile.TemporaryDirectory() as td:
     ok("template : template-maintenance.md à la demande (paths:)",
        any(x["path"] == ".claude/rules/template-maintenance.md" for x in j["on_demand_rules"]))
     print(f"     (template vierge : {j['total_tok']} tok est. auto-chargés — projet)")
+
+    print("\n== 7. Portée user : dossier de config (CLAUDE_CONFIG_DIR) et slug de la mémoire ==")
+    # « _ » exprès : Claude Code remplace tout caractère non alphanumérique (constaté sur une vraie
+    # machine : /mnt/e/programming/_juperso/cv → -mnt-e-programming--juperso-cv).
+    us = tmp / "portee_user"
+    u = us / "mon_projet"
+    write(u / "CLAUDE.md", "# P\n")
+    mem_rel = Path("projects") / re.sub(r"[^A-Za-z0-9]", "-", str(u.resolve())) / "memory" / "MEMORY.md"
+    fake_home, cfg = us / "home", us / "config"
+    write(fake_home / ".claude" / "CLAUDE.md", "h" * 200 + "\n")  # 100 tok est.
+    write(fake_home / ".claude" / mem_rel, "m" * 300 + "\n")       # 150
+    write(cfg / "CLAUDE.md", "c" * 400 + "\n")                     # 200
+    write(cfg / mem_rel, "n" * 600 + "\n")                         # 300
+
+    def user_tok(**extra):
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_CONFIG_DIR"}
+        env.update(HOME=str(fake_home), **extra)
+        r = run(BUDGET, "--root", str(u), "--json", env=env)
+        return sorted(x["tok"] for x in json.loads(r.stdout)["user"])
+
+    ok("sans CLAUDE_CONFIG_DIR : CLAUDE.md user et MEMORY.md lus sous ~/.claude (slug : « _ » → « - »)",
+       user_tok() == [100, 150])
+    ok("CLAUDE_CONFIG_DIR : CLAUDE.md user et MEMORY.md lus dans le dossier de config, pas sous HOME",
+       user_tok(CLAUDE_CONFIG_DIR=str(cfg)) == [200, 300])
 
 print(f"\n{'🎉 CONTEXT BUDGET OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

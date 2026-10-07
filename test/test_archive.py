@@ -5,7 +5,8 @@ Couvre : pré-flights (pas un projet, déjà archivé, worktrees actifs, destina
 marqueur .claude/archived (4 clés), bannière CLAUDE.md (insert au top / strip au restore),
 dry-run strictement sans écriture, commande finale (mkdir + mv projet + mv auto-memory quand
 le slug existe, note « rien à migrer » sinon), scan des références internes, restore
-(retour marqueur, --dest override, non-archivé), status. Home fake via $ARCHIVE_PROJET_HOME.
+(retour marqueur, --dest override, non-archivé), status, CLAUDE_CONFIG_DIR (mémoire et
+.claude.json lus dans le dossier de config). Home fake via $ARCHIVE_PROJET_HOME.
 
 Stdlib pur, jetables sous tempfile. Usage : python3 test/test_archive.py  (exit 0 = vert)
 """
@@ -32,8 +33,11 @@ def ok(label, cond):
         print(f"  ❌ {label}")
 
 
-def run(fake_home, *args, cwd=None):
+def run(fake_home, *args, cwd=None, config_dir=None):
     env = dict(os.environ, ARCHIVE_PROJET_HOME=str(fake_home))
+    env.pop("CLAUDE_CONFIG_DIR", None)  # celui de la session qui lance les tests ne doit pas fuiter
+    if config_dir:
+        env["CLAUDE_CONFIG_DIR"] = str(config_dir)
     return subprocess.run([sys.executable, str(SCRIPT), *args],
                           capture_output=True, text=True, env=env, cwd=cwd)
 
@@ -191,6 +195,30 @@ with tempfile.TemporaryDirectory(prefix="archtest-projects-") as td:
     ok("sans CLAUDE.md : exit 0 + bannière sautée avec warning + marqueur écrit",
        r.returncode == 0 and "bannière sautée" in r.stdout
        and (p5 / ".claude" / "archived").exists())
+
+    # ── CLAUDE_CONFIG_DIR : le dossier de config remplace ~/.claude ───────────
+    # Doc (claude-directory) : tout chemin ~/.claude passe sous CLAUDE_CONFIG_DIR, mémoire comprise.
+    # .claude.json aussi : vérifié avec Claude Code 2.1.293 (`claude purge --dry-run`), celui du home
+    # est alors ignoré.
+    print("\n== CLAUDE_CONFIG_DIR ==")
+    cfg = base / "config-perso"
+    p6 = make_project(base, "projet_cfg")
+    dest6 = p6.parent / "_archives" / p6.name
+    mem6 = cfg / "projects" / expected_slug(p6)
+    (mem6 / "memory").mkdir(parents=True)
+    for cj in (cfg / ".claude.json", fake_home / ".claude.json"):
+        cj.write_text(f'{{"projects": {{"{p6}": {{"hasTrustDialogAccepted": true}}}}}}\n',
+                      encoding="utf-8")
+    r = run(fake_home, "archive", "--reason", "x", "--root", str(p6), "--dry-run", config_dir=cfg)
+    ok("CLAUDE_CONFIG_DIR : mémoire trouvée dans le dossier de config, migrée par la commande finale",
+       f"mv '{mem6}' '{cfg / 'projects' / expected_slug(dest6)}'" in r.stdout)
+    ok("CLAUDE_CONFIG_DIR : .claude.json lu dans le dossier de config, celui du home ignoré",
+       f"{cfg / '.claude.json'} : 1 occurrence(s)" in r.stdout
+       and str(fake_home / ".claude.json") not in r.stdout)
+    r = run(fake_home, "archive", "--reason", "x", "--root", str(p6), "--dry-run")
+    ok("sans CLAUDE_CONFIG_DIR : <home>/.claude.json lu, dossier de config ignoré",
+       f"{fake_home / '.claude.json'} : 1 occurrence(s)" in r.stdout
+       and str(cfg) not in r.stdout and "rien à migrer" in r.stdout)
 
 print(f"\n{'🎉 ARCHIVE OK' if FAIL == 0 else '❌ ARCHIVE KO'} — {PASS} pass, {FAIL} fail")
 sys.exit(1 if FAIL else 0)
