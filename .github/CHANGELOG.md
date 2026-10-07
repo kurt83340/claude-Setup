@@ -5,6 +5,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — `/handoff` : consigner avant de réécrire
+
+Vécu sur node4jPOC (2026-10-07) : le HANDOFF a été réécrit alors qu'une décision structurante (un
+plafond de dépense), un accès cloud et un piège n'existaient que dans l'auto-memory et le nouveau
+HANDOFF. Le skill supposait que tout avait déjà été rangé pendant la session.
+
+- **Étape 2bis** : avant de composer, chaque décision, accès ou piège de la session reçoit sa place
+  versionnée (ADR, `plan.md`, `ACCESS.md`, `/lecon` ou `code-map-gotchas.md`, `tasks.md`) ; ce qui
+  n'en a pas est proposé à l'utilisateur avant la réécriture, et l'Étape 4 dit où chaque élément est
+  consigné. Anti-pattern ajouté.
+- Scénario `test/benchmarks/handoff/consigner-avant.md`.
+
 ### Changed — agent teams : interrupteur on/off/status, invariants au spawn (plugin `agent-teams` 1.2.0)
 
 Demande Julien : un interrupteur plutôt qu'une activation cachée dans le 1er lancement, et plus de
