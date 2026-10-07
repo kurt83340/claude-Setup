@@ -165,7 +165,9 @@ def main():
     if not file_path:
         sys.exit(0)
 
-    cwd = Path(data.get("cwd", os.getcwd()))
+    # Racine = CLAUDE_PROJECT_DIR (fixe pour la session), pas le cwd du payload, qui suit les `cd`
+    # (même règle que posttooluse-growth-detection depuis la PR n°2).
+    cwd = Path(os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd())
     try:
         rel = os.path.relpath(file_path, cwd).replace("\\", "/")
     except ValueError:

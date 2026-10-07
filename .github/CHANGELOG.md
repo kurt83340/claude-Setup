@@ -5,6 +5,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — racine du projet pour tous les hooks (session restée dans un sous-dossier)
+
+Constaté à la vérification de la 1.6.0 : la PR n°2 n'avait corrigé que `posttooluse-growth-detection`.
+Les autres hooks lisaient le `cwd` du payload, qui suit les `cd` : une session restée dans `src/`
+n'injectait aucun gotcha, n'écrivait ni ne ré-injectait aucun filet, et ne rappelait pas le HANDOFF.
+
+- Racine = `CLAUDE_PROJECT_DIR`, sinon le `cwd` du payload : `pretooluse-inject-codemap.py`,
+  `precompact-snapshot-handoff.py`, `sessionend-snapshot.py`, `sessionstart-inject-handoff.py`
+  (fonction `racine_projet`), `stop-handoff-reminder.sh`, et `teamtask-log.py` du plugin
+  `agent-teams` (1.2.1).
+- `test_hooks` +8 : section « racine = CLAUDE_PROJECT_DIR », qui échoue sur l'ancien code.
+
 ## [1.6.0] — 2026-10-07
 
 Huit PR depuis la 1.5.0, toutes nées de l'usage réel du template sur des projets générés : le filet
