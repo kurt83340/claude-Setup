@@ -5,6 +5,17 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — `/feature-done` : relire le ticket ou l'epic avant de le clore
+
+Vécu sur node4jPOC (2026-10-07) : un epic s'est fermé en disant encore « la limite d'AuraDB Free est
+inconnue », une semaine après qu'un ticket enfant l'avait trouvée.
+
+- **Étape 1, point 5** : si le projet suit ses travaux dans un outil de tickets (Jira, Linear, GitHub
+  Issues…), relire le ticket de la feature ou l'epic du jalon avant de le clore ; chaque critère reçoit
+  son résultat, chaque question sa réponse, et ce qu'un enfant a trouvé remonte dans le parent.
+  Anti-pattern ajouté.
+- Scénario `test/benchmarks/feature-done/relire-avant-clore.md`.
+
 ### Changed — `/handoff` : consigner avant de réécrire
 
 Vécu sur node4jPOC (2026-10-07) : le HANDOFF a été réécrit alors qu'une décision structurante (un
