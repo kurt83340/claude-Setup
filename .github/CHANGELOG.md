@@ -5,6 +5,13 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.7.0] — 2026-10-09
+
+Deux acquis d'un projet généré (node4jPOC) : `/adr amend`, pour remplacer un seul point d'un ADR
+qui reste en vigueur, et `/doc-health`, qui ne compte plus une leçon décidée comme en attente.
+Aucune migration : `/upgrade-template` suffit. Un projet existant garde son index des ADR (doc
+projet) ; il peut y reprendre la section « Amendement partiel » du modèle.
+
 ### Added — `/adr amend` : un seul point d'un ADR remplacé, l'ancien reste en vigueur
 
 Relevé dans un projet généré (node4jPOC, 2026-10-08) : un ADR ne changeait que sur un point (Claude
