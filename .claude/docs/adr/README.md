@@ -2,11 +2,12 @@
 
 > Décisions techniques **structurantes** du projet, capturées au fil du temps.
 > **Immuables** : on ne modifie jamais un ADR existant. Si la décision change, on en crée un nouveau qui **supersede** l'ancien.
+> Seule exception : le bandeau daté d'un amendement partiel (voir « Amendement partiel », en bas).
 
 ## Convention
 
 - **Naming** : `00XX-<scope>-<titre-court>.md` (séquentiel, scope dans le nom)
-- **Frontmatter YAML** obligatoire (status, scope, phase, supersedes)
+- **Frontmatter YAML** obligatoire (status, scope, phase, supersedes ; amends pour un amendement partiel)
 - **5 scopes possibles** :
   - `cadrage` — contraintes capturées au début (souvent imposées par le client)
   - `mvp` — décisions structurantes au niveau projet entier
@@ -123,3 +124,13 @@ Si on change d'avis (pivot, nouvelle contrainte, expérience) :
 2. **Créer un nouveau ADR** avec frontmatter `supersedes: 00XX`
 3. **Update le frontmatter de l'ancien** : `status: superseded` + `superseded_by: <nouveau>`
 4. **Update CE README** : déplacer l'ancien ADR vers la section "archived / superseded" avec lien vers le nouveau
+
+## Amendement partiel (`/adr amend`)
+
+Quand un nouvel ADR ne remplace qu'**un point** d'un ADR qui reste en vigueur pour tout le reste :
+
+1. **Créer le nouvel ADR** avec `amends: 00XX` dans son frontmatter (`supersedes` reste `null`) ; sa Décision nomme le point remplacé
+2. **Dans l'ancien, un seul ajout** : un bandeau daté en tête, qui nomme le point remplacé et renvoie au nouvel ADR ; rien d'autre ne change, il reste `accepted`
+3. **Update CE README** : la ligne de l'ancien reste dans sa table, au statut « Accepted (point amendé par NNNN) »
+
+Si toute la décision change, c'est un supersede, pas un amendement.

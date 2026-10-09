@@ -32,7 +32,7 @@
 - Credentials **JAMAIS** dans le repo (stockage : `.claude/docs/ACCESS.md`)
 - `.claude/docs/HANDOFF.md` à update **à chaque fin de session** (via `/handoff`)
 - Décision tech structurante → créer un ADR (via `/adr`)
-- ADR **immuable** : on ne modifie jamais, on crée un nouveau qui supersede
+- ADR **immuable** : on ne modifie jamais, on crée un nouveau qui supersede (ou qui amende un seul point : `/adr amend`, bandeau daté dans l'ancien)
 
 ---
 
