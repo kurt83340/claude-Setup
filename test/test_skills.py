@@ -12,6 +12,7 @@ ce qui est vérifiable sans LLM :
   3. couplages des templates bundlés (spec/templates/*, HANDOFF) — grammaire DoD typée,
      circuit breakers, frontmatter status, Continuation State ;
   4. scénarios test/benchmarks/ : structure valide (skill existant, input, assertions).
+  5. commandes rejouées sur un jeu d'essai : le compteur de leçons de /doc-health.
 
 Le COMPORTEMENT des skills se teste en agentique : test/PROTOCOL-E2E.md Phase B déroule les
 scénarios de test/benchmarks/ sur un projet jetable. Périmètre : skills cœur (.claude/skills/)
@@ -144,6 +145,39 @@ for sc in scenarios:
     m = re.search(r"^assert-contains:\s*\n((?:\s+-\s+.+\n)+)", raw, re.M)
     ok(f"{rel}: assert-contains ≥ 1 item", bool(m))
     ok(f"{rel}: section ## Attendu non vide", "## Attendu" in body and len(body.split("## Attendu", 1)[-1].strip()) > 20)
+
+# 5. Commandes des skills rejouées sur un jeu d'essai (ce qu'elles comptent, pas leur forme)
+print("\n== doc-health : compteur des leçons en attente (étape 4) ==")
+import subprocess, tempfile
+
+etape4 = (SKILLS / "doc-health" / "SKILL.md").read_text(encoding="utf-8")
+etape4 = etape4.split("## Étape 4", 1)[-1].split("## Étape 5", 1)[0]
+awk = re.search(r"^(awk .+)$", etape4, re.M)
+ok("doc-health étape 4 : une commande awk", bool(awk))
+# Une leçon promue ou écartée garde « 🆕 new » devant sa flèche (/lecon promote, /lecon discard) ;
+# l'exemple du format et une mention dans le corps ne sont pas des leçons en attente.
+LECONS = """# Leçons
+## Statuts
+- 🆕 `new` — observé, pas décidé
+## Format d'une entry
+## YYYY-MM-DD — Titre
+**scope:** mvp | **status:** 🆕 new
+---
+## 2026-10-08 — Promue
+**scope:** mvp | **status:** 🆕 new → 🔧 → [rule](../rules/testing.md)
+## 2026-10-07 — En attente
+**scope:** infra | **status:** 🆕 new
+→ Piste : décider, puis la sortir du statut 🆕 new.
+## 2026-10-06 — Écartée
+**scope:** infra | **status:** 🆕 new → ❌ discarded (raison : doublon)
+"""
+if awk:
+    with tempfile.TemporaryDirectory() as d:
+        (Path(d) / ".claude" / "docs").mkdir(parents=True)
+        (Path(d) / ".claude" / "docs" / "lecons.md").write_text(LECONS, encoding="utf-8")
+        compte = subprocess.run(["bash", "-c", awk.group(1)], cwd=d, capture_output=True, text=True)
+    ok("doc-health étape 4 : seule la leçon en attente compte (promue, écartée, exemple, prose exclus)",
+       compte.stdout.strip() == "1")
 
 print(f"\n{'✅' if FAIL == 0 else '❌'} {PASS} ok, {FAIL} ko")
 sys.exit(1 if FAIL else 0)
