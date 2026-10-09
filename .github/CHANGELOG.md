@@ -5,6 +5,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — `/doc-health` ne compte plus une leçon décidée comme en attente
+
+Relevé dans un projet généré (node4jPOC, 2026-10-09) : l'étape 4 comptait toute ligne contenant
+« 🆕 new » sous un en-tête daté. Or une leçon promue ou écartée garde « 🆕 new → … » dans son
+statut (`/lecon promote`, `/lecon discard`), et une leçon peut citer le statut dans son corps : le
+rapport annonçait 2 leçons en attente au lieu d'une.
+
+- Seules comptent les lignes `**status:**` encore « 🆕 new », sans flèche de décision.
+- `test_skills` rejoue la commande de l'étape 4 sur un jeu de leçons (en attente, promue, écartée,
+  exemple du format, mention dans le corps) : rouge sur l'ancienne commande, verte sur la nouvelle,
+  avec gawk comme avec mawk.
+
 ## [1.6.1] — 2026-10-07
 
 Trois correctifs nés de la vérification de la 1.6.0 : tous les hooks prennent la racine du projet,
