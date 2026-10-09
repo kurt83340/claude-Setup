@@ -5,6 +5,20 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Added — `/adr amend` : un seul point d'un ADR remplacé, l'ancien reste en vigueur
+
+Relevé dans un projet généré (node4jPOC, 2026-10-08) : un ADR ne changeait que sur un point (Claude
+par l'API Anthropic au lieu de Vertex) et restait valable pour tout le reste. `/adr` ne connaissait
+que `supersede`, qui archive toute la décision, et interdisait d'écrire dans un ADR accepté ; le
+projet a inventé un amendement, sans règle commune.
+
+- Mode `amend <NNNN>` : nouvel ADR avec `amends: NNNN` ; dans l'ancien, un bandeau daté en tête,
+  seul ajout permis, et `status: accepted` inchangé ; dans l'index, « Accepted (point amendé par
+  NNNN) » ; décision au CHANGELOG du projet.
+- Immuabilité nuancée partout où elle est posée : modèle d'index des ADR, règle de maintenance de la
+  doc (invariant 2), `CLAUDE.md`, `USAGE`, `STRUCTURE`, inventaire des skills.
+- Scénario `test/benchmarks/adr/amend-partiel.md`.
+
 ### Fixed — `/doc-health` ne compte plus une leçon décidée comme en attente
 
 Relevé dans un projet généré (node4jPOC, 2026-10-09) : l'étape 4 comptait toute ligne contenant
