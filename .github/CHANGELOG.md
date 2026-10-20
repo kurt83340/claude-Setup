@@ -5,6 +5,19 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — le scan complet des secrets ne scannait rien
+
+Relevé dans un projet généré (CerebroConformite, 2026-10-20) : `.pre-commit-config.yaml` et `USAGE`
+donnaient `pre-commit run --all-files` comme scan complet. Le hook gitleaks a pour entry
+`gitleaks git --pre-commit --staged` et ne reçoit pas de liste de fichiers : il ne lit que l'index.
+Un secret déjà commité passait donc sans alerte (« Passed »).
+
+- Hook manuel `gitleaks-tout` (`gitleaks git`, tout l'historique, `stages: [manual]`) :
+  `pre-commit run gitleaks-tout --hook-stage manual`. Le hook de commit ne change pas.
+- Commentaire de `.pre-commit-config.yaml` et `USAGE` corrigés.
+- Vérifié dans un dépôt jetable avec un faux jeton GitHub commité : `--all-files` → Passed,
+  `gitleaks-tout` → Failed (`github-pat`), le commit d'un secret indexé reste bloqué.
+
 ## [1.7.0] — 2026-10-09
 
 Deux acquis d'un projet généré (node4jPOC) : `/adr amend`, pour remplacer un seul point d'un ADR

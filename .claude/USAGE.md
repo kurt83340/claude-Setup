@@ -675,7 +675,8 @@ la refusait sans prévenir et laissait passer `rm -fr`. La règle `Bash(rm:*)` v
 
 **Secrets — 3 filets** (v1.5) : `.gitignore` ignore **tous** les `.env*` sauf les gabarits (`.env.example/.sample/.template`),
 ainsi que `secrets.*`, `*.key`, `*.pem`, `credentials.json` · deny `Read` ci-dessus · **gitleaks** au commit (`.pre-commit-config.yaml`,
-activé par `pre-commit install` — proposé à l'init ; scan complet : `pre-commit run --all-files`). Les skills committent
+activé par `pre-commit install` — proposé à l'init ; scan de tout l'historique : `pre-commit run gitleaks-tout --hook-stage manual`,
+jamais `pre-commit run --all-files`, qui rend « Passed » sans rien lire — le hook de commit ne lit que l'index). Les skills committent
 par chemins explicites (`git add <chemins>`), jamais `git add -A` à l'aveugle.
 
 > ⚠️ **Le deny `Read(...)` n'est qu'une première barrière** : d'après la doc officielle des permissions, il couvre les outils
