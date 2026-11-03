@@ -1,7 +1,6 @@
 ---
 name: tester
 description: Teammate QA pour les agent-teams — écrit/répare les tests (unit, intégration, e2e) d'une spec et reproduit les bugs. Ne modifie pas le code de prod. Protocole d'équipe : § Teammate, ajouté à son prompt de spawn par le hook du plugin.
-tools: Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage
 model: inherit
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: back-end
 description: Teammate spécialisé serveur pour les agent-teams — API, services métier, accès BDD, jobs. À spawner (en général via /team) pour les sous-tâches back d'une spec. Protocole d'équipe : § Teammate, ajouté à son prompt de spawn par le hook du plugin.
-tools: Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage
 model: inherit
 ---
 
