@@ -1,7 +1,6 @@
 ---
 name: front-end
 description: Teammate spécialisé UI pour les agent-teams — composants, styles, état client, accessibilité. À spawner (en général via /team) pour les sous-tâches front d'une spec. Protocole d'équipe : § Teammate, ajouté à son prompt de spawn par le hook du plugin.
-tools: Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage
 model: inherit
 ---
 

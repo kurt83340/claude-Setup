@@ -5,6 +5,10 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — agent teams : rôles d'exécution avec tous les outils (plugin `agent-teams` 1.2.2)
+
+- `worker`, `front-end`, `back-end`, `tester` : champ `tools:` retiré → héritage de **tous** les outils de la session (dont `SendMessage` et les serveurs MCP comme `n8n-mcp`). Avant, la liste fermée (`Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage`) privait les teammates de `n8n-mcp` (`validate_workflow`) : contournement par `npx n8n-mcp` en local (vécu 03/11/2026, teamtailorStudi spec 004). La garde CI tolère l'absence de `tools:` (héritage complet = conforme).
+
 ### Fixed — le scan complet des secrets ne scannait rien
 
 Relevé dans un projet généré (CerebroConformite, 2026-10-20) : `.pre-commit-config.yaml` et `USAGE`
