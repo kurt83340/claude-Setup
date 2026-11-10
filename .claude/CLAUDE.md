@@ -29,6 +29,10 @@
 - BDD Alembic → `claude plugin install db-migration@claude-setup --scope project`
 - Équipe d'agents (opt-in) → `claude plugin install agent-teams@claude-setup --scope project`, puis `/agent-teams:team on` (relance requise) · `off` · `status`. Plugin absent → le dire à l'utilisateur avec cette commande, jamais monter une équipe en silence.
 
+## Façon de travailler
+
+- **Tickets** (projet suivi dans Jira, Linear, GitHub Issues…) : un ticket qu'on commence passe à l'état « en cours » de son outil (In Progress, On track…), puis à « terminé » une fois livré ; jamais directement de « à faire » à « terminé ».
+
 ## Permissions
 
 - Toute commande `rm` demande l'accord de l'utilisateur (règle `ask` de `settings.json`, même en bypassPermissions) : avant un `rm`, annoncer le chemin, le contenu et la raison.

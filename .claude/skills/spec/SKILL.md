@@ -116,6 +116,11 @@ Si l'user va commencer la feature **tout de suite**, proposer de :
    **Goal session** : démarrer feature 00X-<kebab>
    ```
 
+3. Si le projet suit ses travaux dans un outil de tickets (Jira, Linear, GitHub Issues…) : passer
+   le ticket de la feature à l'état « en cours » de son outil (In Progress, On track…), selon les
+   règles de publication du projet (simulation, accord). Un ticket qu'on travaille ne reste pas au
+   backlog : sinon il passerait directement de « à faire » à « terminé », sans trace du travail.
+
 ## Sortie attendue
 
 ```
