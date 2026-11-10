@@ -5,6 +5,19 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — un ticket qu'on travaille passe « en cours », jamais de « à faire » à « terminé »
+
+Demandé par Julien (10/11/2026) : les tickets restaient au backlog pendant le travail, puis
+passaient directement à « terminé » à la clôture. L'outil de tickets ne montrait donc jamais ce qui
+était en cours.
+
+- `.claude/CLAUDE.md`, nouvelle section « Façon de travailler » : un ticket qu'on commence passe à
+  l'état « en cours » de son outil (In Progress, On track…), puis à « terminé » une fois livré.
+- `/spec` Étape 5 (démarrage immédiat) : le ticket de la feature passe en cours, selon les règles
+  de publication du projet (simulation, accord).
+- `/feature-done` Étape 1 : le ticket se clôt depuis « en cours » ; encore au backlog, il y passe
+  d'abord.
+
 ### Changed — agent teams : tout teammate fini est fermé par le lead (plugin `agent-teams` 1.2.3)
 
 Demandé par Julien (10/11/2026) : un teammate lancé à la demande de l'utilisateur était

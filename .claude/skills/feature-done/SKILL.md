@@ -30,7 +30,9 @@ Ton rôle : finaliser proprement une feature en synchronisant tous les fichiers 
 5. Si le projet suit ses travaux dans un outil de tickets (Jira, Linear, GitHub Issues…) : relire le
    ticket de la feature, ou l'epic de son jalon, **avant** de le clore. Chaque critère reçoit son
    résultat, chaque question sa réponse (sinon : corriger la description, ou ouvrir un autre ticket) ;
-   ce qu'un ticket enfant a trouvé remonte dans le parent.
+   ce qu'un ticket enfant a trouvé remonte dans le parent. Le ticket se clôt depuis l'état
+   « en cours » : s'il est encore au backlog (démarrage non tracé), le passer d'abord en cours,
+   jamais directement de « à faire » à « terminé ».
 
 > Vécu 2026-10-07 (node4jPOC) : un epic s'est fermé en disant encore « la limite d'AuraDB Free est
 > inconnue », une semaine après qu'un ticket enfant l'avait trouvée.
