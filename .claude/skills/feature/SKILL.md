@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Déroule une feature de bout en bout en enchaînant les skills existants (spec → conception → code → tests → review adverse → vérif → feature-done) selon un pipeline nommé (standard, tdd, n8n ou custom de pipelines/), avec validation utilisateur entre chaque étape - /feature "<titre>" [pipeline].
+description: Déroule une feature de bout en bout en enchaînant les skills existants (spec → conception → code → tests → review adverse → vérif → feature-done) selon un pipeline nommé (standard, tdd, n8n ou custom de pipelines/), plan validé par l'utilisateur puis enchaînement tant que rien ne bloque - /feature "<titre>" [pipeline].
 allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, AskUserQuestion, Bash(ls:*), Bash(git status), Bash(git log:*), Bash(git diff:*), Bash(pytest:*), Bash(npm test:*)
 disable-model-invocation: false
 ---
@@ -9,13 +9,14 @@ disable-model-invocation: false
 
 > **Quand ne PAS utiliser** : un bug → `/debug` · planifier sans exécuter → `/spec` + `/conception` ·
 > feature déjà codée à livrer → `/feature-done`.
-> **Réversibilité** : 🟠 orchestre code + docs sur plusieurs maillons — gate utilisateur entre
-> chaque étape ; undo par étape via git (rien n'est poussé sans validation).
+> **Réversibilité** : 🟠 orchestre code + docs sur plusieurs maillons — gate utilisateur sur le plan
+> et sur tout bloquant ; undo par étape via git (rien n'est poussé sans validation).
 
 Une commande = toute la chaîne. Ce skill n'implémente RIEN lui-même : il **enchaîne les
 maillons existants** (source unique — `/spec`, `/conception`, `/agent-teams:team`,
-`reviewer`, `/feature-done`…) et tient le fil entre eux. Chaque étape se termine par un
-**gate** : tu valides, tu ajustes, ou tu t'arrêtes proprement.
+`reviewer`, `/feature-done`…) et tient le fil entre eux. Le plan validé, les étapes
+s'**enchaînent** tant que rien ne bloque ; un **gate** (tu valides, tu ajustes, ou tu t'arrêtes
+proprement) n'arrive que sur un bloquant.
 
 **Arguments** : `/feature "<titre>"` (pipeline auto/demandé) · `/feature "<titre>" tdd` (explicite)
 
@@ -39,8 +40,14 @@ Pour chaque étape du fichier pipeline :
 1. **Annonce** (1 ligne) : ce qu'on fait + le critère de sortie.
 2. **Exécute** via le maillon indiqué (Skill / subagent / commande) — JAMAIS de
    réimplémentation locale de ce qu'un skill fait déjà.
-3. **Vérifie le critère de sortie**, puis **gate** : AskUserQuestion
-   « ✅ continuer / 🔧 ajuster cette étape / 🛑 stop ».
+3. **Vérifie le critère de sortie**, puis :
+   - **critère atteint et rien ne bloque → enchaîne** sur l'étape suivante sans redemander ; rends
+     compte après coup (fait, vérifié, reste) ;
+   - **gate** AskUserQuestion « ✅ continuer / 🔧 ajuster cette étape / 🛑 stop » seulement : à la fin
+     de l'étape Planifier (le plan validé est le feu vert pour la suite), sur un critère non atteint,
+     une décision qui n'est pas dans le plan (finding 🟠 à arbitrer…), un écart avec ce qui a été
+     montré, ou avant une action irréversible ou visible de l'extérieur (push, merge, publication,
+     suppression), sauf si l'utilisateur l'a déjà autorisée pour ce projet.
 
 **Stop = propre** : les artefacts produits restent (spec/plan/code/tests). Relancer
 `/feature "<titre>"` plus tard → détecte l'avancement (spec existante, tasks cochées,
@@ -69,6 +76,7 @@ pipeline qui n'écrit pas sa mémoire n'a pas eu lieu.
 ## Anti-patterns
 
 - ❌ Réimplémenter un maillon ici (le pipeline ORCHESTRE, les skills FONT)
-- ❌ Sauter un gate (l'utilisateur tranche entre les étapes)
+- ❌ Enchaîner malgré un bloquant (critère non atteint, décision hors plan, écart, action irréversible)
+- ❌ Redemander l'accord à chaque étape quand le plan est validé et que rien ne bloque
 - ❌ Pipeline sans étape Persister finale
 - ❌ Coder pendant l'étape Planifier (le plan d'abord — `/conception` l'interdit déjà)

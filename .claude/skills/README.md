@@ -12,7 +12,7 @@
 - `/handoff` — réécrit HANDOFF.md en fin de session (≤ 40 lignes) + 1 ligne au journal
 - `/spec "<titre>"` — scaffold d'une feature (4 fichiers) + ligne ROADMAP
 - `/conception <spec-id|macro>` — explore (subagents code/docs/mémoire) → 2-3 options → décision → plan vérifiable + revue adverse
-- `/feature "<titre>" [pipeline]` — déroule un pipeline complet (standard/tdd/n8n), gate utilisateur entre chaque étape
+- `/feature "<titre>" [pipeline]` — déroule un pipeline complet (standard/tdd/n8n) : plan validé, puis enchaînement tant que rien ne bloque
 - `/feature-done <spec-id>` — livraison : ROADMAP, CHANGELOG, HANDOFF, ADR proposés, PR
 - `/debug "<symptôme>"` — reproduire (test rouge) → explorer → hypothèses discriminées → fix minimal → leçon
 - `/pivot "<raison>"` — pivot client orchestré (9 étapes, validation à chaque étape)

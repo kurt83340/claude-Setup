@@ -5,6 +5,20 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — plan validé et rien ne bloque : on enchaîne sans redemander
+
+Demandé par Julien (10/11/2026) : « quand il n'y a pas de bloquant, tu peux enchaîner sans me
+demander ». Le plan et les scripts sont validés une fois ; un accord à chaque micro-étape ralentit
+sans rien protéger.
+
+- `.claude/CLAUDE.md` (« Façon de travailler ») : plan validé et rien ne bloque → enchaîner, rendre
+  compte après coup. Arrêt sur une erreur, une décision hors plan, un écart avec ce qui a été montré,
+  ou une action irréversible ou visible de l'extérieur (suppression, push, merge, publication,
+  ouverture d'accès) que l'utilisateur n'a pas déjà autorisée pour ce projet.
+- `/feature` : plus de gate après chaque étape. Gate à la fin de l'étape Planifier et sur un
+  bloquant ; sinon l'étape suivante s'enchaîne. Anti-patterns : enchaîner malgré un bloquant, ou
+  redemander à chaque étape quand rien ne bloque.
+
 ### Changed — la mission d'un agent nomme les skills qu'il charge d'abord (plugin `agent-teams` 1.2.5)
 
 Vécu le 10/11/2026 : les agents n'appelaient pas l'outil `Skill` d'eux-mêmes. Ils lisaient

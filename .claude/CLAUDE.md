@@ -33,6 +33,7 @@
 
 - **Tickets** (projet suivi dans Jira, Linear, GitHub Issues…) : un ticket qu'on commence passe à l'état « en cours » de son outil (In Progress, On track…), puis à « terminé » une fois livré ; jamais directement de « à faire » à « terminé ».
 - **Agents** (session principale ; un agent, lui, ne délègue pas) : déléguer au maximum à des agents bornés (lectures larges, relevés, exécutions), qui rendent un résumé court : la session principale orchestre et dure. Agent teams actives → **toujours** un `name` au spawn : l'agent s'ouvre dans son pane tmux et l'utilisateur le voit travailler (sans nom, il tourne invisible en arrière-plan) ; fermé dès son travail fini et débriefé. Sa consigne nomme les skills qu'il charge d'abord avec l'outil `Skill` (sinon il ne lit que les fichiers cités).
+- **Enchaîner sans redemander** : plan validé et rien ne bloque → enchaîner les étapes prévues et rendre compte après coup (fait, publié, reste). S'arrêter et demander sur une erreur, une décision qui n'est pas dans le plan, un écart avec ce qui a été montré, ou une action irréversible ou visible de l'extérieur (suppression, push, merge, publication, ouverture d'accès) que l'utilisateur n'a pas déjà autorisée pour ce projet.
 
 ## Permissions
 
