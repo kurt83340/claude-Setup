@@ -295,7 +295,7 @@ Rapport généré → tu suis les actions par priorité.
 | Adopter le template sur un projet EXISTANT | `/adopt-template` (brownfield — merges non-destructifs + rétro-remplissage)                  |
 | Mettre à jour la méthode (template récent) | `/upgrade-template [vX.Y.Z]` — merge 3 voies, conflits signalés, doc intacte                 |
 | Démarrer une feature                       | `/spec "<titre>"` (scaffold 4 fichiers + ROADMAP)                                            |
-| Dérouler le pipeline complet (avec gates)  | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done |
+| Dérouler le pipeline complet (plan validé) | `/feature "<titre>" [standard·tdd·custom]` — enchaîne spec→conception→code→tests→review→done |
 | Arrêter le plan d'une feature              | `/conception <spec-id>` (explore → options → décision → plan + revue adverse)                |
 | Fin de session                             | `/handoff`                                                                                   |
 | Feature livrée                             | `/feature-done <spec-id>`                                                                    |
