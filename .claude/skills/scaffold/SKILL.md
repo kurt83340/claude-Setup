@@ -46,8 +46,9 @@ de [`.claude/skills/README.md`](../README.md), dans la section adaptée.
 
 ## Mode `agent` — `/scaffold agent "<nom>"`
 
-1. Questions : **teammate** (session visible, écrit/code, rapporte au lead) ou **subagent pur**
-   (one-shot lecture/analyse, résultat = retour du Task tool) ? · touche à des **libs/API
+1. Questions : **teammate** (session visible, écrit/code, rapporte au lead) ou **subagent**
+   (one-shot lecture/analyse) ? Équipe active, tout agent est nommé, donc teammate : **`SendMessage`**
+   dans `tools:` dans les deux cas. · touche à des **libs/API
    externes** ? · doit **invoquer des skills** ?
 2. Compose le `tools:` minimal, avec les règles du template :
    - teammate → **`SendMessage` OBLIGATOIRE** (sinon rapport perdu + zombie — la CI le refuse)

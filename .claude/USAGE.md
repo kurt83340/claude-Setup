@@ -607,6 +607,11 @@ Le lead propose un **plan d'équipe** (rôles préconfigurés `worker`/`front-en
 attend ta **validation**, spawne, suit (task list native + rapports SendMessage +
 `.claude/.cache/team-progress.log`), merge, **débriefe la mémoire** et clôt proprement.
 
+**Agents toujours nommés** (équipe active) : la session principale délègue au maximum (lectures larges,
+relevés, exécutions bornées) et donne un `name` à **chaque** agent, besognes courtes et `doc-maintainer`
+compris : chacun s'ouvre dans son pane, tu vois tout ce qui tourne. Sans nom, un agent tourne en
+arrière-plan, invisible.
+
 **Cycle de vie** : le lead ferme tout teammate dont le travail est fini, après débrief (et merge
 s'il code), y compris un teammate que TU as demandé ; il ne garde ouvert que celui dont dépend une
 étape suivante annoncée, et le ferme dès qu'elle est faite. **Topologie** : par défaut chaque

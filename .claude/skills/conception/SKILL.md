@@ -31,7 +31,8 @@ déjà payés), `stack.md`. → Écris « Contraintes retenues » en tête du `r
 ## Étape 1 — Explorer en parallèle (subagents lecture seule)
 
 Le bruit d'exploration tue la qualité du plan → il ne rentre PAS dans ton contexte principal.
-Spawne EN PARALLÈLE des **subagents** (Task tool — one-shot, invisibles ; pas des teammates) :
+Spawne EN PARALLÈLE des **subagents** (Task tool — one-shot ; équipe active → nommés, donc
+teammates visibles : § Mode visible) :
 
 1. **`explore-code`** (agent) : fichiers/modules touchés, patterns à imiter, points
    d'intégration, couplages applicables → rapport en `chemin:ligne`.
@@ -107,11 +108,11 @@ et `in-progress` si démarrage immédiat), ROADMAP à jour (`[ ]` → `[~]` si d
 HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
 `/agent-teams:team <spec-id>` (plugin `agent-teams` ; les tasks sont déjà partitionnées pour).
 
-## Mode visible (tmux) — optionnel
+## Mode visible (tmux) — défaut dès que l'équipe est active
 
-Par défaut, explorateurs et critique sont des **subagents** (rapides, invisibles). Si
-l'utilisateur veut les VOIR travailler (ou qu'une équipe tmux est déjà ouverte) : spawne-les
-en **teammates** (les rôles `explore-code`, `explore-docs`, `explore-memoire`, critique =
+Agent teams actives : explorateurs et critique sont **nommés**, donc spawnés en **teammates**
+(l'utilisateur les voit travailler). Sans équipe, ce sont des subagents invisibles. En teammates :
+spawne-les (les rôles `explore-code`, `explore-docs`, `explore-memoire`, critique =
 `reviewer`) — mêmes briefs, rapport par `SendMessage` → ferme-les après débrief (invariants du
 plugin agent-teams). Par défaut, les deux gates (choix d'option, validation finale) se jouent dans
 TA session — c'est là que vit la synthèse. Variante documentée : l'utilisateur peut répondre

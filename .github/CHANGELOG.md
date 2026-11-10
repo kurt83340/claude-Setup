@@ -5,6 +5,22 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — équipe active : tout agent est nommé, donc visible (plugin `agent-teams` 1.2.4)
+
+Demandé par Julien (10/11/2026) : il veut suivre tous les agents en split pane tmux, et que la
+session principale délègue au maximum pour durer. Or le défaut du protocole laissait les besognes
+courtes (scan, relevé, doc) en subagents sans nom : ils tournaient en arrière-plan, invisibles.
+
+- `.claude/CLAUDE.md` (« Façon de travailler ») : déléguer au maximum à des agents bornés, qui rendent
+  un résumé court ; agent teams actives → **toujours** un `name` au spawn ; fermé une fois fini.
+- `protocole.md` (politique de délégation) : équipe active, tout agent est nommé, besognes courtes
+  comprises ; le subagent sans nom est réservé aux sessions sans équipe.
+- `/conception` : le mode visible (explorateurs et critique en teammates) devient le défaut dès que
+  l'équipe est active.
+- `doc-maintainer` : `SendMessage` ajouté à `tools:` (nommé, il devient teammate et doit pouvoir
+  rapporter) ; la CI ne l'exempte plus du contrôle « Défs teammate ont SendMessage ».
+- `USAGE`, `agents/README` ; `test_agent_teams` : 3 contrôles de plus.
+
 ### Changed — un ticket qu'on travaille passe « en cours », jamais de « à faire » à « terminé »
 
 Demandé par Julien (10/11/2026) : les tickets restaient au backlog pendant le travail, puis

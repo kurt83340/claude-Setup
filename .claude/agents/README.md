@@ -22,7 +22,7 @@
 
 3. **Tout est dans le même espace de noms** — pas de collision possible avec namespacing par sous-dossier.
 
-4. **Rôle teammate → `SendMessage` OBLIGATOIRE dans `tools:`** (tout agent, sauf subagent pur type `doc-maintainer`). Spawné **nommé**, un agent tourne en teammate et ne peut rapporter au lead QUE via `SendMessage` — sans lui : rapport perdu, idle muet, zombie qui ping. **Vérifié en CI** (étape « Défs teammate — SendMessage »), donc pas besoin d'y penser : l'oubli fait échouer le build. Détail : invariants d'équipe du plugin `agent-teams` (`skills/team/invariants.md`, injectés au spawn).
+4. **Rôle teammate → `SendMessage` OBLIGATOIRE dans `tools:`** (tout agent, `doc-maintainer` compris : équipe active, tout agent est nommé). Spawné **nommé**, un agent tourne en teammate et ne peut rapporter au lead QUE via `SendMessage` — sans lui : rapport perdu, idle muet, zombie qui ping. **Vérifié en CI** (étape « Défs teammate — SendMessage »), donc pas besoin d'y penser : l'oubli fait échouer le build. Détail : invariants d'équipe du plugin `agent-teams` (`skills/team/invariants.md`, injectés au spawn).
 
 ## Invocation — subagent OU teammate
 
