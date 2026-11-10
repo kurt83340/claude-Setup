@@ -89,6 +89,8 @@ try:
        and HEAD not in out["additionalContext"])
     ok("§ Lead : tout teammate fini est fermé (shutdown_request), plus de user-owned",
        "shutdown_request" in out["additionalContext"] and "user-owned" not in out["additionalContext"])
+    ok("skills : § Teammate (charge-la avec l'outil Skill) et § Lead (la mission les nomme) injectés",
+       "outil `Skill`" in ui["prompt"].split(HEAD, 1)[1] and "skills à charger" in out["additionalContext"])
     ok("pas de permissionDecision (le flux de permissions normal continue)", "permissionDecision" not in out)
     r, out2 = hook(spawn(sid, name="front"), **{TEAM_ENV: "true"})
     ok("2e spawn de la session : § Teammate oui, § Lead non (1×/session)",
@@ -193,6 +195,7 @@ dm = (ROOT / ".claude" / "agents" / "doc-maintainer.md").read_text(encoding="utf
 ok("doc-maintainer : SendMessage dans tools (nommé, il devient teammate)",
    any(l.startswith("tools:") and "SendMessage" in l for l in dm.splitlines()))
 idx = (ROOT / ".claude" / "CLAUDE.md").read_text(encoding="utf-8")
+ok(".claude/CLAUDE.md : la consigne d'un agent nomme les skills à charger (1.2.5)", "outil `Skill`" in idx)
 ok(".claude/CLAUDE.md : agents toujours nommés quand l'équipe est active", "**toujours** un `name`" in idx)
 
 print(f"\n{'🎉 AGENT-TEAMS OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")

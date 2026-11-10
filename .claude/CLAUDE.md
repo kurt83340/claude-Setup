@@ -32,7 +32,7 @@
 ## Façon de travailler
 
 - **Tickets** (projet suivi dans Jira, Linear, GitHub Issues…) : un ticket qu'on commence passe à l'état « en cours » de son outil (In Progress, On track…), puis à « terminé » une fois livré ; jamais directement de « à faire » à « terminé ».
-- **Agents** (session principale ; un agent, lui, ne délègue pas) : déléguer au maximum à des agents bornés (lectures larges, relevés, exécutions), qui rendent un résumé court : la session principale orchestre et dure. Agent teams actives → **toujours** un `name` au spawn : l'agent s'ouvre dans son pane tmux et l'utilisateur le voit travailler (sans nom, il tourne invisible en arrière-plan) ; fermé dès son travail fini et débriefé.
+- **Agents** (session principale ; un agent, lui, ne délègue pas) : déléguer au maximum à des agents bornés (lectures larges, relevés, exécutions), qui rendent un résumé court : la session principale orchestre et dure. Agent teams actives → **toujours** un `name` au spawn : l'agent s'ouvre dans son pane tmux et l'utilisateur le voit travailler (sans nom, il tourne invisible en arrière-plan) ; fermé dès son travail fini et débriefé. Sa consigne nomme les skills qu'il charge d'abord avec l'outil `Skill` (sinon il ne lit que les fichiers cités).
 
 ## Permissions
 

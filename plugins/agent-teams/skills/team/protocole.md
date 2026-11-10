@@ -2,7 +2,7 @@
 
 > Version longue du protocole d'équipe (politique teammate vs subagent, cycle de vie, topologie,
 > worktrees, spawn, suivi, débrief, mémoire, hooks). Lue par `/agent-teams:team` (Étape 0) ; jamais
-> auto-chargée. Les **invariants** courts (§ Teammate 6 règles, § Lead 5 invariants) vivent dans
+> auto-chargée. Les **invariants** courts (§ Teammate 7 règles, § Lead 5 invariants) vivent dans
 > `invariants.md` et sont **injectés au spawn** par le hook du plugin (v1.2.0 — avant : rule copiée
 > dans `.claude/rules/`, ~1,9k tokens à chaque session du projet, équipe ou pas) : § Teammate à la
 > fin du prompt de chaque teammate, § Lead au lead au 1er spawn de la session.
@@ -41,6 +41,12 @@
   (topologie « mesh », accordée par le lead). Par défaut : **tout passe par le lead**.
 - Si le lead utilise la task list partagée : claim ta tâche (owner), passe-la `in_progress`
   puis `completed` — c'est le tableau de bord du lead.
+
+**Skills**
+
+- Ta mission cite une skill (outil de tickets, dépôt, base…), ou une skill du projet couvre ta
+  tâche → charge-la avec l'outil `Skill` **avant d'agir**. Lire seulement les fichiers que la mission
+  cite ne suffit pas : tu n'aurais qu'une partie de ses règles (simulation, accord, formats).
 
 **Périmètre (anti-collision)**
 
@@ -109,6 +115,10 @@ git worktree add ../<repo>--<teammate> -b feature/<00X>-<slug>--<teammate>
 
 Les hooks utilisent `${CLAUDE_PROJECT_DIR}` → worktree-safe. Le reviewer (lecture seule)
 n'a pas besoin de worktree.
+
+**Spawn — la mission nomme les skills à charger.** Un agent ne charge pas de lui-même une skill que
+tu utilises : sans consigne, il se contente des fichiers que tu cites. Ouvre la mission par « charge
+d'abord la skill `<x>` avec l'outil Skill » pour chaque skill dont sa tâche dépend.
 
 **Spawn — TOUJOURS depuis la racine du repo :**
 

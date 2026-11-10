@@ -5,6 +5,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — la mission d'un agent nomme les skills qu'il charge d'abord (plugin `agent-teams` 1.2.5)
+
+Vécu le 10/11/2026 : les agents n'appelaient pas l'outil `Skill` d'eux-mêmes. Ils lisaient
+seulement les fichiers que le lead citait, donc une partie des règles de la skill (simulation
+avant publication, formats).
+
+- § Teammate injecté : règle 7, une skill citée par la mission, ou qui couvre la tâche, se charge
+  avec l'outil `Skill` avant d'agir. § Lead, point 2 : la mission nomme les skills à charger.
+- `protocole.md` (§ Teammate « Skills », § Lead « Spawn »), `/agent-teams:team` Étape 4,
+  `.claude/CLAUDE.md` (« Façon de travailler », agents).
+- `test_agent_teams` : le § Teammate injecté contient la règle ; `.claude/CLAUDE.md` la porte.
+
 ### Changed — équipe active : tout agent est nommé, donc visible (plugin `agent-teams` 1.2.4)
 
 Demandé par Julien (10/11/2026) : il veut suivre tous les agents en split pane tmux, et que la

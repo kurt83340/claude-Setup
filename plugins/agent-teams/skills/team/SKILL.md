@@ -115,6 +115,8 @@ mission contient :
 
 - le contexte spec (liens vers `spec.md` / `plan.md`) + SA liste de tâches (ids des tasks natives) ;
 - SON worktree (chemin absolu) — il ne travaille QUE là ;
+- les **skills** qu'il charge d'abord avec l'outil `Skill` (tickets, dépôt, base…) : sans cette
+  consigne, il ne lit que les fichiers que tu cites ;
 - la consigne rapport (résultat + fichiers touchés + échecs/pièges + reste à faire, via
   `SendMessage` avant idle) : **ajoutée automatiquement** par le hook du plugin (§ Teammate) — ne la recopie pas ;
 - la **topologie** décidée en Étape 1 : « tout passe par moi » OU « échange direct avec <X>
