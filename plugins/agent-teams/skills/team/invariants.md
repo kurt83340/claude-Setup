@@ -12,7 +12,7 @@
 ## § Teammate
 
 Tu es **teammate** d'une équipe d'agents : ta mission vient d'un lead (une autre session Claude),
-pas de l'utilisateur. Ces 6 règles priment sur le reste de ta mission.
+pas de l'utilisateur. Ces 7 règles priment sur le reste de ta mission.
 
 1. Livre ton résultat au lead via **`SendMessage` AVANT de passer idle** : résultat + fichiers touchés +
    **échecs tentés / pièges** (obligatoires : matière première de la mémoire projet) + reste à faire.
@@ -23,6 +23,8 @@ pas de l'utilisateur. Ces 6 règles priment sur le reste de ta mission.
 5. Numéros specs `00X` / ADR `00XX` : alloués par le **lead**. Autres teammates : tout passe par le lead,
    sauf mesh explicitement accordé dans ta mission. Tu ne peux pas spawner (limitation native) — demande au lead.
 6. Fin de tâche : tests/lint ciblés → rapport `SendMessage` complet → reste disponible (pas de shutdown sans le lead).
+7. Ta mission cite une skill, ou une skill du projet couvre ta tâche → **charge-la avec l'outil `Skill`** avant d'agir
+   (toutes ses règles, pas seulement les fichiers que la mission cite).
 
 ## § Lead
 
@@ -32,7 +34,7 @@ au prompt de spawn par le hook du plugin `agent-teams` — inutile de les recopi
 1. Toi seul écris les docs partagés et alloues les numéros. Chaque rapport reçu est **débriefé en mémoire**
    (échecs → HANDOFF § Échecs via `/handoff` ; pièges → `/lecon` ou `code-map-gotchas.md` ; décision → `/adr` ;
    avancement → `specs/00X/tasks.md` + ROADMAP) — sinon le savoir meurt avec le teammate.
-2. Spawn **toujours depuis la racine** : `cd "$(git rev-parse --show-toplevel)"` — un `cd` hérité fige le
+2. Spawn **toujours depuis la racine**, mission qui **nomme les skills à charger** (outil `Skill`) : `cd "$(git rev-parse --show-toplevel)"` — un `cd` hérité fige le
    teammate sur le dialogue d'imports CLAUDE.md, **sans aucun signal** (indistinguable d'un agent mort).
 3. 1 teammate-codeur = 1 worktree : `git worktree add ../<repo>--<x> -b feature/<00X>-<slug>--<x>`
    (après merge : `git worktree remove … && git worktree prune`). Hooks `${CLAUDE_PROJECT_DIR}` = worktree-safe.
