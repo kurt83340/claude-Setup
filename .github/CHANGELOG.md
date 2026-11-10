@@ -5,6 +5,20 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Changed — agent teams : tout teammate fini est fermé par le lead (plugin `agent-teams` 1.2.3)
+
+Demandé par Julien (10/11/2026) : un teammate lancé à la demande de l'utilisateur était
+« user-owned » ; il persistait et le lead ne le fermait jamais de sa propre initiative. Son pane
+restait ouvert après le rapport, jusqu'à ce que l'utilisateur pense à le fermer.
+
+- Une seule règle, quelle que soit l'origine du teammate : travail fini → débrief (et merge s'il
+  code) → `SendMessage` `{"type": "shutdown_request"}`. Seul reste ouvert celui dont dépend une étape
+  suivante annoncée, fermé dès qu'elle est faite ; un pane mort se ferme par `tmux kill-pane`.
+- Distinction lead-owned / user-owned retirée (elle ne servait qu'à décider qui ferme) : § Lead
+  injecté au lead (point 4), `protocole.md`, `/agent-teams:team` (Étapes 1, 7 et 8,
+  anti-patterns), `USAGE`, `/conception` (mode visible).
+- `test_agent_teams` : le § Lead injecté contient `shutdown_request` et plus « user-owned ».
+
 ### Changed — agent teams : rôles d'exécution avec tous les outils (plugin `agent-teams` 1.2.2)
 
 - `worker`, `front-end`, `back-end`, `tester` : champ `tools:` retiré → héritage de **tous** les outils de la session (dont `SendMessage` et les serveurs MCP comme `n8n-mcp`). Avant, la liste fermée (`Read, Edit, Write, Bash, Grep, Glob, mcp__context7, SendMessage`) privait les teammates de `n8n-mcp` (`validate_workflow`) : contournement par `npx n8n-mcp` en local (vécu 03/11/2026, teamtailorStudi spec 004). La garde CI tolère l'absence de `tools:` (héritage complet = conforme).

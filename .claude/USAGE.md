@@ -607,10 +607,11 @@ Le lead propose un **plan d'équipe** (rôles préconfigurés `worker`/`front-en
 attend ta **validation**, spawne, suit (task list native + rapports SendMessage +
 `.claude/.cache/team-progress.log`), merge, **débriefe la mémoire** et clôt proprement.
 
-**Cycle de vie** : un teammate spawné par le lead de sa propre initiative est fermé par lui à
-la clôture (lead-owned) ; un teammate que TU as demandé **persiste** — seul toi décides de le
-fermer (user-owned). **Topologie** : par défaut chaque teammate ne parle qu'au lead
-(hub-and-spoke) ; le mesh (teammates qui s'écrivent entre eux) est opt-in, scopé, décidé au spawn.
+**Cycle de vie** : le lead ferme tout teammate dont le travail est fini, après débrief (et merge
+s'il code), y compris un teammate que TU as demandé ; il ne garde ouvert que celui dont dépend une
+étape suivante annoncée, et le ferme dès qu'elle est faite. **Topologie** : par défaut chaque
+teammate ne parle qu'au lead (hub-and-spoke) ; le mesh (teammates qui s'écrivent entre eux) est
+opt-in, scopé, décidé au spawn.
 
 **Sessions sans prompts (sandbox uniquement)** : les teammates **héritent du mode de
 permission du lead** au spawn → un seul levier. Soit le flag ponctuel

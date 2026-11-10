@@ -71,17 +71,20 @@ reste disponible (pas de shutdown sauf demande du lead).
 Défaut du template : **le travail de feature part en teammates** (visibles) ; les besognes
 courtes (scan, doc) restent en subagents.
 
-**Cycle de vie — qui possède un teammate, qui le ferme :**
+**Cycle de vie — qui ferme un teammate, et quand :**
 
-- Teammate spawné à **ton initiative** (délégation que TU as décidée, ex. via `/agent-teams:team`) →
-  **lead-owned** : tu le fermes toi-même après débrief + merge. Pas de session zombie.
-- Teammate **demandé par l'utilisateur** (« lance-moi un agent front-end sur X ») →
-  **user-owned** : il **persiste**. Tu ne le fermes JAMAIS de ta propre initiative — seul
-  l'utilisateur décide (il veut souvent l'observer ou lui parler dans son pane tmux).
-  Doute sur le propriétaire ? Demande.
+- Travail fini (rapport reçu et **débriefé**, branche **mergée** s'il code) → **tu le fermes** :
+  `SendMessage` avec `{"type": "shutdown_request"}`. Même règle qu'il ait été spawné à ton
+  initiative (ex. via `/agent-teams:team`) ou à la demande de l'utilisateur (« lance-moi un agent
+  front-end sur X ») : un teammate fini ne reste pas ouvert. Pas de session zombie.
+- Seule exception : une **étape suivante annoncée** dépend de lui (correction après review, suite
+  prévue de sa tâche) → garde-le, dis-le à l'utilisateur, et ferme-le dès que cette étape est faite.
+- Teammate encore au travail → tu ne le fermes pas ; à la clôture, signale-le à l'utilisateur.
+- Pane mort : il reste listé (`ListAgents`). Repère-le
+  (`tmux list-panes -a -F '#{pane_id} #{pane_dead}'` → `1`) et ferme-le : `tmux kill-pane -t %N`.
 - ⚠️ Limitation native : aucun teammate ne survit à la fin de TA session (`/resume` ne les
-  restaure pas). « Persistant » = pour la durée de la session lead ; la persistance
-  inter-sessions passe par le **débrief mémoire** + HANDOFF.
+  restaure pas) → débriefe et merge **avant** de fermer ; ce qui doit durer d'une session à
+  l'autre passe par le **débrief mémoire** + HANDOFF.
 
 **Topologie de communication (à fixer au spawn, jamais implicite) :**
 

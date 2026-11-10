@@ -112,8 +112,8 @@ HANDOFF « Next » = task 1 du plan. Propose : exécuter en solo maintenant, ou
 Par défaut, explorateurs et critique sont des **subagents** (rapides, invisibles). Si
 l'utilisateur veut les VOIR travailler (ou qu'une équipe tmux est déjà ouverte) : spawne-les
 en **teammates** (les rôles `explore-code`, `explore-docs`, `explore-memoire`, critique =
-`reviewer`) — mêmes briefs, rapport par `SendMessage`, **lead-owned** → ferme-les après débrief (rule
-agent-teams). Par défaut, les deux gates (choix d'option, validation finale) se jouent dans
+`reviewer`) — mêmes briefs, rapport par `SendMessage` → ferme-les après débrief (invariants du
+plugin agent-teams). Par défaut, les deux gates (choix d'option, validation finale) se jouent dans
 TA session — c'est là que vit la synthèse. Variante documentée : l'utilisateur peut répondre
 **directement dans le pane** d'un teammate ; dans ce cas le teammate pose sa question en
 texte, prévient le lead par `SendMessage` (« en attente décision utilisateur ») et lui

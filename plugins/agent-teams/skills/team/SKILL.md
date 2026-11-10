@@ -10,7 +10,7 @@ disable-model-invocation: false
 Tu es le **LEAD**. Les **invariants** (§ Teammate / § Lead, `invariants.md` dans le dossier de ce skill)
 ne sont **jamais auto-chargés** : le hook du plugin les injecte au spawn (§ Teammate ajouté au prompt
 de chaque teammate, § Lead à toi au 1er spawn de la session). Le **protocole complet**
-(politique teammate vs subagent, cycle de vie lead-owned/user-owned, topologie hub-and-spoke/mesh,
+(politique teammate vs subagent, cycle de vie et fermeture, topologie hub-and-spoke/mesh,
 worktrees, spawn, suivi, débrief mémoire) = **`protocole.md`, dans le dossier de ce skill** — lis-le
 en Étape 0 s'il n'est pas déjà dans ton contexte. Ce skill = la **séquence opératoire**.
 
@@ -74,8 +74,8 @@ git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un r
      rôles doivent négocier (ex. contrat d'API front ↔ back) ;
    - **mode d'exécution** : standard ou **TDD** (les tests d'abord — cf. Étape 2) — si
      `/conception` l'a déjà arrêté dans `plan.md` § Décisions, applique ce choix ;
-   - rappel cycle de vie : les teammates spawnés par `/team` sont **lead-owned** → je les
-     fermerai à la clôture (Étape 8).
+   - rappel cycle de vie : je ferme chaque teammate dès que son travail est fini et débriefé
+     (Étapes 7 et 8), y compris un teammate que l'utilisateur a demandé.
 5. → **Validation utilisateur avant de spawner.**
 
 ## Étape 2 — Tasks natives (tableau de bord partagé)
@@ -144,13 +144,17 @@ code-map ; décision structurante → `/adr` ; avancement → tasks natives + RO
 
 Un teammate a fini SA branche → review (reviewer ou toi) → merge dans la branche
 d'intégration → **tests après CHAQUE merge** (jamais deux merges sans vert entre).
+Rapport débriefé + branche mergée → ferme ce teammate (`SendMessage` `{"type": "shutdown_request"}`),
+sauf si une étape suivante annoncée dépend de lui.
 
 ## Étape 8 — Clôture (propre)
 
 1. Recopie l'état final des tasks natives → coche `specs/<id>/tasks.md` (source versionnée).
-2. Ferme **UNIQUEMENT les teammates que CE skill a spawnés** (lead-owned). Un teammate
-   demandé par l'utilisateur (avant ou pendant) est **user-owned** : il persiste — signale
-   juste à l'utilisateur qu'il est encore actif.
+2. Ferme **tout teammate dont le travail est fini** et encore ouvert, qu'il ait été spawné par ce
+   skill ou demandé par l'utilisateur (avant ou pendant) : `SendMessage` `{"type": "shutdown_request"}`.
+   Garde seulement celui dont dépend une étape suivante annoncée (dis-le à l'utilisateur, ferme-le
+   dès qu'elle est faite) ; un teammate encore au travail n'est pas fermé : signale-le. Pane mort →
+   `tmux kill-pane -t %N`.
 3. `git worktree remove ../<repo>--<x>` pour chaque worktree mergé + `git worktree prune`.
 4. Tous les tasks ✅ → propose `/feature-done <id>`.
 5. `/handoff` (la ligne de `HANDOFF-journal.md` note : « session équipe : N teammates, X tasks, branches mergées »).
@@ -161,6 +165,6 @@ d'intégration → **tests après CHAQUE merge** (jamais deux merges sans vert e
 - ❌ Spawner depuis un sous-dossier (cd hérité → teammate figé sur le dialogue d'imports) ;
   respawner un teammate muet sans `capture-pane` d'abord
 - ❌ > 4 teammates codeurs, ou 2 teammates sur les MÊMES fichiers
-- ❌ Fermer un teammate user-owned (seul l'utilisateur décide)
+- ❌ Laisser ouvert un teammate dont le travail est fini (même demandé par l'utilisateur), ou le fermer avant débrief/merge
 - ❌ Fermer la session sans débrief/merge (`/resume` ne restaure pas l'équipe)
 - ❌ Laisser l'état final uniquement dans la task list native (recopier dans `specs/<id>/tasks.md`)
