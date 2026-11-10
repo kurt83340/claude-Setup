@@ -185,5 +185,15 @@ try:
 finally:
     shutil.rmtree(TMP, ignore_errors=True)
 
+print("\n▶ Politique de délégation : équipe active → tout agent est nommé (1.2.4)")
+proto = (PLUGIN / "skills" / "team" / "protocole.md").read_text(encoding="utf-8")
+ok("protocole : tout agent est nommé, plus de besognes courtes en subagents invisibles",
+   "tout agent est nommé" in proto and "restent en subagents" not in proto)
+dm = (ROOT / ".claude" / "agents" / "doc-maintainer.md").read_text(encoding="utf-8")
+ok("doc-maintainer : SendMessage dans tools (nommé, il devient teammate)",
+   any(l.startswith("tools:") and "SendMessage" in l for l in dm.splitlines()))
+idx = (ROOT / ".claude" / "CLAUDE.md").read_text(encoding="utf-8")
+ok(".claude/CLAUDE.md : agents toujours nommés quand l'équipe est active", "**toujours** un `name`" in idx)
+
 print(f"\n{'🎉 AGENT-TEAMS OK' if FAIL == 0 else '💥 ÉCHECS'} — {PASS} pass, {FAIL} fail")
 sys.exit(0 if FAIL == 0 else 1)

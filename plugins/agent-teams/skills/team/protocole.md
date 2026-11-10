@@ -61,15 +61,19 @@ reste disponible (pas de shutdown sauf demande du lead).
 
 **Politique de délégation — teammate vs subagent :**
 
-| Critère           | Teammate (session visible — pane ou panneau)  | Subagent (Task tool, invisible)             |
-| ----------------- | --------------------------------------------- | ------------------------------------------- |
-| Durée / autonomie | Longue, multi-tours, doit être observable     | Courte, one-shot                            |
-| Écrit du code     | ✅ — dans SON worktree                        | À éviter (pas d'isolation worktree)         |
-| Exemples          | Sous-tâche de spec, review continue           | Recherche/lecture, `doc-maintainer`, audits |
-| Retour            | `SendMessage` + idle notification + task list | Résultat = retour du Task tool              |
+| Critère           | Teammate (nommé — pane ou panneau, visible)   | Subagent (sans `name`, invisible)      |
+| ----------------- | --------------------------------------------- | -------------------------------------- |
+| Durée / autonomie | Toute durée, observable (besognes courtes ok) | Courte, one-shot                       |
+| Écrit du code     | ✅ — dans SON worktree                        | À éviter (pas d'isolation worktree)    |
+| Exemples          | Tout agent quand l'équipe est active          | Équipe coupée : recherche, audits, doc |
+| Retour            | `SendMessage` + idle notification + task list | Résultat = retour du Task tool         |
 
-Défaut du template : **le travail de feature part en teammates** (visibles) ; les besognes
-courtes (scan, doc) restent en subagents.
+Défaut du template, **équipe active** : **tout agent est nommé** (`name` au spawn), besognes
+courtes comprises (scan, relevé, doc, `doc-maintainer`) → il devient teammate et s'ouvre dans son
+pane : l'utilisateur voit tout ce qui tourne. Délègue au maximum (lectures larges, relevés,
+exécutions bornées, résumé court en retour) pour que ta session orchestre et dure ; ferme chaque
+agent dès son rapport débriefé (§ Cycle de vie). Un agent sans nom tourne en arrière-plan,
+invisible : réservé aux sessions sans équipe.
 
 **Cycle de vie — qui ferme un teammate, et quand :**
 

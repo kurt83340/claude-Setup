@@ -1,7 +1,7 @@
 ---
 name: doc-maintainer
 description: Maintenance documentaire EN LOT, hors conversation — plusieurs specs livrées d'un coup (/feature-done en boucle), audit /doc-health suivi d'actions, promotions groupées de leçons/idées/décisions, drift code-map. N'écrit PAS le HANDOFF (il faut le contexte de la conversation → /handoff dans le fil principal). Orchestre les skills doc, sans ré-implémenter leur logique.
-tools: Read, Write, Edit, Bash, Grep, Glob, Skill
+tools: Read, Write, Edit, Bash, Grep, Glob, Skill, SendMessage
 model: inherit
 ---
 
