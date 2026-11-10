@@ -87,6 +87,8 @@ try:
     ok("§ Lead injecté au lead (additionalContext), sans les règles teammate",
        "§ Lead" in out.get("additionalContext", "") and "worktree" in out["additionalContext"]
        and HEAD not in out["additionalContext"])
+    ok("§ Lead : tout teammate fini est fermé (shutdown_request), plus de user-owned",
+       "shutdown_request" in out["additionalContext"] and "user-owned" not in out["additionalContext"])
     ok("pas de permissionDecision (le flux de permissions normal continue)", "permissionDecision" not in out)
     r, out2 = hook(spawn(sid, name="front"), **{TEAM_ENV: "true"})
     ok("2e spawn de la session : § Teammate oui, § Lead non (1×/session)",
