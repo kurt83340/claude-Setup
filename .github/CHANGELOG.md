@@ -5,6 +5,16 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.8.0] — 2026-11-10
+
+Retours d'usage d'une session d'orchestration longue (plusieurs agents en panes tmux, tickets
+suivis dans un outil externe) : la session principale délègue au maximum à des agents nommés,
+visibles et fermés une fois finis, qui chargent les skills dont leur mission dépend ; un ticket
+qu'on travaille passe « en cours » ; plan validé et rien ne bloque, on enchaîne sans redemander.
+Plus le scan complet des secrets, qui ne scannait rien. Aucune migration : `/upgrade-template`
+suffit (nouvelle section « Façon de travailler » de `.claude/CLAUDE.md`). Plugin `agent-teams`
+1.2.5 : `claude plugin update agent-teams@claude-setup`.
+
 ### Changed — plan validé et rien ne bloque : on enchaîne sans redemander
 
 Demandé par Julien (10/11/2026) : « quand il n'y a pas de bloquant, tu peux enchaîner sans me
