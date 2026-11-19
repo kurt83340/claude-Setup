@@ -16,8 +16,8 @@ migration : `/upgrade-template` (`.gitignore`, ligne « Agents » de `.claude/CL
 ### Changed — worktrees des agents sous `.claude/worktrees/`
 
 - `protocole.md`, `SKILL.md` (Étape 3 et clôture), `invariants.md` (§ Lead, point 3) et le message de
-  refus du hook : `git worktree add .claude/worktrees/<nom>` ; retrait par `git worktree remove
-  .claude/worktrees/<nom>`.
+  refus du hook : `git worktree add .claude/worktrees/<nom>` pour créer ;
+  `git worktree remove .claude/worktrees/<nom>` pour retirer.
 - `.gitignore` du template : `.claude/worktrees/`.
 - `test/test_agent_teams.py` : le refus du hook et § Lead donnent `.claude/worktrees/`.
 
