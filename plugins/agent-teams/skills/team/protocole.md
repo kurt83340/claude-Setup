@@ -109,9 +109,12 @@ invisible : réservé aux sessions sans équipe.
 **Worktrees** (dès 2 teammates qui codent) — 1 teammate-codeur = 1 worktree :
 
 ```bash
-git worktree add ../<repo>--<teammate> -b feature/<00X>-<slug>--<teammate>
-# après merge : git worktree remove ../<repo>--<teammate> && git worktree prune
+git worktree add .claude/worktrees/<teammate> -b feature/<00X>-<slug>--<teammate>
+# après merge : git worktree remove .claude/worktrees/<teammate> && git worktree prune
 ```
+
+Les worktrees vivent **dans le projet**, sous `.claude/worktrees/` (ignoré par git, là où l'option
+native `isolation` les mettait), jamais à côté du dépôt : l'utilisateur les retrouve avec le projet.
 
 Les hooks utilisent `${CLAUDE_PROJECT_DIR}` → worktree-safe. Le reviewer (lecture seule)
 n'a pas besoin de worktree.
@@ -125,7 +128,7 @@ d'abord la skill `<x>` avec l'outil Skill » pour chaque skill dont sa tâche d�
 - `isolation: "worktree"` (ou toute autre) fait de l'agent un **subagent en arrière-plan** : pas de pane
   tmux, donc invisible pour l'utilisateur, et pas de § Teammate (le hook n'injecte rien). Vécu le
   19/11/2026 : sept agents nommés lancés ainsi, aucun dans un pane.
-- Le worktree se crée **à la main**, depuis la racine : `git worktree add ../<repo>--<x> -b <branche>` ; la
+- Le worktree se crée **à la main**, depuis la racine : `git worktree add .claude/worktrees/<x> -b <branche>` ; la
   mission donne son chemin absolu. Puis le spawn, nommé, **sans** `isolation`.
 - Depuis 1.2.6, le hook du plugin **refuse** ce spawn (`permissionDecision: deny`) et rappelle la marche à suivre.
 

@@ -107,6 +107,8 @@ try:
        o.get("permissionDecision") == "deny" and "updatedInput" not in o and r.returncode == 0)
     ok("refus : la marche à suivre est dite (git worktree add, relancer sans isolation)",
        "git worktree add" in o.get("permissionDecisionReason", "") and "SANS `isolation`" in o["permissionDecisionReason"])
+    ok("refus : worktree dans le projet (.claude/worktrees/), jamais à côté du dépôt (1.2.7)",
+       "git worktree add .claude/worktrees/" in o["permissionDecisionReason"] and "../<repo>" not in o["permissionDecisionReason"])
     r, o = hook(spawn(sid, name="", isolation="worktree"), **{TEAM_ENV: "1"})
     ok("isolation sans name (subagent voulu) → rien", r.returncode == 0 and r.stdout.strip() == "")
     r, o = hook(spawn(sid, isolation="worktree"), **{TEAM_ENV: "0"})

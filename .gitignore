@@ -49,3 +49,5 @@ logs/
 .claude/settings.local.json
 .claude/.cache/
 .claude/.growth-suggestions.md
+# Worktrees des agents (git worktree add .claude/worktrees/<nom>), retirés après fusion
+.claude/worktrees/
