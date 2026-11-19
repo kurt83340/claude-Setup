@@ -13,9 +13,15 @@ du projet (~1,9k tokens), même sans équipe. Maintenant rien n'est chargé au d
 - au 1er spawn de la session, § Lead est injecté au lead (`additionalContext`), une seule fois
   (marqueur par session dans $TMPDIR), ré-armé après compaction ou /clear (SessionStart).
 
-Rien n'est fait : flag inactif (le spawn reste un subagent), appel sans `name`, fork, `isolation`,
-ou appel émis DANS un subagent/teammate (`agent_id` présent — pas d'équipe imbriquée).
-Toujours exit 0, jamais de `permissionDecision` : le flux de permissions normal continue.
+Rien n'est fait : flag inactif (le spawn reste un subagent), appel sans `name`, fork, ou appel émis
+DANS un subagent/teammate (`agent_id` présent — pas d'équipe imbriquée).
+
+Un seul refus (v1.2.6) : flag actif + `name` + `isolation`. L'option fait de l'agent un subagent en
+arrière-plan : pas de pane tmux (l'utilisateur ne le voit pas travailler) et pas de § Teammate (il code
+sans les règles d'équipe). Vécu le 19/11/2026 (Veille Handicap) : sept agents nommés lancés avec
+`isolation: "worktree"`, aucun visible. Le refus (`permissionDecision: deny`) dit la marche à suivre :
+worktree créé à la main (`git worktree add`), puis le même spawn sans `isolation`.
+Toujours exit 0 ; hors de ce cas, jamais de `permissionDecision` : le flux de permissions normal continue.
 """
 
 import json
@@ -48,11 +54,24 @@ def emit(out: dict) -> None:
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", **out}}, ensure_ascii=False))
 
 
+ISOLATION_REFUSEE = (
+    "Agent teams actives : un agent nommé lancé avec `isolation` n'est PAS un teammate. Il tourne en "
+    "arrière-plan, sans pane tmux (l'utilisateur ne le voit pas travailler) et sans les règles d'équipe. "
+    "Crée son worktree à la main depuis la racine du dépôt : "
+    "`git worktree add ../<repo>--<nom> -b <branche>`, donne ce chemin absolu dans sa mission "
+    "(il n'y travaille que là), puis relance le même spawn SANS `isolation`. "
+    "Pour un agent invisible voulu (recherche courte), retire `name` à la place."
+)
+
+
 def on_spawn(data: dict) -> None:
     ti = data.get("tool_input")
     if not teams_enabled() or data.get("agent_id") or not isinstance(ti, dict):
         return
-    if not ti.get("name") or ti.get("isolation") or ti.get("subagent_type") == "fork":
+    if not ti.get("name") or ti.get("subagent_type") == "fork":
+        return
+    if ti.get("isolation"):
+        emit({"permissionDecision": "deny", "permissionDecisionReason": ISOLATION_REFUSEE})
         return
     try:
         text = INVARIANTS.read_text(encoding="utf-8")

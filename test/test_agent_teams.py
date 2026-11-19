@@ -99,10 +99,18 @@ try:
     ok("prompt qui contient déjà les règles (respawn recopié) → pas de doublon", "updatedInput" not in out3)
     for label, payload in (("sans name (subagent)", spawn(sid, name="")),
                            ("fork", spawn(sid, subagent_type="fork")),
-                           ("isolation", spawn(sid, isolation="worktree")),
                            ("appel DANS un subagent/teammate (agent_id)", {**spawn(sid), "agent_id": "a1"})):
         r, o = hook(payload, **{TEAM_ENV: "1"})
         ok(f"{label} → rien", r.returncode == 0 and r.stdout.strip() == "")
+    r, o = hook(spawn(sid, isolation="worktree"), **{TEAM_ENV: "1"})
+    ok("name + isolation → refusé (permissionDecision deny), sans updatedInput",
+       o.get("permissionDecision") == "deny" and "updatedInput" not in o and r.returncode == 0)
+    ok("refus : la marche à suivre est dite (git worktree add, relancer sans isolation)",
+       "git worktree add" in o.get("permissionDecisionReason", "") and "SANS `isolation`" in o["permissionDecisionReason"])
+    r, o = hook(spawn(sid, name="", isolation="worktree"), **{TEAM_ENV: "1"})
+    ok("isolation sans name (subagent voulu) → rien", r.returncode == 0 and r.stdout.strip() == "")
+    r, o = hook(spawn(sid, isolation="worktree"), **{TEAM_ENV: "0"})
+    ok("isolation + name, flag inactif → rien (pas d'équipe)", r.returncode == 0 and r.stdout.strip() == "")
     r, o = hook({"hook_event_name": "PreToolUse", "session_id": sid, "tool_name": "Agent", "tool_input": "x"},
                 **{TEAM_ENV: "1"})
     ok("tool_input inattendu → exit 0 silencieux", r.returncode == 0 and r.stdout.strip() == "")
