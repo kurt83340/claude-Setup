@@ -5,6 +5,22 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.8.2] — 2026-11-19
+
+Les worktrees des agents vivent dans le projet, sous `.claude/worktrees/<nom>` (ignoré par git), et
+plus à côté du dépôt (`../<repo>--<nom>`) : demandé par Julien le 19/11/2026 (« j'aime bien avoir mes
+worktrees dans .claude/worktrees »), c'est là que l'option native `isolation` les mettait. Aucune
+migration : `/upgrade-template` (`.gitignore`, ligne « Agents » de `.claude/CLAUDE.md`). Plugin
+`agent-teams` 1.2.7 : `claude plugin update agent-teams@claude-setup`.
+
+### Changed — worktrees des agents sous `.claude/worktrees/`
+
+- `protocole.md`, `SKILL.md` (Étape 3 et clôture), `invariants.md` (§ Lead, point 3) et le message de
+  refus du hook : `git worktree add .claude/worktrees/<nom>` ; retrait par `git worktree remove
+  .claude/worktrees/<nom>`.
+- `.gitignore` du template : `.claude/worktrees/`.
+- `test/test_agent_teams.py` : le refus du hook et § Lead donnent `.claude/worktrees/`.
+
 ## [1.8.1] — 2026-11-19
 
 Un agent nommé lancé avec l'option `isolation` tournait en arrière-plan, sans pane tmux ni règles

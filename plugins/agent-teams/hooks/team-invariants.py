@@ -20,7 +20,7 @@ Un seul refus (v1.2.6) : flag actif + `name` + `isolation`. L'option fait de l'a
 arrière-plan : pas de pane tmux (l'utilisateur ne le voit pas travailler) et pas de § Teammate (il code
 sans les règles d'équipe). Vécu le 19/11/2026 (Veille Handicap) : sept agents nommés lancés avec
 `isolation: "worktree"`, aucun visible. Le refus (`permissionDecision: deny`) dit la marche à suivre :
-worktree créé à la main (`git worktree add`), puis le même spawn sans `isolation`.
+worktree créé à la main dans le projet (`git worktree add .claude/worktrees/<nom>`), puis le même spawn sans `isolation`.
 Toujours exit 0 ; hors de ce cas, jamais de `permissionDecision` : le flux de permissions normal continue.
 """
 
@@ -58,7 +58,7 @@ ISOLATION_REFUSEE = (
     "Agent teams actives : un agent nommé lancé avec `isolation` n'est PAS un teammate. Il tourne en "
     "arrière-plan, sans pane tmux (l'utilisateur ne le voit pas travailler) et sans les règles d'équipe. "
     "Crée son worktree à la main depuis la racine du dépôt : "
-    "`git worktree add ../<repo>--<nom> -b <branche>`, donne ce chemin absolu dans sa mission "
+    "`git worktree add .claude/worktrees/<nom> -b <branche>` (dans le projet, jamais à côté), donne ce chemin absolu dans sa mission "
     "(il n'y travaille que là), puis relance le même spawn SANS `isolation`. "
     "Pour un agent invisible voulu (recherche courte), retire `name` à la place."
 )

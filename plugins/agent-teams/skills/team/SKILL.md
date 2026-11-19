@@ -98,8 +98,10 @@ git status --short > /dev/null 2>&1 && echo "✅ repo git" || echo "❌ pas un r
 ## Étape 3 — Worktrees (teammates qui codent)
 
 ```bash
-git worktree add ../<repo>--<teammate> -b feature/<00X>-<slug>--<teammate>
+git worktree add .claude/worktrees/<teammate> -b feature/<00X>-<slug>--<teammate>
 ```
+
+Toujours sous `.claude/worktrees/` du projet (ignoré par git), jamais à côté du dépôt.
 
 1 worktree par codeur. `reviewer` (lecture seule) : pas de worktree — il lit le repo
 principal et les worktrees.
@@ -157,7 +159,7 @@ sauf si une étape suivante annoncée dépend de lui.
    Garde seulement celui dont dépend une étape suivante annoncée (dis-le à l'utilisateur, ferme-le
    dès qu'elle est faite) ; un teammate encore au travail n'est pas fermé : signale-le. Pane mort →
    `tmux kill-pane -t %N`.
-3. `git worktree remove ../<repo>--<x>` pour chaque worktree mergé + `git worktree prune`.
+3. `git worktree remove .claude/worktrees/<x>` pour chaque worktree mergé + `git worktree prune`.
 4. Tous les tasks ✅ → propose `/feature-done <id>`.
 5. `/handoff` (la ligne de `HANDOFF-journal.md` note : « session équipe : N teammates, X tasks, branches mergées »).
 
