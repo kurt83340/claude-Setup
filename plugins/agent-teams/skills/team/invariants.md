@@ -38,6 +38,8 @@ au prompt de spawn par le hook du plugin `agent-teams` — inutile de les recopi
    teammate sur le dialogue d'imports CLAUDE.md, **sans aucun signal** (indistinguable d'un agent mort).
 3. 1 teammate-codeur = 1 worktree : `git worktree add ../<repo>--<x> -b feature/<00X>-<slug>--<x>`
    (après merge : `git worktree remove … && git worktree prune`). Hooks `${CLAUDE_PROJECT_DIR}` = worktree-safe.
+   **Jamais l'option `isolation` sur un agent nommé** : il tournerait en arrière-plan, sans pane ni règles
+   d'équipe (le hook du plugin refuse ce spawn).
 4. Teammate au travail fini (rapport débriefé, branche mergée s'il code) → **tu le fermes**, qu'il vienne de toi
    ou de l'utilisateur : `SendMessage` `{"type": "shutdown_request"}`. Reste ouvert seul celui dont dépend une
    étape suivante annoncée, fermé dès qu'elle est faite. Pane mort → `tmux kill-pane -t %N`.

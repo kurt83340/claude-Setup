@@ -120,6 +120,15 @@ n'a pas besoin de worktree.
 tu utilises : sans consigne, il se contente des fichiers que tu cites. Ouvre la mission par « charge
 d'abord la skill `<x>` avec l'outil Skill » pour chaque skill dont sa tâche dépend.
 
+**Spawn — jamais l'option `isolation` sur un agent nommé :**
+
+- `isolation: "worktree"` (ou toute autre) fait de l'agent un **subagent en arrière-plan** : pas de pane
+  tmux, donc invisible pour l'utilisateur, et pas de § Teammate (le hook n'injecte rien). Vécu le
+  19/11/2026 : sept agents nommés lancés ainsi, aucun dans un pane.
+- Le worktree se crée **à la main**, depuis la racine : `git worktree add ../<repo>--<x> -b <branche>` ; la
+  mission donne son chemin absolu. Puis le spawn, nommé, **sans** `isolation`.
+- Depuis 1.2.6, le hook du plugin **refuse** ce spawn (`permissionDecision: deny`) et rappelle la marche à suivre.
+
 **Spawn — TOUJOURS depuis la racine du repo :**
 
 - Un `cd` fait en Bash **persiste** entre les appels et est **hérité** par tout teammate

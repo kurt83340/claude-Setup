@@ -5,6 +5,18 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+### Fixed — agent nommé avec `isolation` : refusé, il ne serait pas un teammate (`agent-teams` 1.2.6)
+
+Vécu le 19/11/2026 (Veille Handicap) : sept agents nommés lancés avec `isolation: "worktree"` ont
+tourné en arrière-plan, sans pane tmux ni règles d'équipe ; Julien ne les voyait pas travailler.
+Demandé par Julien : « dans mon setup, ça doit toujours se passer comme ça, dans le process ».
+
+- Hook `team-invariants.py` : flag actif + `name` + `isolation` → `permissionDecision: deny`, avec la
+  marche à suivre (worktree créé à la main par `git worktree add`, même spawn sans `isolation`).
+- `invariants.md` (§ Lead, point 3), `protocole.md` (§ Spawn) et `.claude/CLAUDE.md` (« Agents ») le disent.
+- `test/test_agent_teams.py` : le cas `isolation` attend le refus ; sans `name`, toujours rien.
+- Mise à jour : `claude plugin update agent-teams@claude-setup`.
+
 ## [1.8.0] — 2026-11-10
 
 Retours d'usage d'une session d'orchestration longue (plusieurs agents en panes tmux, tickets
