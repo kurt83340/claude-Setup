@@ -5,6 +5,13 @@ Versions du **template lui-même** — distinct du CHANGELOG d'un projet génér
 
 ## [Unreleased]
 
+## [1.8.1] — 2026-11-19
+
+Un agent nommé lancé avec l'option `isolation` tournait en arrière-plan, sans pane tmux ni règles
+d'équipe : le plugin le refuse désormais et dit la marche à suivre (worktree créé à la main, spawn sans
+`isolation`). Aucune migration : `/upgrade-template` suffit (ligne « Agents » de `.claude/CLAUDE.md`).
+Plugin `agent-teams` 1.2.6 : `claude plugin update agent-teams@claude-setup`.
+
 ### Fixed — agent nommé avec `isolation` : refusé, il ne serait pas un teammate (`agent-teams` 1.2.6)
 
 Vécu le 19/11/2026 (Veille Handicap) : sept agents nommés lancés avec `isolation: "worktree"` ont
